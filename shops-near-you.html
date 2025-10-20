@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shops Near You - GreenTail</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      background: #f8f9fa;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    .site-header {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #33664C;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-icon img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-menu a {
+      text-decoration: none;
+      color: #4a5568;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .nav-menu a:hover {
+      color: #33664C;
+    }
+
+    .nav-menu a.active {
+      color: #33664C;
+      font-weight: 600;
+    }
+
+    .nav-menu a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: #33664C;
+    }
+
+    /* Main Content */
+    .main-content {
+      padding: 40px 0;
+    }
+
+    .page-title {
+      font-size: 36px;
+      margin-bottom: 30px;
+      color: #1a365d;
+      font-weight: 800;
+    }
+
+    .shop-search-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    /* Store List */
+    .store-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .store-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .store-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #33664C, #27ae60);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .store-card:hover {
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+    }
+
+    .store-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .store-card.highlight {
+      border: 2px solid #33664C;
+      background: #f0f8f4;
+      box-shadow: 0 4px 12px rgba(51, 102, 76, 0.15);
+    }
+
+    .store-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .store-header strong {
+      font-size: 18px;
+      color: #1a365d;
+      font-weight: 700;
+    }
+
+    .distance {
+      color: #4a5568;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stock {
+      color: #4a5568;
+      font-size: 14px;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .store-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .store-actions span {
+      color: #33664C;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .store-actions span:hover {
+      color: #2a5a3f;
+    }
+
+    .highlight-text {
+      margin-top: 12px;
+      color: #33664C;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn.green {
+      background: #33664C;
+      color: white;
+      box-shadow: 0 4px 12px rgba(51, 102, 76, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn.green::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn.green:hover {
+      background: #2a5a3f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(51, 102, 76, 0.4);
+    }
+
+    .btn.green:hover::before {
+      left: 100%;
+    }
+
+    .btn.green:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(51, 102, 76, 0.3);
+    }
+
+    .btn.small {
+      padding: 6px 12px;
+      font-size: 13px;
+      background: #f5f5f5;
+      color: #4a5568;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn.small:hover {
+      background: #e2e8f0;
+    }
+
+    /* Map Panel */
+    .map-panel {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .zip-input {
+      margin-bottom: 20px;
+    }
+
+    .zip-input input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: border-color 0.3s;
+    }
+
+    .zip-input input:focus {
+      outline: none;
+      border-color: #33664C;
+    }
+
+    .zip-input button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .zip-input small {
+      display: block;
+      color: #4a5568;
+      font-size: 12px;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+
+    .map-placeholder {
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 60px 20px;
+      text-align: center;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-icon {
+      width: 80px;
+      height: 80px;
+      background: #e2e8f0;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #4a5568;
+    }
+
+    .map-placeholder p {
+      margin: 5px 0;
+      color: #1a365d;
+    }
+
+    .map-note {
+      color: #4a5568;
+      font-size: 14px;
+    }
+
+    /* Dataset Section */
+    .dataset {
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 40px;
+    }
+
+    .dataset h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #1a365d;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    thead {
+      background: #33664C;
+      color: white;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+
+    th {
+      font-weight: 600;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    table a {
+      color: #33664C;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    table a:hover {
+      text-decoration: underline;
+    }
+
+    .footnote {
+      margin-top: 15px;
+      color: #4a5568;
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 968px) {
+      .shop-search-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .map-panel {
+        position: static;
+      }
+
+      .nav-menu {
+        gap: 20px;
+      }
+
+      .page-title {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 15px;
+      }
+
+      .header-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .store-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-container">
+      <div class="logo">
+        <div class="logo-icon">
+          <img src="/Users/kaibo/Desktop/greentail-assets/logos/logo.png" alt="GreenTail Logo" />
+        </div>
+        <span>GreenTail</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="homepage.html">Home</a>
+        <a href="#">Quiz</a>
+        <a href="#" class="active">Search</a>
+        <a href="#">Compare</a>
+        <a href="#">About</a>
+        <a href="#">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="container">
+      <h1 class="page-title">Shops near you</h1>
+
+      <div class="shop-search-layout">
+        <!-- Left: Store list -->
+        <div class="store-list">
+          <!-- Store Card 1 - Highlighted -->
+          <div class="store-card highlight">
+            <div class="store-header">
+              <strong>MudBay – Ballard</strong><span class="distance">0.6 mi</span>
+            </div>
+            <p class="stock">Stocks: Acme Organic Chicken, EcoBite Grain-Free</p>
+            <div class="store-actions">
+              <a href="#" class="btn green">
+                <img src="icons/location-icon.svg" alt="Directions" style="width: 12px; height: 12px; filter: brightness(0) invert(1);">
+                Directions
+              </a>
+              <span onclick="callStore('(206) 783‑1328')">Call</span>
+              <span onclick="showHours('Mon–Fri 10:00 AM–7:30 PM; Sat 9:00 AM–7:00 PM; Sun 9:00 AM–7:00 PM')">Hours</span>
+            </div>
+            <p class="highlight-text">Carries your best match!</p>
+          </div>
+
+          <!-- Store Card 2 -->
+          <div class="store-card">
+            <div class="store-header">
+              <strong>PetSmart – Aurora</strong><span class="distance">1.8 mi</span>
+            </div>
+            <p class="stock">Stocks: EcoBite Salmon, PurePaw Organic</p>
+            <div class="store-actions">
+              <a href="#" class="btn green">
+                <img src="icons/location-icon.svg" alt="Directions" style="width: 12px; height: 12px; filter: brightness(0) invert(1);">
+                Directions
+              </a>
+              <span onclick="callStore('(206) 361‑1634')">Call</span>
+              <span onclick="showHours('Mon–Sat 9:00 AM–9:00 PM; Sun 10:00 AM–7:00 PM')">Hours</span>
+            </div>
+          </div>
+
+          <!-- Store Card 3 -->
+          <div class="store-card">
+            <div class="store-header">
+              <strong>Petco – Interbay</strong><span class="distance">3.4 mi</span>
+            </div>
+            <p class="stock">Stocks: PurePaw Organic, FarmFresh Kibble</p>
+            <div class="store-actions">
+              <a href="#" class="btn green">
+                <img src="icons/location-icon.svg" alt="Directions" style="width: 12px; height: 12px; filter: brightness(0) invert(1);">
+                Directions
+              </a>
+              <span onclick="callStore('(206) 784‑0524')">Call</span>
+              <span onclick="showHours('Mon–Sat 9:00 AM–9:00 PM; Sun 10:00 AM–7:00 PM')">Hours</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Map + Input -->
+        <aside class="map-panel">
+          <div class="zip-input">
+            <input type="text" placeholder="98105" value="98105" />
+            <button class="btn green">Update</button>
+            <a href="#" class="btn small">Back to Search</a>
+            <small>Used only to show local availability.</small>
+          </div>
+          <div class="map-placeholder">
+            <div class="map-icon">🗺️</div>
+            <p><strong>Map coming soon</strong></p>
+            <p class="map-note">Interactive store locations will be displayed here</p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Mock dataset section -->
+      <section class="dataset">
+        <h2>Mock store dataset (for prototype)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Store</th>
+              <th>Address</th>
+              <th>Distance (mi)</th>
+              <th>Carries (SKUs/brands)</th>
+              <th>Phone</th>
+              <th>Hours URL</th>
+              <th>Maps URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MudBay – Ballard</td>
+              <td>5314 15th Ave NW, Seattle, WA 98107</td>
+              <td>0.6</td>
+              <td>Acme Organic Chicken, EcoBite Grain-Free</td>
+              <td>(206) 783‑1328</td>
+              <td><a href="https://www.mudbay.com/stores/" target="_blank">mudbay.com</a></td>
+              <td><a href="https://maps.google.com/?q=5314+15th+Ave+NW+Seattle+WA+98107" target="_blank">maps.google.com</a></td>
+            </tr>
+            <tr>
+              <td>PetSmart – Aurora</td>
+              <td>13000 Aurora Ave N, Seattle, WA 98133</td>
+              <td>1.8</td>
+              <td>EcoBite Salmon, PurePaw Organic</td>
+              <td>(206) 361‑1634</td>
+              <td><a href="https://www.storeopeninghours.com/petsmart‑seattle‑wa" target="_blank">storeopeninghours.com</a></td>
+              <td><a href="https://maps.google.com/?q=13000+Aurora+Ave+N+Seattle+WA+98133" target="_blank">maps.google.com</a></td>
+            </tr>
+            <tr>
+              <td>Petco – Interbay</td>
+              <td>8728 Holman Rd NW, Seattle, WA 98117</td>
+              <td>3.4</td>
+              <td>PurePaw Organic, FarmFresh Kibble</td>
+              <td>(206) 784‑0524</td>
+              <td><a href="https://www.chamberofcommerce.com/business-directory/washington/seattle/pet-store/5361387-petco/" target="_blank">chamberofcommerce.com</a></td>
+              <td><a href="https://maps.google.com/?q=8728+Holman+Rd+NW+Seattle+WA+98117" target="_blank">maps.google.com</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="footnote">Prototype uses this dataset for the Nearby Shops page.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Function to handle phone calls
+    function callStore(phoneNumber) {
+      // Create a modal popup for phone call
+      showModal('Call Store', `
+        <div style="text-align: center; padding: 20px;">
+          <h3 style="margin-bottom: 15px; color: #1a365d;">Call Store</h3>
+          <p style="font-size: 18px; margin-bottom: 20px; color: #4a5568;">${phoneNumber}</p>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="window.open('tel:${phoneNumber.replace(/\D/g, '')}', '_self'); closeModal();" 
+                    style="background: #33664C; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+              Call Now
+            </button>
+            <button onclick="closeModal();" 
+                    style="background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+              Cancel
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    // Function to show store hours
+    function showHours(hours) {
+      showModal('Store Hours', `
+        <div style="text-align: center; padding: 20px;">
+          <h3 style="margin-bottom: 15px; color: #1a365d;">Store Hours</h3>
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="color: #4a5568; line-height: 1.6; margin: 0;">${hours}</p>
+          </div>
+          <button onclick="closeModal();" 
+                  style="background: #33664C; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            Close
+          </button>
+        </div>
+      `);
+    }
+
+    // Function to handle directions
+    function showDirections(address, storeName) {
+      showModal('Get Directions', `
+        <div style="text-align: center; padding: 20px;">
+          <h3 style="margin-bottom: 15px; color: #1a365d;">Get Directions</h3>
+          <p style="color: #4a5568; margin-bottom: 10px;"><strong>${storeName}</strong></p>
+          <p style="color: #4a5568; margin-bottom: 20px; line-height: 1.5;">${address}</p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.open('https://maps.google.com/?q=${encodeURIComponent(address)}', '_blank'); closeModal();" 
+                    style="background: #33664C; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+              Open in Google Maps
+            </button>
+            <button onclick="closeModal();" 
+                    style="background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+              Cancel
+            </button>
+          </div>
+        </div>
+      `);
+    }
+
+    // Modal functions
+    function showModal(title, content) {
+      // Create modal overlay
+      const modalOverlay = document.createElement('div');
+      modalOverlay.id = 'modalOverlay';
+      modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      `;
+
+      // Create modal content
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+      `;
+
+      modalContent.innerHTML = content;
+      modalOverlay.appendChild(modalContent);
+
+      // Add CSS animations
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideIn {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Add to page
+      document.body.appendChild(modalOverlay);
+
+      // Close on overlay click
+      modalOverlay.addEventListener('click', function(e) {
+        if (e.target === modalOverlay) {
+          closeModal();
+        }
+      });
+
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeModal();
+        }
+      });
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modalOverlay');
+      if (modal) {
+        modal.remove();
+      }
+    }
+
+    // Add click handlers when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      const directionButtons = document.querySelectorAll('.btn.green');
+      const storeData = [
+        { name: 'MudBay – Ballard', address: '5314 15th Ave NW, Seattle, WA 98107' },
+        { name: 'PetSmart – Aurora', address: '13000 Aurora Ave N, Seattle, WA 98133' },
+        { name: 'Petco – Interbay', address: '8728 Holman Rd NW, Seattle, WA 98117' }
+      ];
+      
+      directionButtons.forEach((button, index) => {
+        if (storeData[index]) {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            showDirections(storeData[index].address, storeData[index].name);
+          });
+        }
+      });
+    });
+
+    // 添加按钮点击水波纹效果
+    document.querySelectorAll('.btn').forEach(button => {
+      button.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          transform: scale(0);
+          animation: ripple 0.6s linear;
+          pointer-events: none;
+        `;
+        
+        this.style.position = 'relative';
+        this.style.overflow = 'hidden';
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+          ripple.remove();
+        }, 600);
+      });
+    });
+
+    // 添加CSS动画
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        }
+      });
+    }, observerOptions);
+
+    // 观察元素并添加动画
+    document.querySelectorAll('.store-card, .map-panel').forEach(el => {
+      el.style.animation = 'fadeInUp 0.8s ease-out both';
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>
