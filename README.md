@@ -1,61 +1,154 @@
-# GreenTail 网站资源文件夹
+# GreenTail - Sustainable Pet Food Verification Platform
 
-这个文件夹用于存放 GreenTail 网站所需的所有图片和资源文件。
+A modern web application that helps pet parents choose organic, planet-friendly pet food with confidence. Built with React and Tailwind CSS.
 
-## 文件夹结构
+## 🌟 Features
+
+- **Pet Food Quiz** - 90-second quiz to understand your pet's needs
+- **Store Locator** - Find nearby stores that carry recommended products
+- **Sustainability Focus** - Environmental impact scoring and eco-friendly recommendations
+- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- **Modern UI/UX** - Smooth animations and intuitive navigation
+
+## 🚀 Quick Start
+
+### Option 1: React Development Server (Recommended)
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Open in browser:**
+   ```
+   http://localhost:3000
+   ```
+
+### Option 2: Static HTML Files
+
+Simply open any of these files directly in your browser:
+- `complete-homepage.html` - Main homepage with all features
+- `first-time-pet.html` - Pet parenting guide
+- `shops-near-you.html` - Store locator page
+
+## 📁 Project Structure
 
 ```
 greentail-assets/
-├── images/          # 网页图片
-│   ├── hero-dog.jpg     # 主横幅中的金毛犬图片
-│   └── ...
-├── icons/           # 图标文件
-│   ├── leaf-icon.svg    # 叶子图标
-│   ├── recycle-icon.svg # 回收图标
-│   ├── check-icon.svg   # 勾选图标
-│   └── location-icon.svg # 位置图标
-├── logos/           # Logo文件
-│   ├── greentail-logo.svg    # 主Logo
-│   └── greentail-logo.png    # 主Logo (PNG版本)
-└── README.md        # 说明文件
+├── src/                          # React source code
+│   ├── HomePage.jsx             # Main homepage component
+│   ├── QuizPage.jsx             # Pet quiz page component
+│   ├── SearchPage.jsx           # Store search page component
+│   ├── main.jsx                 # React entry point
+│   └── index.css                # Global styles
+├── public/                       # Static assets
+│   ├── logos/                   # Logo files
+│   ├── images/                  # Hero images
+│   └── icons/                   # SVG icons
+├── App.jsx                      # Main React app with routing
+├── package.json                 # Dependencies and scripts
+├── tailwind.config.js           # Tailwind CSS configuration
+├── vite.config.js               # Vite build configuration
+├── complete-homepage.html       # Standalone homepage
+├── first-time-pet.html          # Standalone quiz page
+├── shops-near-you.html          # Standalone search page
+└── README.md                    # This file
 ```
 
-## 需要的图片资源
+## 🎨 Design Features
 
-### 主要图片
-- **hero-dog.jpg** - 主横幅区域的金毛犬图片（建议尺寸：500x400px）
-- 背景图片（如果需要）
+### Visual Design
+- **Modern Gradient Backgrounds** - Soft blue-green gradients
+- **Card-based Layout** - Clean, organized information display
+- **Responsive Grid System** - Adapts to all screen sizes
+- **Smooth Animations** - Hover effects and transitions
 
-### 图标文件
-- **leaf-icon.svg** - 叶子图标（用于环保相关功能）
-- **recycle-icon.svg** - 回收图标
-- **check-icon.svg** - 勾选图标
-- **location-icon.svg** - 位置图标
-- **paw-icon.svg** - 爪子图标
-- **search-icon.svg** - 搜索图标
-- **heart-icon.svg** - 心形图标
+### Color Scheme
+- **Primary Green**: #33664C (GreenTail brand color)
+- **Text Colors**: Gray-900 for headings, Gray-600 for body text
+- **Background**: Blue-green gradients with white cards
+- **Accents**: Green-800 for buttons and highlights
 
-### Logo文件
-- **greentail-logo.svg** - 主Logo（矢量格式）
-- **greentail-logo.png** - 主Logo（位图格式，建议尺寸：120x40px）
+### Typography
+- **Font Family**: System fonts (San Francisco, Segoe UI, etc.)
+- **Headings**: Bold, large sizes with proper hierarchy
+- **Body Text**: Readable line heights and spacing
 
-## 使用说明
+## 🛠️ Technology Stack
 
-1. 将相应的图片文件放入对应的文件夹中
-2. 确保文件名与上述列表一致
-3. 建议使用SVG格式的图标以获得最佳显示效果
-4. 图片文件建议使用WebP或JPG格式以优化加载速度
+- **Frontend**: React 18 with modern hooks
+- **Styling**: Tailwind CSS for utility-first styling
+- **Routing**: React Router for single-page application navigation
+- **Build Tool**: Vite for fast development and building
+- **Icons**: Custom SVG icons for consistent design
+- **Images**: Optimized PNG/SVG assets
 
-## 更新HTML文件
+## 📱 Responsive Design
 
-当您添加了图片文件后，需要更新HTML文件中的图片路径：
+The application is fully responsive and optimized for:
+- **Desktop** (1200px+) - Full layout with side-by-side content
+- **Tablet** (768px-1199px) - Adjusted grid layouts
+- **Mobile** (320px-767px) - Stacked layout with touch-friendly buttons
 
-```html
-<!-- 示例：更新Logo -->
-<div class="logo-icon">
-    <img src="assets/logos/greentail-logo.svg" alt="GreenTail Logo">
-</div>
+## 🎯 Key Pages
 
-<!-- 示例：更新主横幅图片 -->
-<img src="assets/images/hero-dog.jpg" alt="Golden Retriever with carrots">
+### Homepage (`/`)
+- Hero section with main value proposition
+- How it works explanation
+- Why choose GreenTail features
+- Trust indicators and testimonials
+
+### Quiz Page (`/quiz`)
+- Pet parenting guide for new owners
+- Video content placeholder
+- Essential information cards
+- Organic food education
+
+### Search Page (`/search`)
+- Store locator with real data
+- Interactive map placeholder
+- Store information and contact details
+- Distance and availability information
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
 ```
+
+### Customization
+
+- **Colors**: Modify `tailwind.config.js` for brand colors
+- **Content**: Update component files in `src/` directory
+- **Assets**: Replace files in `public/` directories
+- **Styling**: Use Tailwind utility classes or modify `src/index.css`
+
+## 📄 License
+
+MIT License - feel free to use this code for your projects!
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📞 Contact
+
+For questions or support, please contact the GreenTail team.
+
+---
+
+**Built with ❤️ for pet parents and the planet**
