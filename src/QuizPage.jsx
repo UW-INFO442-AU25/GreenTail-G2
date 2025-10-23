@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function QuizPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to quiz start page
+    navigate('/quiz/0');
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -132,9 +140,11 @@ function QuizPage() {
       <section className="py-20 text-center">
         <div className="max-w-6xl mx-auto px-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-8">Ready to find the best food for your pet?</h3>
-          <a href="#" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl inline-block">
-            Take the 90-sec Quiz
-          </a>
+          <button onClick={() => navigate('/quiz/start')}
+                  className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl inline-block">
+                  Take the 90-sec Quiz
+          </button>
+
         </div>
       </section>
 

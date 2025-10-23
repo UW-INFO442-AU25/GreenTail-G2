@@ -38,10 +38,10 @@ function HomePage() {
                 In 90 seconds, we learn about your pet and show the best organic foods that fit your budget and values.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 items-start">
-                <a href="#" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group">
+                <Link to="/quiz/0" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group">
                   <span className="relative z-10">Take the 90-sec Quiz</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
-                </a>
+                </Link>
                 <Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
                   First time owning pet? →
                 </Link>
@@ -112,9 +112,9 @@ function HomePage() {
             </div>
           </div>
           <div className="text-center space-y-4">
-            <a href="#" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl inline-block">
+            <Link to="/quiz/0" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl inline-block">
               Start the Quiz
-            </a>
+            </Link>
             <p className="text-gray-600">
               <a href="#" className="text-green-800 hover:underline">Already have an account? Sign in</a>
             </p>
