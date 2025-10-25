@@ -289,6 +289,96 @@ const ProfilePage = () => {
     navigate('/login');
   };
 
+  // If user is not logged in, show login prompt
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <Link to="/" className="flex items-center space-x-2">
+                  <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8" />
+                  <span className="text-xl font-bold text-green-800">GreenTail</span>
+                </Link>
+              </div>
+              <nav className="hidden md:flex space-x-8">
+                <Link 
+                  to="/" 
+                  className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium"
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/quiz" 
+                  className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium"
+                >
+                  Quiz
+                </Link>
+                <Link 
+                  to="/search" 
+                  className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium"
+                >
+                  Search
+                </Link>
+                <Link 
+                  to="/compare" 
+                  className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium"
+                >
+                  Compare
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium"
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/profile" 
+                  className="text-green-800 hover:text-green-600 transition-colors duration-300 font-medium"
+                >
+                  Profile
+                </Link>
+              </nav>
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Login Prompt */}
+        <section className="py-16 bg-white">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Sign in to view your profile</h1>
+            <p className="text-lg text-gray-600 mb-8">
+              Log in to see your saved products, preferences, and personalized recommendations.
+            </p>
+            <div className="space-y-4">
+              <Link
+                to="/login"
+                className="inline-block bg-green-800 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium"
+              >
+                Sign In
+              </Link>
+              <div className="text-sm text-gray-500">
+                Don't have an account? <Link to="/login" className="text-green-800 hover:text-green-600">Create one here</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   // Error boundary for debugging
   try {
     return (
