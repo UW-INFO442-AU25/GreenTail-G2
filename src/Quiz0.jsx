@@ -1,9 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ProgressBar from './ProgressBar';
+import { useScrollAnimation } from './hooks/useScrollAnimation';
 
 function Quiz0() {
   const navigate = useNavigate();
+  const { sectionsRef, getAnimationClass, getParallaxStyle } = useScrollAnimation();
 
   const handleStartQuiz = () => {
     navigate('/quiz/1');
@@ -25,9 +27,9 @@ function Quiz0() {
               <li><a href="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</a></li>
               <li><a href="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-green-800">Quiz</a></li>
               <li><a href="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</a></li>
+              <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</Link></li>
+              <li><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</Link></li>
             </ul>
           </nav>
         </div>
@@ -53,9 +55,9 @@ function Quiz0() {
             >
               Start Quiz
             </button>
-            <a href="#" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
+            <Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
               First time pet parenting? →
-            </a>
+            </Link>
           </div>
 
           <div className="flex justify-center gap-4 mb-12 flex-wrap">

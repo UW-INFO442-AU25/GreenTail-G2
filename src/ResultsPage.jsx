@@ -1,17 +1,31 @@
-import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
+import { useAuth } from './AuthContext';
+import { findBestMatches, getMatchLevelStyle, generatePersonalizedDescription } from './utils/matchingAlgorithm';
+import { useScrollAnimation } from './hooks/useScrollAnimation';
 
 function ResultsPage() {
   const { quizData } = useQuiz();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { sectionsRef, getAnimationClass, getStaggeredAnimationClass } = useScrollAnimation();
   const [activeTags, setActiveTags] = useState([]);
   const initializedRef = useRef(false);
 
   // Debug: Log quiz data
   console.log('ResultsPage quizData:', quizData);
 
+  // 使用智能匹配算法获取最佳匹配产品
+  const matchedProducts = useMemo(() => {
+    if (!quizData || !quizData.pet) {
+      return [];
+    }
+    return findBestMatches(quizData);
+  }, [quizData]);
+
   // Simple fallback if no data
-  if (!quizData) {
+  if (!quizData || !quizData.pet) {
     return (
       <div className="min-h-screen bg-green-50 flex items-center justify-center">
         <div className="text-center">
@@ -79,24 +93,8 @@ function ResultsPage() {
     setActiveTags([]);
   };
 
-  // Generate description based on user answers
-  const generateDescription = () => {
-    const parts = [];
-    if (quizData.pet) parts.push(quizData.pet);
-    if (quizData.lifeStage) parts.push(quizData.lifeStage);
-    
-    if (quizData.avoidIngredients && quizData.avoidIngredients.length > 0 && !quizData.avoidIngredients.includes('None')) {
-      const allergies = quizData.avoidIngredients.filter(ingredient => ingredient !== 'Not sure').join(', ');
-      if (allergies) parts.push(`Allergies: ${allergies.toLowerCase()}`);
-    }
-    
-    if (quizData.zipCode) {
-      parts.push(`ZIP ${quizData.zipCode}`);
-    }
-    
-    parts.push('(from your answers)');
-    return parts.join(' • ');
-  };
+  // 使用智能算法生成个性化描述
+  const personalizedDescription = generatePersonalizedDescription(quizData);
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -114,9 +112,9 @@ function ResultsPage() {
               <li><a href="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</a></li>
               <li><a href="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-green-800">Quiz</a></li>
               <li><a href="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</a></li>
+              <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</Link></li>
+              <li><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</Link></li>
             </ul>
           </nav>
         </div>
@@ -146,7 +144,7 @@ function ResultsPage() {
             {/* Main Results */}
             <main className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Best matches for your pet</h1>
-              <p className="text-gray-600 mb-6">{generateDescription()}</p>
+              <p className="text-gray-600 mb-6">{personalizedDescription}</p>
 
               {/* Filters */}
               <div className="flex items-center gap-4 mb-6 flex-wrap">
@@ -176,112 +174,53 @@ function ResultsPage() {
 
               <div className="text-green-800 text-sm mb-6">✔ Your answers saved</div>
 
-              {/* Product Grid */}
+              {/* 动态产品网格 */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Product 1 */}
-                <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="bg-green-800 text-white px-3 py-1 rounded text-sm font-semibold">Best match</span>
-                    <span className="text-xl font-semibold text-gray-900">$34.99</span>
+                {matchedProducts.length > 0 ? (
+                  matchedProducts.map((product) => {
+                    const matchStyle = getMatchLevelStyle(product.matchLevel);
+                    return (
+                      <div key={product.id} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-4">
+                          <span className={`${matchStyle.bgColor} ${matchStyle.textColor} px-3 py-1 rounded text-sm font-semibold`}>
+                            {matchStyle.label}
+                          </span>
+                          <span className="text-xl font-semibold text-gray-900">${product.price}</span>
+                        </div>
+                        <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+                        <h3 className="font-semibold text-gray-900 mb-3 text-lg">
+                          {product.name.includes(product.brand) ? product.name : `${product.brand} · ${product.name}`}
+                        </h3>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {product.tags.slice(0, 4).map((tag, index) => (
+                            <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-gray-600 mb-4">{product.description}</p>
+                        <p className="text-sm text-gray-600 mb-4">$/1000 kcal: ${product.pricePer1000kcal}</p>
+                        <div className="flex justify-between items-center">
+                          <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
+                            Buy on {product.preferredChannel}
+                          </a>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Match: {product.matchScore}%</span>
+                            <input type="checkbox" className="rounded" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-2 text-center py-12">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">No matching products found</h3>
+                    <p className="text-gray-600 mb-6">Please try adjusting your filter criteria or retake the quiz.</p>
+                    <Link to="/quiz/0" className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300">
+                      Retake Quiz
+                    </Link>
                   </div>
-                  <img src="/images/Orijen.png" alt="Orijen" className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-3 text-lg">Orijen · Six Fish Recipe</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">low-footprint protein</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">recyclable bag</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">certified organic</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">made nearby</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">High-protein, grain-free recipe with six different fish sources. Perfect for dogs with sensitivities.</p>
-                  <p className="text-sm text-gray-600 mb-4">$/1000 kcal: $2.85</p>
-                  <div className="flex justify-between items-center">
-                    <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
-                      Buy on MudBay
-                    </a>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Why this?</span>
-                      <input type="checkbox" className="rounded" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product 2 */}
-                <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold">Great choice</span>
-                    <span className="text-xl font-semibold text-gray-900">$28.99</span>
-                  </div>
-                  <img src="/images/BlueBuffalo.png" alt="Blue Buffalo" className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-3 text-lg">Blue Buffalo · Wilderness</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">grain-free</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">high protein</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">no by-products</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">Grain-free recipe with high-quality protein sources. Great for active dogs who need extra nutrition.</p>
-                  <p className="text-sm text-gray-600 mb-4">$/1000 kcal: $2.42</p>
-                  <div className="flex justify-between items-center">
-                    <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
-                      Buy on Amazon
-                    </a>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Why this?</span>
-                      <input type="checkbox" className="rounded" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product 3 */}
-                <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="bg-yellow-600 text-white px-3 py-1 rounded text-sm font-semibold">Good option</span>
-                    <span className="text-xl font-semibold text-gray-900">$32.50</span>
-                  </div>
-                  <img src="/images/COREGrain.png" alt="CORE Grain-Free" className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-3 text-lg">Wellness · CORE Grain-Free</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">grain-free</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">natural ingredients</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">omega fatty acids</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">High-quality grain-free formula with natural ingredients and omega fatty acids for healthy skin and coat.</p>
-                  <p className="text-sm text-gray-600 mb-4">$/1000 kcal: $2.68</p>
-                  <div className="flex justify-between items-center">
-                    <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
-                      Buy on Chewy
-                    </a>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Why this?</span>
-                      <input type="checkbox" className="rounded" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product 4 */}
-                <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="bg-purple-600 text-white px-3 py-1 rounded text-sm font-semibold">Eco-friendly</span>
-                    <span className="text-xl font-semibold text-gray-900">$36.99</span>
-                  </div>
-                  <img src="/images/OpenFarm.png" alt="Open Farm" className="w-full h-48 object-cover rounded-lg mb-4" />
-                  <h3 className="font-semibold text-gray-900 mb-3 text-lg">Open Farm · Homestead Turkey</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">sustainable sourcing</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">compostable bag</span>
-                    <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">ethically raised</span>
-                  </div>
-                  <p className="text-gray-600 mb-4">Premium eco-friendly option with sustainably sourced ingredients and compostable packaging.</p>
-                  <p className="text-sm text-gray-600 mb-4">$/1000 kcal: $2.95</p>
-                  <div className="flex justify-between items-center">
-                    <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
-                      Buy on Chewy
-                    </a>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Why this?</span>
-                      <input type="checkbox" className="rounded" />
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </main>
           </div>
