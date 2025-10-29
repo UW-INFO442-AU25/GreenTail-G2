@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
 import { useAuth } from './AuthContext';
@@ -6,6 +6,7 @@ import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { getMatchLevelStyle, findBestMatches } from './utils/matchingAlgorithm';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import StoreMapModal from './components/StoreMapModal';
 
 function SearchPage() {
   const { quizData } = useQuiz();
@@ -15,6 +16,8 @@ function SearchPage() {
   const { sectionsRef, getAnimationClass, getStaggeredAnimationClass } = useScrollAnimation();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('best');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [selectedProductForMap, setSelectedProductForMap] = useState(null);
   const [filters, setFilters] = useState({
     species: ['Dog'],
     lifeStage: ['Adult'],
@@ -34,6 +37,17 @@ function SearchPage() {
     locallySourced: false,
     humanGrade: false
   });
+
+  // Saved products state for compare suggestion
+  const [savedForCompare, setSavedForCompare] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [showComparePrompt, setShowComparePrompt] = useState(true);
+  const savedCount = savedForCompare.length;
 
   // 过滤和搜索产品
   const filteredProducts = useMemo(() => {
@@ -295,24 +309,49 @@ function SearchPage() {
 
     const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
     const isAlreadySaved = savedProducts.find(p => p.id === product.id);
-    
+
+    let updated;
     if (!isAlreadySaved) {
-      const productToSave = {
-        ...product,
-        savedAt: new Date().toISOString()
-      };
-      savedProducts.push(productToSave);
-      localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
-      showSuccess('Product saved to your profile!');
+      const productToSave = { ...product, savedAt: new Date().toISOString() };
+      updated = [...savedProducts, productToSave];
+      localStorage.setItem('savedProducts', JSON.stringify(updated));
+      showSuccess('Saved to your profile');
     } else {
-      showError('Product is already saved!');
+      updated = savedProducts.filter(p => p.id !== product.id);
+      localStorage.setItem('savedProducts', JSON.stringify(updated));
+      showSuccess('Removed from saved');
     }
+    setSavedForCompare(updated);
+    // Re-open compare prompt on any heart click if there are at least 2 saved items
+    setShowComparePrompt(updated.length >= 2);
   };
 
   const isProductSaved = (productId) => {
     const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
     return savedProducts.find(p => p.id === productId);
   };
+
+  // Compare now action - send last two saved items to compare page
+  const handleCompareNow = () => {
+    const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    if (saved.length < 2) return;
+    const lastTwo = saved.slice(-2).map(p => p.id);
+    localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
+    navigate('/compare');
+  };
+
+  // Keep local state in sync when user removes elsewhere (future-proof)
+  useEffect(() => {
+    const onStorage = () => {
+      try {
+        setSavedForCompare(JSON.parse(localStorage.getItem('savedProducts') || '[]'));
+      } catch {
+        setSavedForCompare([]);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -377,6 +416,17 @@ function SearchPage() {
               <option value="lowest">Lowest price</option>
               <option value="highest">Highest price</option>
             </select>
+            
+            {/* 地图按钮 */}
+            <button
+              onClick={() => {
+                setSelectedProductForMap(null);
+                setShowMapModal(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+            >
+              🗺️ Find Stores Near You
+            </button>
             
             {/* Active Filter Tags */}
             <div className="flex flex-wrap gap-2">
@@ -802,11 +852,21 @@ function SearchPage() {
                           Buy on {product.preferredChannel}
                         </a>
                         <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              setSelectedProductForMap(product.name);
+                              setShowMapModal(true);
+                            }}
+                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1"
+                            title="Find stores with this product"
+                          >
+                            📍 Find Nearby
+                          </button>
                           <button className="text-gray-600 hover:text-green-800 text-sm">Compare</button>
                           <button 
-                            onClick={() => handleSaveProduct(product)}
+                            onClick={(e) => { e.preventDefault(); handleSaveProduct(product); }}
                             className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300`}
-                            title={isProductSaved(product.id) ? 'Saved!' : 'Save to profile'}
+                            title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
                           >
                             {isProductSaved(product.id) ? (
                               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -842,6 +902,25 @@ function SearchPage() {
         </div>
       </main>
 
+      {/* Compare suggestion bar */}
+      {savedCount >= 2 && showComparePrompt && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white border border-green-200 shadow-xl rounded-full px-5 py-3 flex items-center gap-4">
+          <span className="text-sm text-gray-800">You saved {savedCount} items</span>
+          <button
+            onClick={handleCompareNow}
+            className="bg-green-800 text-white text-sm px-4 py-2 rounded-full hover:bg-green-700 transition-colors"
+          >
+            Compare latest 2
+          </button>
+          <button
+            onClick={() => setShowComparePrompt(false)}
+            className="text-gray-500 text-xs hover:text-gray-700"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12">
         <div className="max-w-6xl mx-auto px-8">
@@ -868,6 +947,13 @@ function SearchPage() {
           </div>
         </div>
       </footer>
+
+      {/* 地图弹窗 */}
+      <StoreMapModal 
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        selectedProduct={selectedProductForMap}
+      />
     </div>
   );
 }

@@ -39,6 +39,23 @@ const ComparePage = () => {
     }
   }, []);
 
+  // If navigated from Search with preselection, auto-apply and show results
+  useEffect(() => {
+    try {
+      const selection = JSON.parse(localStorage.getItem('compareSelection') || 'null');
+      if (selection && Array.isArray(selection) && selection.length >= 2) {
+        const first = petFoodDatabase.find(p => p.id === selection[0]) || null;
+        const second = petFoodDatabase.find(p => p.id === selection[1]) || null;
+        const third = selection[2] ? petFoodDatabase.find(p => p.id === selection[2]) : null;
+        setSelectedProducts({ first, second, third });
+        // Clear once consumed
+        localStorage.removeItem('compareSelection');
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const handleProductSelect = (position, productId) => {
     if (productId === '') {
       setSelectedProducts(prev => ({

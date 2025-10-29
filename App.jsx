@@ -18,6 +18,10 @@ import FirstTimePage from './src/FirstTimePage';
 import LoginPage from './src/LoginPage';
 import AboutPage from './src/AboutPage';
 import ProfilePage from './src/ProfilePage';
+import ShopsNearYouPage from './src/ShopsNearYouPage';
+import TestPage from './src/TestPage';
+import PetFoodLabelsGuide from './src/PetFoodLabelsGuide';
+import OrganicPetFoodGuide from './src/OrganicPetFoodGuide';
 
 function App() {
   return (
@@ -41,6 +45,10 @@ function App() {
             <Route path="/first-time" element={<FirstTimePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/shops-near-you" element={<ShopsNearYouPage />} />
+            <Route path="/test" element={<TestPage />} />
+            <Route path="/pet-food-labels-guide" element={<PetFoodLabelsGuide />} />
+            <Route path="/organic-pet-food-guide" element={<OrganicPetFoodGuide />} />
           </Routes>
           </Router>
         </QuizProvider>

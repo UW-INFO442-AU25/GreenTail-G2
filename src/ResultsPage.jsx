@@ -4,6 +4,8 @@ import { useQuiz } from './QuizContext';
 import { useAuth } from './AuthContext';
 import { findBestMatches, getMatchLevelStyle, generatePersonalizedDescription } from './utils/matchingAlgorithm';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import StoreMapModal from './components/StoreMapModal';
+import TransitionPlanModal from './components/TransitionPlanModal';
 
 function ResultsPage() {
   const { quizData } = useQuiz();
@@ -11,6 +13,9 @@ function ResultsPage() {
   const navigate = useNavigate();
   const { sectionsRef, getAnimationClass, getStaggeredAnimationClass } = useScrollAnimation();
   const [activeTags, setActiveTags] = useState([]);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [selectedProductForMap, setSelectedProductForMap] = useState(null);
+  const [showTransitionPlan, setShowTransitionPlan] = useState(false);
   const initializedRef = useRef(false);
 
   // Debug: Log quiz data
@@ -128,23 +133,41 @@ function ResultsPage() {
             <aside className="w-64 flex-shrink-0">
               <div className="bg-white rounded-xl p-4 shadow-lg mb-4">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Learn to decode pet food labels</h4>
-                <a href="#" className="text-green-800 hover:underline">Read guide →</a>
+                <Link to="/pet-food-labels-guide" className="text-green-800 hover:underline">Read guide →</Link>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg mb-4">
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">2-week transition plan</h4>
-                <a href="#" className="text-green-800 hover:underline">Get plan →</a>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">7-14 day transition plan</h4>
+                <button 
+                  onClick={() => setShowTransitionPlan(true)}
+                  className="text-green-800 hover:underline cursor-pointer"
+                >
+                  Get plan →
+                </button>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg mb-4">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">What "organic" covers</h4>
-                <a href="#" className="text-green-800 hover:underline">Learn more →</a>
+                <Link to="/organic-pet-food-guide" className="text-green-800 hover:underline">Learn more →</Link>
               </div>
-              <a href="#" className="text-green-800 hover:underline text-sm">See all tips →</a>
+              
             </aside>
 
             {/* Main Results */}
             <main className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Best matches for your pet</h1>
               <p className="text-gray-600 mb-6">{personalizedDescription}</p>
+
+              {/* 地图按钮 */}
+              <div className="mb-6">
+                <button
+                  onClick={() => {
+                    setSelectedProductForMap(null);
+                    setShowMapModal(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  🗺️ Find Stores Near You
+                </button>
+              </div>
 
               {/* Filters */}
               <div className="flex items-center gap-4 mb-6 flex-wrap">
@@ -205,6 +228,16 @@ function ResultsPage() {
                             Buy on {product.preferredChannel}
                           </a>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <button 
+                              onClick={() => {
+                                setSelectedProductForMap(product.name);
+                                setShowMapModal(true);
+                              }}
+                              className="text-gray-600 hover:text-green-800 flex items-center gap-1"
+                              title="Find stores with this product"
+                            >
+                              📍 Find Nearby
+                            </button>
                             <span>Match: {product.matchScore}%</span>
                             <input type="checkbox" className="rounded" />
                           </div>
@@ -226,6 +259,22 @@ function ResultsPage() {
           </div>
         </div>
       </div>
+
+      {/* 地图弹窗 */}
+      <StoreMapModal 
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        selectedProduct={selectedProductForMap}
+      />
+
+      {/* 转换计划弹窗 */}
+      <TransitionPlanModal 
+        isOpen={showTransitionPlan}
+        onClose={() => setShowTransitionPlan(false)}
+        petType={quizData?.pet || 'Dog'}
+        currentFood="Regular"
+        newFood="Organic"
+      />
     </div>
   );
 }

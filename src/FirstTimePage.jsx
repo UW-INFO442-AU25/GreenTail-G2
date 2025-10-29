@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import YouTubeVideo from './components/YouTubeVideo';
 
 const FirstTimePage = () => {
   const { sectionsRef, getAnimationClass, getParallaxStyle } = useScrollAnimation();
+  const videoRef = useRef(null);
+
+  const scrollToVideo = () => {
+    if (!videoRef.current) return;
+    const headerOffset = 80; // fixed header height
+    const elementPosition = videoRef.current.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - headerOffset;
+    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-green-50">
@@ -40,26 +50,29 @@ const FirstTimePage = () => {
               A quick guide to caring for your new pet—health, food, and daily routines—plus what "organic" really means.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 items-center justify-center">
-              <Link to="/quiz" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group">
+              <Link to="/quiz/1" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl relative overflow-hidden group">
                 <span className="relative z-10">Take the 90-sec Quiz</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
               </Link>
-              <a href="#" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
-                Watch 2-min overview →
-              </a>
+              <button onClick={scrollToVideo} className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
+                Watch 2‑min overview →
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Video Section */}
-      <section className="py-20">
+      <section ref={videoRef} className="py-20">
         <div className="max-w-6xl mx-auto px-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12">Video: Getting started with your pet</h2>
-          <div className="bg-blue-50 h-80 rounded-xl flex items-center justify-center mx-auto max-w-4xl cursor-pointer transition-transform duration-300 hover:scale-105">
-            <div className="text-6xl text-green-800">▶</div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-8">Video: Getting started with your pet</h2>
+          <div className="max-w-4xl mx-auto">
+            <YouTubeVideo
+              videoId="RXh5yyGmP5k"
+              title="Pet Nutrition Guide for New Pet Parents"
+              startTime={6}
+            />
           </div>
-          <p className="text-gray-600 mt-4">2:03 · Intro to feeding, routines, and vet basics</p>
         </div>
       </section>
 
@@ -70,77 +83,33 @@ const FirstTimePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Supplies checklist</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Leash/collar or carrier, bowls, bed, litter/poop bags, ID tag, brush, toys.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Leash/collar or carrier, bowls, bed, litter/poop bags, ID tag, brush, toys.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Vet & vaccines</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Find a local vet, schedule an exam, keep vaccine and microchip records handy.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Find a local vet, schedule an exam, keep vaccine and microchip records handy.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Nutrition basics</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Choose by species & life stage. Watch portions; fresh water always.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Choose by species & life stage. Watch portions; fresh water always.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Switch foods slowly</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Mix new food over 7–14 days to avoid tummy upsets.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Mix new food over 7–14 days to avoid tummy upsets.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Read the label</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Ingredients order matters; look for clear sourcing and certifications.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Ingredients order matters; look for clear sourcing and certifications.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <h3 className="text-lg font-semibold text-green-800 mb-3">Budget & eco swaps</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">Try a best-match topper first; pick recyclable or compostable bags.</p>
-              <a href="#" className="text-green-800 text-sm font-medium hover:underline">Learn more →</a>
+              <p className="text-gray-600 text-sm leading-relaxed">Try a best-match topper first; pick recyclable or compostable bags.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Organic Info Section */}
-      <section className="py-20 bg-green-100">
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">What does "organic" mean for pet food?</h3>
-            <ul className="space-y-4 mb-6">
-              <li className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
-                </div>
-                <span className="text-gray-700">Fewer synthetic pesticides on crops/ingredients.</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
-                </div>
-                <span className="text-gray-700">Third-party certification improves transparency.</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
-                </div>
-                <span className="text-gray-700">Doesn't replace vet advice—still pick what fits your pet.</span>
-              </li>
-            </ul>
-            <a href="#" className="text-green-800 font-medium hover:underline">How we evaluate →</a>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-20 text-center">
-        <div className="max-w-6xl mx-auto px-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8">Ready to find the best food for your pet?</h3>
-          <Link to="/quiz" className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl inline-block">
-            Take the 90-sec Quiz
-          </Link>
-        </div>
-      </section>
+      
 
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ProgressBar from './ProgressBar';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
@@ -6,13 +6,21 @@ import { useScrollAnimation } from './hooks/useScrollAnimation';
 function Quiz0() {
   const navigate = useNavigate();
   const { sectionsRef, getAnimationClass, getParallaxStyle } = useScrollAnimation();
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleStartQuiz = () => {
-    navigate('/quiz/1');
+    setIsStarting(true);
+    setTimeout(() => navigate('/quiz/1'), 300);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-green-50">
+      {/* Decorative BG */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-24 -top-24 w-72 h-72 bg-green-100 rounded-full blur-3xl opacity-40"></div>
+        <div className="absolute -left-20 top-48 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-40"></div>
+      </div>
+
       {/* Header */}
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
@@ -40,47 +48,42 @@ function Quiz0() {
 
       {/* Main Content */}
       <div className="pt-8 pb-20">
-        <div className="max-w-4xl mx-auto px-8 text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Tell us about your pet
-          </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            In 90 seconds, we'll personalize recommendations and show the best organic options for your budget and values.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mb-8">
-            <button 
-              onClick={handleStartQuiz}
-              className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:-translate-y-1 hover:shadow-xl"
-            >
-              Start Quiz
-            </button>
-            <Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
-              First time pet parenting? →
-            </Link>
-          </div>
-
-          <div className="flex justify-center gap-4 mb-12 flex-wrap">
-            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-              It's quick
-            </span>
-            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-              Skip what you don't know
-            </span>
-            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-              We don't sell your data
-            </span>
-          </div>
-
-          <div className="max-w-sm mx-auto">
-            <img 
-              src="/images/dog.png" 
-              alt="Happy dog" 
-              className="w-full h-auto rounded-2xl shadow-lg"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              ZIP is optional; it only helps with local availability.
+        <div className="max-w-6xl mx-auto px-8">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+              Let’s find the perfect organic match for your pet 🐾
+            </h1>
+            <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+              In just 90 seconds, get personalized organic food and product recommendations tailored to your pet’s needs — and your budget.
             </p>
+            
+            <div className="flex flex-col gap-4 items-center justify-center mb-8">
+              <button 
+                onClick={handleStartQuiz}
+                className={`bg-green-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:bg-green-700 hover:shadow-xl ${isStarting ? 'scale-95' : 'scale-100'}`}
+              >
+                {isStarting ? 'Starting…' : "Start My Pet Quiz"}
+              </button>
+              <Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-base">
+                New to pet parenting? See our beginner’s guide →
+              </Link>
+            </div>
+
+            <div className="flex justify-center gap-4 mb-12 flex-nowrap overflow-x-auto px-4">
+              <span className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
+                <svg className="w-4 h-4 text-green-700" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h7l-1 8 11-14h-7l0-6z"/></svg>
+                It’s quick
+              </span>
+              <span className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
+                <svg className="w-4 h-4 text-green-700" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 5l8 7-8 7V5z"/></svg>
+                Skip what you don’t know
+              </span>
+              <span className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
+                <svg className="w-4 h-4 text-green-700" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6l7-4z"/></svg>
+                We don’t sell your data
+              </span>
+            </div>
           </div>
         </div>
       </div>

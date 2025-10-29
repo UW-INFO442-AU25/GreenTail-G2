@@ -556,8 +556,11 @@
           </div>
           <div class="map-placeholder">
             <div class="map-icon">🗺️</div>
-            <p><strong>Map coming soon</strong></p>
-            <p class="map-note">Interactive store locations will be displayed here</p>
+            <p><strong>Interactive Map</strong></p>
+            <p class="map-note">Click to open full map view</p>
+            <button onclick="openMapModal()" class="btn green" style="margin-top: 15px;">
+              Open Interactive Map
+            </button>
           </div>
         </aside>
       </div>
@@ -763,6 +766,40 @@
         }
       });
     });
+
+    // 地图弹窗功能
+    function openMapModal() {
+      showModal('Interactive Store Map', `
+        <div style="text-align: center; padding: 20px;">
+          <h3 style="margin-bottom: 15px; color: #1a365d;">Interactive Map</h3>
+          <div style="background: #f8f9fa; padding: 40px; border-radius: 8px; margin-bottom: 20px; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🗺️</div>
+            <p style="color: #1a365d; font-weight: 600; margin-bottom: 10px;">Interactive Map Coming Soon!</p>
+            <p style="color: #4a5568; font-size: 14px; margin-bottom: 20px;">This will show an interactive map with store locations, directions, and real-time inventory.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+              <button onclick="showDirections('5314 15th Ave NW, Seattle, WA 98107', 'MudBay – Ballard'); closeModal();" 
+                      style="background: #33664C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                MudBay Directions
+              </button>
+              <button onclick="showDirections('13000 Aurora Ave N, Seattle, WA 98133', 'PetSmart – Aurora'); closeModal();" 
+                      style="background: #33664C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                PetSmart Directions
+              </button>
+              <button onclick="showDirections('8728 Holman Rd NW, Seattle, WA 98117', 'Petco – Interbay'); closeModal();" 
+                      style="background: #33664C; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                Petco Directions
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center;">
+            <button onclick="closeModal();" 
+                    style="background: #33664C; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+              Close
+            </button>
+          </div>
+        </div>
+      `);
+    }
 
     // 添加按钮点击水波纹效果
     document.querySelectorAll('.btn').forEach(button => {
