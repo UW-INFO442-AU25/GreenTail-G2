@@ -108,7 +108,7 @@ function ResultsPage() {
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6 object-contain" />
+              <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6 object-contain" />
             </div>
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>

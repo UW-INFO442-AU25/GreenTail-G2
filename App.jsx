@@ -28,7 +28,7 @@ function App() {
     <AuthProvider>
       <ToastProvider>
         <QuizProvider>
-          <Router>
+          <Router basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
