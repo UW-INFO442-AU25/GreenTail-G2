@@ -110,7 +110,7 @@ function HomePage() {
             >
               <div className={getAnimationClass('hero-image', 200)}>
                 <img 
-                  src="/images/hero-dog.png" 
+                  src={`${import.meta.env.BASE_URL}images/hero-dog.png`} 
                   alt="Happy dog with organic food" 
                   className="max-w-full h-auto transform hover:scale-105 transition-transform duration-700"
                 />
