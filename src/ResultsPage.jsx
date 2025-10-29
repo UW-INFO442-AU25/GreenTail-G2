@@ -128,9 +128,9 @@ function ResultsPage() {
       {/* Main Content */}
       <div className="pt-20 pb-20">
         <div className="max-w-6xl mx-auto px-8">
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar */}
-            <aside className="w-64 flex-shrink-0">
+            <aside className="w-full lg:w-64 flex-shrink-0">
               <div className="bg-white rounded-xl p-4 shadow-lg mb-4">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Learn to decode pet food labels</h4>
                 <Link to="/pet-food-labels-guide" className="text-green-800 hover:underline">Read guide →</Link>

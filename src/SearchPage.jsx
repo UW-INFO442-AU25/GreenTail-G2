@@ -508,10 +508,10 @@ function SearchPage() {
             </div>
                 </div>
 
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
-            <aside className="w-64 flex-shrink-0">
-              <div className="bg-white rounded-xl p-6 shadow-lg sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <aside className="w-full lg:w-64 flex-shrink-0">
+              <div className="bg-white rounded-xl p-6 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter by</h3>
                 
                 <div className="mb-6">
@@ -824,7 +824,7 @@ function SearchPage() {
               </div>
               
               {/* Product Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProducts.map((product) => {
                   const matchStyle = getMatchLevelStyle(product.matchLevel);
                   return (

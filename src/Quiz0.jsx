@@ -51,7 +51,7 @@ function Quiz0() {
         <div className="max-w-6xl mx-auto px-8">
           {/* Hero Section */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
               Let’s find the perfect organic match for your pet 🐾
             </h1>
             <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">

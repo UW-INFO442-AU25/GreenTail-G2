@@ -89,9 +89,9 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           </button>
         </div>
 
-        <div className="flex h-[calc(90vh-120px)]">
+        <div className="flex flex-col md:flex-row h-[calc(90vh-120px)]">
           {/* 左侧：商店列表 */}
-          <div className="w-1/3 border-r overflow-y-auto">
+          <div className="md:w-1/3 w-full border-b md:border-b-0 md:border-r overflow-y-auto">
             <div className="p-4">
               <div className="mb-4">
                 <input
@@ -166,7 +166,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           </div>
 
           {/* 右侧：地图 */}
-          <div className="w-2/3">
+          <div className="md:w-2/3 w-full h-80 md:h-auto">
             <MapContainer
               center={mapCenter}
               zoom={12}
