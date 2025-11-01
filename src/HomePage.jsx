@@ -124,6 +124,42 @@ function HomePage() {
     }, 0); // No initial delay
   };
 
+  // Ensure video loads and plays on mount
+  useEffect(() => {
+    if (fullscreenVideoRef.current && isFullscreenVideo) {
+      const video = fullscreenVideoRef.current;
+      
+      // Ensure video is muted and set to autoplay (required for autoplay policy)
+      video.muted = true;
+      video.playsInline = true;
+      
+      // Load and play the video
+      const playPromise = video.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Video is playing
+            console.log('Video is playing');
+          })
+          .catch((error) => {
+            // Autoplay was prevented
+            console.warn('Autoplay prevented:', error);
+            // Try to play again after user interaction is detected
+            const handleInteraction = () => {
+              video.play().catch(() => {
+                // Ignore if still can't play
+              });
+              document.removeEventListener('click', handleInteraction);
+              document.removeEventListener('touchstart', handleInteraction);
+            };
+            document.addEventListener('click', handleInteraction, { once: true });
+            document.addEventListener('touchstart', handleInteraction, { once: true });
+          });
+      }
+    }
+  }, [isFullscreenVideo]);
+
   // Initialize hero animations on mount (only if content should show)
   useEffect(() => {
     // Only trigger initial animations if content is already showing
@@ -178,7 +214,16 @@ function HomePage() {
             autoPlay
             muted
             playsInline
+            preload="auto"
             onEnded={handleVideoEnd}
+            onLoadedData={() => {
+              // Ensure video plays when loaded
+              if (fullscreenVideoRef.current) {
+                fullscreenVideoRef.current.play().catch(() => {
+                  // Autoplay prevented, will handle in useEffect
+                });
+              }
+            }}
             aria-label="GreenTail introduction video"
           />
         </div>
