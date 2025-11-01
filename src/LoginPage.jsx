@@ -151,7 +151,7 @@ const LoginPage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8" />
+                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
                 <span className="text-xl font-bold text-green-800">GreenTail</span>
               </Link>
             </div>
@@ -184,7 +184,7 @@ const LoginPage = () => {
         <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">
-            <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8 mr-2" />
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8 mr-2" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
 

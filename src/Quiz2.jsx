@@ -45,16 +45,14 @@ function Quiz2() {
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav>
             <ul className="flex gap-8">
-              <li><a href="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</a></li>
-              <li><a href="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-green-800">Quiz</a></li>
-              <li><a href="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</a></li>
+              <li><Link to="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</Link></li>
+              <li><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-green-800">Quiz</Link></li>
+              <li><Link to="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</Link></li>
               <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</Link></li>
               <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</Link></li>
               <li><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</Link></li>

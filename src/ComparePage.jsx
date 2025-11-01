@@ -1,8 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { useAuth } from './AuthContext';
-import { useScrollAnimation } from './hooks/useScrollAnimation';
+
+/**
+ * ComparePage - Redesigned per comparison_page_critique.md
+ * 
+ * Architecture:
+ * 1. Analyst's Verdict Section - Enhanced insights with qualitative summary and Pros & Cons
+ * 2. Comprehensive Comparison Table - Detailed side-by-side comparison of all attributes
+ * 3. Clear CTAs - Primary "Add to Cart" and secondary "View Details" actions per product
+ * 
+ * Animation Strategy:
+ * - Initial load: Verdict section fades in
+ * - Scroll-triggered: Table sections use Intersection Observer
+ * - Micro-interactions: Button hover effects
+ * - Performance: Only transform and opacity
+ */
 
 const ComparePage = () => {
   const [selectedProducts, setSelectedProducts] = useState({
@@ -15,7 +29,12 @@ const ComparePage = () => {
   
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { sectionsRef, getAnimationClass, getStaggeredAnimationClass } = useScrollAnimation();
+  
+  // Animation state
+  const [isVisible, setIsVisible] = useState({});
+  const [hasAnimated, setHasAnimated] = useState({});
+  const sectionsRef = useRef({});
+  const observerRef = useRef(null);
 
   const handleLogout = () => {
     logout();
@@ -283,70 +302,320 @@ const ComparePage = () => {
     );
   };
 
-  const getComparisonInsights = (products) => {
-    const insights = [];
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+            const key = entry.target.dataset.sectionKey;
+            if (key && !hasAnimated[key]) {
+              setIsVisible((prev) => ({ ...prev, [key]: true }));
+              setHasAnimated((prev) => ({ ...prev, [key]: true }));
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '0px 0px -50px 0px',
+      }
+    );
+
+    Object.keys(sectionsRef.current).forEach((key) => {
+      const element = sectionsRef.current[key];
+      if (element) {
+        element.dataset.sectionKey = key;
+        observerRef.current.observe(element);
+      }
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasAnimated]);
+
+  // Initialize animations on mount
+  useEffect(() => {
+    // Trigger initial animations for header and title sections
+    setTimeout(() => {
+      setIsVisible((prev) => ({
+        ...prev,
+        'compare-header': true,
+        'compare-title': true,
+        'compare-selector': true,
+      }));
+      setHasAnimated((prev) => ({
+        ...prev,
+        'compare-header': true,
+        'compare-title': true,
+        'compare-selector': true,
+      }));
+    }, 300);
+  }, []);
+
+  // Initialize animations when products are selected
+  useEffect(() => {
+    const products = Object.values(selectedProducts).filter(Boolean);
+    if (products.length >= 2) {
+      setTimeout(() => {
+        setIsVisible((prev) => ({
+          ...prev,
+          'verdict-section': true,
+          'comparison-table': true,
+          'ctas-section': true,
+        }));
+        setHasAnimated((prev) => ({
+          ...prev,
+          'verdict-section': true,
+          'comparison-table': true,
+          'ctas-section': true,
+        }));
+      }, 300);
+    }
+  }, [selectedProducts]);
+
+  // Generate Analyst's Verdict - Phase 1: Enhanced insights
+  const generateAnalystsVerdict = (products) => {
+    if (products.length < 2) return null;
+
+    const [product1, product2] = products;
     
-    // Price comparison
-    const prices = products.map(p => p.price);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const priceDiff = maxPrice - minPrice;
+    // Determine positioning (premium vs value, etc.)
+    const price1 = product1.price;
+    const price2 = product2.price;
+    const isPremium1 = price1 > price2;
+    const isOrganic1 = product1.isOrganic || product1.ecoFeatures?.certified;
+    const isOrganic2 = product2.isOrganic || product2.ecoFeatures?.certified;
     
-    if (priceDiff > 10) {
-      const cheapest = products.find(p => p.price === minPrice);
-      insights.push({
-        type: 'price',
-        message: `${cheapest.name} is $${priceDiff.toFixed(2)} cheaper than the most expensive option`,
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-          </svg>
-        )
-      });
-    }
+    // Generate qualitative summary
+    const summary = `${product1.brand} ${product1.name} is a ${
+      isPremium1 ? 'premium, protein-dense' : 'balanced'
+    } formula ideal for ${
+      product1.lifeStage?.[0] || 'adult'
+    } ${product1.petType?.[0] || 'pets'} and owners prioritizing ${
+      isOrganic1 ? 'ingredient sourcing and organic certification' : 
+      product1.ecoFeatures?.lowFootprintProtein ? 'sustainable protein sources' :
+      'nutritional balance'
+    }. In contrast, ${product2.brand} ${product2.name} offers a ${
+      isPremium1 ? 'strong, balanced nutritional profile' : 'premium, high-quality'
+    } at a ${
+      isPremium1 ? 'more accessible' : 'higher'
+    } price point, making it a ${
+      isPremium1 ? 'versatile choice for a wide range' : 'premium option for discerning'
+    } of ${product2.lifeStage?.[0] || 'adult'} ${product2.petType?.[0] || 'pets'}.`;
 
-    // Organic comparison
-    const organicCount = products.filter(p => p.isOrganic).length;
-    if (organicCount === products.length) {
-      insights.push({
-        type: 'organic',
-        message: 'All products are organic certified',
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-          </svg>
-        )
-      });
-    } else if (organicCount > 0) {
-      const organicProducts = products.filter(p => p.isOrganic);
-      insights.push({
-        type: 'organic',
-        message: `${organicProducts.map(p => p.name).join(', ')} are organic certified`,
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-          </svg>
-        )
-      });
-    }
+    // Generate Pros & Cons for each product
+    const generateProsCons = (product, otherProducts) => {
+      const pros = [];
+      const cons = [];
+      
+      // Price analysis
+      const otherPrices = otherProducts.map(p => p.price);
+      const isCheapest = product.price === Math.min(product.price, ...otherPrices);
+      const isMostExpensive = product.price === Math.max(product.price, ...otherPrices);
+      
+      if (isCheapest) {
+        pros.push('Budget-friendly cost per serving');
+      } else if (isMostExpensive) {
+        cons.push('Premium price point');
+      }
+      
+      // Quality indicators
+      if (product.isOrganic || product.ecoFeatures?.certified) {
+        pros.push('Organic certified with transparent sourcing');
+      }
+      
+      if (product.ecoFeatures?.lowFootprintProtein) {
+        pros.push('High-quality, diverse protein sources');
+      } else if (!product.ecoFeatures?.lowFootprintProtein && otherProducts.some(p => p.ecoFeatures?.lowFootprintProtein)) {
+        cons.push('Less sustainable protein sourcing');
+      }
+      
+      if (product.isGrainFree) {
+        pros.push('Grain-free formula suitable for sensitive pets');
+      }
+      
+      // Value proposition
+      const pricePerKcal = product.pricePer1000kcal;
+      const otherPricePerKcal = otherProducts.map(p => p.pricePer1000kcal);
+      const isBestValue = pricePerKcal === Math.min(pricePerKcal, ...otherPricePerKcal);
+      
+      if (isBestValue) {
+        pros.push('Excellent value per calorie');
+      }
+      
+      // Life stage coverage
+      if (product.lifeStage?.length > 1) {
+        pros.push('Suitable for multiple life stages');
+      } else if (otherProducts.some(p => p.lifeStage?.length > 1)) {
+        cons.push('Limited to specific life stage');
+      }
+      
+      // Packaging
+      if (product.ecoFeatures?.recyclablePackaging) {
+        pros.push('Eco-friendly recyclable packaging');
+      } else if (otherProducts.some(p => p.ecoFeatures?.recyclablePackaging)) {
+        cons.push('Less eco-friendly packaging');
+      }
+      
+      // Fill remaining slots
+      if (pros.length < 2) {
+        if (!product.isGrainFree && otherProducts.some(p => p.isGrainFree)) {
+          cons.push('Contains grains (may not suit all pets)');
+        }
+      }
+      
+      return { pros: pros.slice(0, 3), cons: cons.slice(0, 3) };
+    };
 
-    // Grain-free comparison
-    const grainFreeCount = products.filter(p => p.isGrainFree).length;
-    if (grainFreeCount === products.length) {
-      insights.push({
-        type: 'grain-free',
-        message: 'All products are grain-free',
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-          </svg>
-        )
-      });
-    }
-
-    return insights;
+    return {
+      summary,
+      products: products.map((product, index) => ({
+        product,
+        position: index === 0 ? 'first' : index === 1 ? 'second' : 'third',
+        ...generateProsCons(product, products.filter((_, i) => i !== index))
+      }))
+    };
   };
+
+  // Generate comprehensive comparison table data - Phase 2
+  const generateComparisonTable = useMemo(() => {
+    const products = Object.values(selectedProducts).filter(Boolean);
+    if (products.length < 2) return null;
+
+    const tableRows = [];
+    
+    // Key Information section
+    tableRows.push({ section: 'Key Information', rows: [
+      {
+        attribute: 'Best For',
+        values: products.map(p => 
+          `${p.lifeStage?.[0] || 'Adult'} ${p.petType?.[0] || 'Pets'}`
+        ),
+        highlight: null // No single best value
+      },
+      {
+        attribute: 'Price',
+        values: products.map(p => `$${p.price.toFixed(2)}`),
+        highlight: products.map((p, i) => {
+          const prices = products.map(pr => pr.price);
+          return p.price === Math.min(...prices) ? i : null;
+        }).filter(i => i !== null)[0] || null
+      },
+      {
+        attribute: 'Price per 1000 kcal',
+        values: products.map(p => `$${p.pricePer1000kcal.toFixed(2)}`),
+        highlight: products.map((p, i) => {
+          const prices = products.map(pr => pr.pricePer1000kcal);
+          return p.pricePer1000kcal === Math.min(...prices) ? i : null;
+        }).filter(i => i !== null)[0] || null
+      },
+      {
+        attribute: 'Rating',
+        values: products.map(p => `4.5 ⭐ (12 reviews)`), // Mock data
+        highlight: null
+      }
+    ]});
+
+    // Guaranteed Analysis section (mock data - can be enhanced with real data)
+    tableRows.push({ section: 'Guaranteed Analysis', rows: [
+      {
+        attribute: 'Crude Protein',
+        values: products.map(p => {
+          // Mock calculation based on product attributes
+          const baseProtein = p.tags?.some(t => t.toLowerCase().includes('high protein')) ? 38 : 32;
+          return `${baseProtein}% (min)`;
+        }),
+        highlight: products.map((p, i) => {
+          const proteins = products.map(pr => {
+            const hasHighProtein = pr.tags?.some(t => t.toLowerCase().includes('high protein'));
+            return hasHighProtein ? 38 : 32;
+          });
+          return p.tags?.some(t => t.toLowerCase().includes('high protein')) && 
+                 Math.max(...proteins) === 38 ? i : null;
+        }).filter(i => i !== null)[0] || null
+      },
+      {
+        attribute: 'Crude Fat',
+        values: products.map(p => {
+          const baseFat = p.price > 30 ? 18 : 16;
+          return `${baseFat}% (min)`;
+        }),
+        highlight: products.map((p, i) => {
+          const fats = products.map(pr => pr.price > 30 ? 18 : 16);
+          return Math.max(...fats) === (p.price > 30 ? 18 : 16) ? i : null;
+        }).filter(i => i !== null)[0] || null
+      },
+      {
+        attribute: 'Fiber',
+        values: products.map(p => {
+          const baseFiber = p.isGrainFree ? 3.5 : 4.0;
+          return `${baseFiber}% (max)`;
+        }),
+        highlight: products.map((p, i) => {
+          const fibers = products.map(pr => pr.isGrainFree ? 3.5 : 4.0);
+          return p.isGrainFree && Math.min(...fibers) === 3.5 ? i : null;
+        }).filter(i => i !== null)[0] || null
+      }
+    ]});
+
+    // Key Ingredients section
+    tableRows.push({ section: 'Key Ingredients', rows: [
+      {
+        attribute: 'Top 5 Ingredients',
+        values: products.map(p => {
+          const proteins = p.mainProteins?.slice(0, 5).join(', ') || 'N/A';
+          return proteins;
+        }),
+        highlight: null
+      },
+      {
+        attribute: 'Grain-Free',
+        values: products.map(p => p.isGrainFree ? 'Yes' : 'No'),
+        highlight: products.map((p, i) => p.isGrainFree ? i : null).filter(i => i !== null)
+      },
+      {
+        attribute: 'Organic Certified',
+        values: products.map(p => (p.isOrganic || p.ecoFeatures?.certified) ? 'Yes' : 'No'),
+        highlight: products.map((p, i) => (p.isOrganic || p.ecoFeatures?.certified) ? i : null).filter(i => i !== null)
+      }
+    ]});
+
+    // Additional Attributes section
+    tableRows.push({ section: 'Additional Attributes', rows: [
+      {
+        attribute: 'Life Stage',
+        values: products.map(p => p.lifeStage?.join(', ') || 'N/A'),
+        highlight: null
+      },
+      {
+        attribute: 'Main Proteins',
+        values: products.map(p => p.mainProteins?.join(', ') || 'N/A'),
+        highlight: null
+      },
+      {
+        attribute: 'Feeding Style',
+        values: products.map(p => p.feedingStyle?.join(', ') || 'N/A'),
+        highlight: null
+      },
+      {
+        attribute: 'Eco Features',
+        values: products.map(p => {
+          const features = [];
+          if (p.ecoFeatures?.lowFootprintProtein) features.push('Low-Footprint Protein');
+          if (p.ecoFeatures?.recyclablePackaging) features.push('Recyclable Packaging');
+          if (p.ecoFeatures?.certified) features.push('Certified Organic');
+          return features.length > 0 ? features.join(', ') : 'None';
+        }),
+        highlight: null
+      }
+    ]});
+
+    return tableRows;
+  }, [selectedProducts]);
 
   const renderProductCard = (product, index) => {
     const score = getProductScore(product);
@@ -458,27 +727,100 @@ const ComparePage = () => {
     );
   };
 
-  const renderComparisonInsights = (products) => {
-    const insights = getComparisonInsights(products);
+  // Render Analyst's Verdict - Phase 1: Enhanced insights
+  const renderAnalystsVerdict = (products) => {
+    if (products.length < 2) return null;
     
-    if (insights.length === 0) return null;
+    const verdict = generateAnalystsVerdict(products);
+    if (!verdict) return null;
 
     return (
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div 
+        className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8"
+        ref={el => sectionsRef.current['verdict-section'] = el}
+      >
+        <div 
+          className={`transition-all duration-1000 ease-out ${
+            isVisible['verdict-section'] 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-5'
+          }`}
+          style={{ transitionDelay: '400ms' }}
+        >
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
           <svg className="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
             <path d="M5 5a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2a1 1 0 10-2 0v2H5V7h2a1 1 0 000-2H5z" />
           </svg>
-          Comparison Insights
+            Analyst's Verdict
         </h3>
-        <div className="space-y-3">
-          {insights.map((insight, index) => (
-            <div key={index} className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
-              <div className="flex-shrink-0">{insight.icon}</div>
-              <span className="text-gray-700">{insight.message}</span>
+          
+          {/* Qualitative Summary */}
+          <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+            <p className="text-gray-700 leading-relaxed">{verdict.summary}</p>
             </div>
-          ))}
+
+          {/* Pros & Cons Framework */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {verdict.products.map((item, index) => (
+              <div 
+                key={index} 
+                className={`bg-white rounded-lg p-4 shadow-sm transition-all duration-800 ease-out ${
+                  isVisible['verdict-section'] 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-5'
+                }`}
+                style={{ 
+                  transitionDelay: `${600 + index * 150}ms`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                }}
+              >
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  {item.product.brand} {item.product.name}
+                </h4>
+                
+                {/* Pros */}
+                <div className="mb-4">
+                  <div className="text-xs font-semibold text-green-800 mb-2">Pros:</div>
+                  <ul className="space-y-1">
+                    {item.pros.map((pro, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                        <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>{pro}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                {/* Cons */}
+                <div>
+                  <div className="text-xs font-semibold text-red-800 mb-2">Cons:</div>
+                  <ul className="space-y-1">
+                    {item.cons.map((con, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                        <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <span>{con}</span>
+                      </li>
+                    ))}
+                    {item.cons.length === 0 && (
+                      <li className="text-sm text-gray-500 italic">No significant drawbacks</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -526,62 +868,185 @@ const ComparePage = () => {
 
     return (
       <div className="space-y-8">
-        {/* Comparison Insights */}
-        {renderComparisonInsights(products)}
+        {/* Analyst's Verdict - Phase 1: Enhanced insights */}
+        {renderAnalystsVerdict(products)}
         
         {/* Product Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {products.map((product, index) => renderProductCard(product, index))}
         </div>
 
-        {/* Detailed Comparison Table (Collapsible) */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Detailed Comparison</h3>
-            <p className="text-sm text-gray-600 mt-1">Click to expand detailed feature comparison</p>
+        {/* Comprehensive Comparison Table - Phase 2: Detailed side-by-side */}
+        {generateComparisonTable && (
+          <div 
+            className="bg-white rounded-xl shadow-lg overflow-hidden mb-8"
+            ref={el => sectionsRef.current['comparison-table'] = el}
+          >
+            <div 
+              className={`transition-all duration-1000 ease-out ${
+                isVisible['comparison-table'] 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-5'
+              }`}
+              style={{ transitionDelay: '400ms' }}
+            >
+              <div className="p-6 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-xl font-bold text-gray-900">Detailed Comparison</h3>
+                <p className="text-sm text-gray-600 mt-1">Side-by-side comparison of key attributes</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200">
+                        Attribute
+                      </th>
                   {products.map((product, index) => (
-                    <th key={index} className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {product.name}
+                        <th key={index} className="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200 min-w-[200px]">
+                          <div className="flex flex-col items-center">
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-16 h-16 object-cover rounded-lg mb-2"
+                            />
+                            <div className="font-semibold text-xs">{product.brand}</div>
+                            <div className="text-xs text-gray-600">{product.name}</div>
+                          </div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {[
-                  { key: 'brand', label: 'Brand' },
-                  { key: 'price', label: 'Price', format: (value) => `$${value}` },
-                  { key: 'pricePer1000kcal', label: 'Price per 1000 kcal', format: (value) => `$${value}` },
-                  { key: 'petType', label: 'Pet Type' },
-                  { key: 'lifeStage', label: 'Life Stage' },
-                  { key: 'mainProteins', label: 'Main Proteins', format: (value) => Array.isArray(value) ? value.join(', ') : value },
-                  { key: 'isGrainFree', label: 'Grain Free', format: (value) => value ? 'Yes' : 'No' },
-                  { key: 'isOrganic', label: 'Organic', format: (value) => value ? 'Yes' : 'No' },
-                  { key: 'feedingStyle', label: 'Feeding Style' },
-                  { key: 'budgetRange', label: 'Budget Range' },
-                  { key: 'availableAt', label: 'Available At', format: (value) => Array.isArray(value) ? value.join(', ') : value }
-                ].map((field) => (
-                  <tr key={field.key} className="hover:bg-gray-50 transition-colors">
+                    {generateComparisonTable.map((section, sectionIndex) => (
+                      <React.Fragment key={sectionIndex}>
+                        {/* Section Header */}
+                        <tr className="bg-green-50">
+                          <td colSpan={products.length + 1} className="px-6 py-3">
+                            <h4 className="text-sm font-bold text-green-800">{section.section}</h4>
+                          </td>
+                        </tr>
+                        {/* Section Rows */}
+                        {section.rows.map((row, rowIndex) => (
+                          <tr 
+                            key={rowIndex} 
+                            className="hover:bg-gray-50 transition-colors"
+                            style={{
+                              animationDelay: `${(sectionIndex * 100 + rowIndex * 50)}ms`,
+                              opacity: isVisible['comparison-table'] ? 1 : 0,
+                              transform: isVisible['comparison-table'] ? 'translateY(0)' : 'translateY(10px)',
+                              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
+                            }}
+                          >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {field.label}
+                              {row.attribute}
                     </td>
-                    {products.map((product, index) => (
-                      <td key={index} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {field.format 
-                          ? field.format(product[field.key])
-                          : product[field.key] || 'N/A'
-                        }
+                            {row.values.map((value, valueIndex) => (
+                              <td 
+                                key={valueIndex} 
+                                className={`px-6 py-4 whitespace-nowrap text-sm text-center ${
+                                  (Array.isArray(row.highlight) && row.highlight.includes(valueIndex)) ||
+                                  (typeof row.highlight === 'number' && row.highlight === valueIndex)
+                                    ? 'font-bold text-green-800 bg-green-50' 
+                                    : 'text-gray-700'
+                                }`}
+                              >
+                                {value}
                       </td>
                     ))}
                   </tr>
+                        ))}
+                      </React.Fragment>
                 ))}
               </tbody>
             </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Clear CTAs Section - Phase 3: Primary and secondary actions */}
+        <div 
+          className="bg-white rounded-xl shadow-lg p-6"
+          ref={el => sectionsRef.current['ctas-section'] = el}
+        >
+          <div 
+            className={`transition-all duration-1000 ease-out ${
+              isVisible['ctas-section'] 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-5'
+            }`}
+            style={{ transitionDelay: '400ms' }}
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Ready to choose?</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {products.map((product, index) => (
+                <div 
+                  key={index} 
+                  className={`border border-gray-200 rounded-lg p-4 transition-all duration-800 ease-out ${
+                    isVisible['ctas-section'] 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-5'
+                  }`}
+                  style={{ 
+                    transitionDelay: `${400 + index * 150}ms`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-1">{product.brand}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{product.name}</p>
+                    <div className="text-2xl font-bold text-green-800">${product.price}</div>
+                  </div>
+                  
+                  {/* Primary CTA */}
+                  <a 
+                    href="#" 
+                    className="block w-full bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center mb-3 transition-all duration-300 ease"
+                    style={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+                      e.currentTarget.style.backgroundColor = '#065f46'; // green-700
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.backgroundColor = '#166534'; // green-800
+                    }}
+                    aria-label={`Add ${product.name} to cart`}
+                  >
+                    Add to Cart • Buy on {product.preferredChannel}
+                  </a>
+                  
+                  {/* Secondary CTAs */}
+                  <div className="space-y-2">
+                    <a 
+                      href="#" 
+                      className="block text-sm text-green-800 hover:text-green-900 hover:underline transition-colors duration-200"
+                    >
+                      View Full Product Details →
+                    </a>
+                    <a 
+                      href="#" 
+                      className="block text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors duration-200"
+                    >
+                      Read Customer Reviews →
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -591,12 +1056,21 @@ const ComparePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header 
+        className="bg-white shadow-sm border-b"
+        ref={el => sectionsRef.current['compare-header'] = el}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div 
+            className={`flex justify-between items-center h-16 transition-all duration-1000 ease-out ${
+              isVisible['compare-header'] 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 -translate-y-5'
+            }`}
+          >
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8" />
+                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
                 <span className="text-xl font-bold text-green-800">GreenTail</span>
               </Link>
             </div>
@@ -660,19 +1134,53 @@ const ComparePage = () => {
       {/* Compare Section */}
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
+          <div 
+            className="text-center mb-8"
+            ref={el => sectionsRef.current['compare-title'] = el}
+          >
+            <div 
+              className={`transition-all duration-1000 ease-out ${
+                isVisible['compare-title'] 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-5'
+              }`}
+              style={{ transitionDelay: '400ms' }}
+            >
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Compare</h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Choose two or three foods from your saved items to see differences.
             </p>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div className="flex flex-wrap gap-4 mb-6">
+          <div 
+            className="bg-white rounded-lg shadow-sm p-6 mb-8"
+            ref={el => sectionsRef.current['compare-selector'] = el}
+          >
+            <div 
+              className={`flex flex-wrap gap-4 mb-6 transition-all duration-1000 ease-out ${
+                isVisible['compare-selector'] 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-5'
+              }`}
+              style={{ transitionDelay: '600ms' }}
+            >
               <button 
                 onClick={handleUseSavedItems}
-                className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+                className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-all duration-300"
                 disabled={savedItems.length < 2}
+                style={{
+                  transform: 'translateY(0)',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                }}
               >
                 Use saved items ({savedItems.length})
               </button>
@@ -683,14 +1191,30 @@ const ComparePage = () => {
                   console.log('Remove all button clicked');
                   handleRemoveAll();
                 }}
-                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors"
+                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
                 type="button"
+                style={{
+                  transform: 'translateY(0)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
               >
                 Remove all
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div 
+              className={`grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 transition-all duration-1000 ease-out ${
+                isVisible['compare-selector'] 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-5'
+              }`}
+              style={{ transitionDelay: '800ms' }}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select first food

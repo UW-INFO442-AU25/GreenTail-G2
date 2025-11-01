@@ -299,7 +299,7 @@ const ProfilePage = () => {
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
                 <Link to="/" className="flex items-center space-x-2">
-                  <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8" />
+                  <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
                   <span className="text-xl font-bold text-green-800">GreenTail</span>
                 </Link>
               </div>
@@ -389,7 +389,7 @@ const ProfilePage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link to="/" className="flex items-center space-x-2">
-                <img src="/logos/logo.png" alt="GreenTail Logo" className="h-8 w-8" />
+                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
                 <span className="text-xl font-bold text-green-800">GreenTail</span>
               </Link>
             </div>

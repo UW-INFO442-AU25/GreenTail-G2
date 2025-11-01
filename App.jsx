@@ -29,27 +29,27 @@ function App() {
       <ToastProvider>
         <QuizProvider>
           <Router basename={import.meta.env.BASE_URL}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/quiz" element={<QuizPage />} />
-            <Route path="/quiz/0" element={<Quiz0 />} />
-            <Route path="/quiz/1" element={<Quiz1 />} />
-            <Route path="/quiz/2" element={<Quiz2 />} />
-            <Route path="/quiz/3" element={<Quiz3 />} />
-            <Route path="/quiz/4" element={<Quiz4 />} />
-            <Route path="/quiz/5" element={<Quiz5 />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/compare" element={<ComparePage />} />
-            <Route path="/first-time" element={<FirstTimePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/shops-near-you" element={<ShopsNearYouPage />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/pet-food-labels-guide" element={<PetFoodLabelsGuide />} />
-            <Route path="/organic-pet-food-guide" element={<OrganicPetFoodGuide />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/quiz" element={<QuizPage />} />
+              <Route path="/quiz/0" element={<Quiz0 />} />
+              <Route path="/quiz/1" element={<Quiz1 />} />
+              <Route path="/quiz/2" element={<Quiz2 />} />
+              <Route path="/quiz/3" element={<Quiz3 />} />
+              <Route path="/quiz/4" element={<Quiz4 />} />
+              <Route path="/quiz/5" element={<Quiz5 />} />
+              <Route path="/results" element={<ResultsPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/compare" element={<ComparePage />} />
+              <Route path="/first-time" element={<FirstTimePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/shops-near-you" element={<ShopsNearYouPage />} />
+              <Route path="/test" element={<TestPage />} />
+              <Route path="/pet-food-labels-guide" element={<PetFoodLabelsGuide />} />
+              <Route path="/organic-pet-food-guide" element={<OrganicPetFoodGuide />} />
+            </Routes>
           </Router>
         </QuizProvider>
       </ToastProvider>

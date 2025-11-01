@@ -21,9 +21,7 @@ const FirstTimePage = () => {
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav>
@@ -117,7 +115,7 @@ const FirstTimePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6" />
+                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6" />
                 GreenTail
               </h3>
               <p className="text-gray-600 leading-relaxed">Helping pet parents choose organic, planet-friendly food with confidence.</p>

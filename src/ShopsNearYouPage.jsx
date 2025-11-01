@@ -61,9 +61,7 @@ const ShopsNearYouPage = () => {
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav>
@@ -112,7 +110,7 @@ const ShopsNearYouPage = () => {
                       onClick={() => handleGetDirections(store.address)}
                       className="flex items-center gap-2 bg-green-800 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                     >
-                      <img src="/icons/location-icon.svg" alt="Directions" className="w-4 h-4 filter brightness-0 invert" />
+                      <img src={`${import.meta.env.BASE_URL}icons/location-icon.svg`} alt="Directions" className="w-4 h-4 filter brightness-0 invert" />
                       Directions
                     </button>
                     <button

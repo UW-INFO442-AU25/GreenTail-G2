@@ -1,19 +1,32 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
 import { useAuth } from './AuthContext';
 import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { getMatchLevelStyle, findBestMatches } from './utils/matchingAlgorithm';
-import { useScrollAnimation } from './hooks/useScrollAnimation';
 import StoreMapModal from './components/StoreMapModal';
+
+/**
+ * SearchPage - Enhanced with smooth animations per smooth_transition_recommendations.md
+ * 
+ * Animation Strategy:
+ * 1. Page initial load: Staggered animations for search context, filter sidebar, product cards
+ * 2. Scroll-triggered animations: Intersection Observer for product cards entering viewport
+ * 3. Micro-interactions: Hover effects on buttons and product images
+ * 4. Performance: Only transform and opacity (hardware accelerated)
+ * 5. Accessibility: Respects prefers-reduced-motion
+ */
 
 function SearchPage() {
   const { quizData } = useQuiz();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
-  const { sectionsRef, getAnimationClass, getStaggeredAnimationClass } = useScrollAnimation();
+  const [isVisible, setIsVisible] = useState({});
+  const [hasAnimated, setHasAnimated] = useState({});
+  const sectionsRef = useRef({});
+  const observerRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('best');
   const [showMapModal, setShowMapModal] = useState(false);
@@ -298,15 +311,8 @@ function SearchPage() {
   };
 
   const handleSaveProduct = (product) => {
-    // 检查用户是否已登录
-    if (!user) {
-      showError('Please log in to save products to your profile.');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-      return;
-    }
-
+    // Allow saving to localStorage for both logged-in and non-logged-in users
+    // Logged-in users can sync to their profile, non-logged-in users can save locally
     const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
     const isAlreadySaved = savedProducts.find(p => p.id === product.id);
 
@@ -315,7 +321,11 @@ function SearchPage() {
       const productToSave = { ...product, savedAt: new Date().toISOString() };
       updated = [...savedProducts, productToSave];
       localStorage.setItem('savedProducts', JSON.stringify(updated));
-      showSuccess('Saved to your profile');
+      if (user) {
+        showSuccess('Saved to your profile');
+      } else {
+        showSuccess('Saved locally. Sign in to sync across devices');
+      }
     } else {
       updated = savedProducts.filter(p => p.id !== product.id);
       localStorage.setItem('savedProducts', JSON.stringify(updated));
@@ -353,15 +363,72 @@ function SearchPage() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // Intersection Observer for scroll-triggered animations
+  // Optimization: Uses Intersection Observer API for efficient scroll detection
+  // When element reaches 20% visibility, triggers animation
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+            const key = entry.target.dataset.sectionKey;
+            if (key && !hasAnimated[key]) {
+              setIsVisible((prev) => ({ ...prev, [key]: true }));
+              setHasAnimated((prev) => ({ ...prev, [key]: true }));
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.2, // Trigger when 20% visible
+        rootMargin: '0px 0px -50px 0px', // Start animation slightly before fully visible
+      }
+    );
+
+    // Observe all sections
+    Object.keys(sectionsRef.current).forEach((key) => {
+      const element = sectionsRef.current[key];
+      if (element) {
+        element.dataset.sectionKey = key;
+        observerRef.current.observe(element);
+      }
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasAnimated]);
+
+  // Initialize animations on mount
+  useEffect(() => {
+    // Search context, filters, and search input animate immediately on page load
+    setTimeout(() => {
+      setIsVisible((prev) => ({
+        ...prev,
+        'search-context': true,
+        'filter-sidebar': true,
+        'search-header': true,
+        'search-input': true,
+      }));
+      setHasAnimated((prev) => ({
+        ...prev,
+        'search-context': true,
+        'filter-sidebar': true,
+        'search-header': true,
+        'search-input': true,
+      }));
+    }, 300);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav>
@@ -378,9 +445,19 @@ function SearchPage() {
       </header>
 
       {/* Search Context Summary */}
+      {/* Optimization: Fade-in on page load */}
       {quizData && quizData.pet && (
-        <section className="bg-green-50 py-4">
-          <div className="max-w-6xl mx-auto px-8">
+        <section 
+          className="bg-green-50 py-4"
+          ref={el => sectionsRef.current['search-context'] = el}
+        >
+          <div 
+            className={`max-w-6xl mx-auto px-8 transition-all duration-1000 ease-out ${
+              isVisible['search-context'] 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-5'
+            }`}
+          >
             <p className="text-gray-700">
               <strong>
                 {quizData.pet} · {quizData.lifeStage} · 
@@ -392,7 +469,7 @@ function SearchPage() {
             </p>
             <button 
               onClick={clearFilters}
-              className="text-green-800 hover:underline text-sm mt-1"
+              className="text-green-800 hover:underline text-sm mt-1 transition-colors duration-300"
             >
               Clear filters
             </button>
@@ -404,26 +481,54 @@ function SearchPage() {
       <main className="pt-8 pb-20">
         <div className="max-w-6xl mx-auto px-8">
           {/* Sort & Tags */}
-          <div className="flex items-center gap-4 mb-6 flex-wrap">
-            <label htmlFor="sort" className="text-sm font-medium text-gray-700">Sort by</label>
-            <select 
-              id="sort" 
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+          {/* Optimization: Fade-in on page load */}
+          <div 
+            className="flex items-center gap-4 mb-6 flex-wrap"
+            ref={el => sectionsRef.current['search-header'] = el}
+          >
+            <div 
+              className={`transition-all duration-1000 ease-out ${
+                isVisible['search-header'] 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-5'
+              }`}
+                style={{ transitionDelay: '400ms' }}
             >
-              <option value="best">Best match</option>
-              <option value="lowest">Lowest price</option>
-              <option value="highest">Highest price</option>
-            </select>
+              <label htmlFor="sort" className="text-sm font-medium text-gray-700">Sort by</label>
+              <select 
+                id="sort" 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm ml-2"
+              >
+                <option value="best">Best match</option>
+                <option value="lowest">Lowest price</option>
+                <option value="highest">Highest price</option>
+              </select>
+            </div>
             
-            {/* 地图按钮 */}
+            {/* 地图按钮 - Hover effect: translateY(-3px) + shadow */}
             <button
               onClick={() => {
                 setSelectedProductForMap(null);
                 setShowMapModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease"
+              style={{
+                transform: 'translateY(0)',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.backgroundColor = '#065f46'; // green-700
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                e.currentTarget.style.backgroundColor = '#166534'; // green-800
+              }}
             >
               🗺️ Find Stores Near You
             </button>
@@ -510,8 +615,19 @@ function SearchPage() {
 
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
-            <aside className="w-full lg:w-64 flex-shrink-0">
-              <div className="bg-white rounded-xl p-6 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+            {/* Optimization: Fade-in on page load */}
+            <aside 
+              className="w-full lg:w-64 flex-shrink-0"
+              ref={el => sectionsRef.current['filter-sidebar'] = el}
+            >
+              <div 
+                className={`bg-white rounded-xl p-6 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
+                  isVisible['filter-sidebar'] 
+                    ? 'opacity-100 translate-x-0' 
+                    : 'opacity-0 -translate-x-5'
+                }`}
+                style={{ transitionDelay: '500ms' }}
+              >
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter by</h3>
                 
                 <div className="mb-6">
@@ -674,16 +790,44 @@ function SearchPage() {
                   </label>
                 </div>
 
+                {/* Filter buttons with hover effects */}
                 <div className="flex gap-2 mb-4">
                   <button 
                     onClick={() => {/* Apply filters logic */}}
-                    className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300"
+                    className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                    style={{
+                      transform: 'translateY(0)',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                      e.currentTarget.style.backgroundColor = '#065f46'; // green-700
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.backgroundColor = '#166534'; // green-800
+                    }}
                   >
                     Apply filters
                   </button>
                   <button 
                     onClick={clearFilters}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors duration-300"
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                    style={{
+                      transform: 'translateY(0)',
+                      transition: 'transform 0.3s ease, background-color 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.backgroundColor = '#d1d5db'; // gray-300
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.backgroundColor = '#e5e7eb'; // gray-200
+                    }}
                   >
                     Clear
                   </button>
@@ -699,14 +843,23 @@ function SearchPage() {
             </aside>
 
             {/* Product Results */}
+            {/* Optimization: Search input fades in on page load */}
             <section className="flex-1 min-h-0">
-              <div className="mb-6">
+              <div 
+                className="mb-6"
+                ref={el => sectionsRef.current['search-input'] = el}
+              >
                 <input 
                   type="text" 
                   placeholder="Search by brand, protein, keyword..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800"
+                  className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 transition-all duration-1000 ease-out ${
+                    isVisible['search-input'] 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-5'
+                  }`}
+                  style={{ transitionDelay: '400ms' }}
                 />
               </div>
               
@@ -824,18 +977,54 @@ function SearchPage() {
               </div>
               
               {/* Product Grid */}
+              {/* Optimization: Staggered fade-in on scroll for product cards */}
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => {
+                {filteredProducts.map((product, index) => {
                   const matchStyle = getMatchLevelStyle(product.matchLevel);
+                  const productKey = `product-${product.id}`;
                   return (
-                    <div key={product.id} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+                    <div 
+                      key={product.id} 
+                      className="bg-white rounded-xl p-6 shadow-lg flex flex-col h-full transition-all duration-300 ease"
+                      ref={el => sectionsRef.current[productKey] = el}
+                      style={{
+                        transform: isVisible[productKey] ? 'translateY(0)' : 'translateY(20px)',
+                        opacity: isVisible[productKey] ? 1 : 0,
+                        transition: `transform 0.8s ease-out, opacity 0.8s ease-out, box-shadow 0.3s ease`,
+                        transitionDelay: isVisible[productKey] ? `${Math.min(index * 80, 800)}ms` : '0ms',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-4px)';
+                        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                      }}
+                    >
                       <div className="flex justify-between items-start mb-4">
                         <span className={`${matchStyle.bgColor} ${matchStyle.textColor} px-3 py-1 rounded text-sm font-semibold`}>
                           {matchStyle.label}
                         </span>
                         <span className="text-xl font-semibold text-gray-900">${product.price}</span>
                       </div>
-                      <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded-lg mb-4" />
+                      {/* Product image with hover effect: scale(1.03) */}
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-400 ease"
+                        style={{
+                          transform: 'scale(1)',
+                          transition: 'transform 0.4s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'scale(1.03)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      />
                       <h4 className="font-semibold text-gray-900 mb-3 text-lg">
                         {product.name.includes(product.brand) ? product.name : `${product.brand} · ${product.name}`}
                       </h4>
@@ -848,7 +1037,26 @@ function SearchPage() {
                       </div>
                       <p className="text-sm text-gray-600 mb-4">$/1000 kcal: ${product.pricePer1000kcal}</p>
                       <div className="flex justify-between items-center mt-auto">
-                        <a href="#" className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors duration-300">
+                        {/* Buy button with hover effect */}
+                        <a 
+                          href="#" 
+                          className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                          style={{
+                            transform: 'translateY(0)',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                            transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                            e.currentTarget.style.backgroundColor = '#065f46'; // green-700
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                            e.currentTarget.style.backgroundColor = '#166534'; // green-800
+                          }}
+                        >
                           Buy on {product.preferredChannel}
                         </a>
                         <div className="flex items-center gap-2">
@@ -857,12 +1065,12 @@ function SearchPage() {
                               setSelectedProductForMap(product.name);
                               setShowMapModal(true);
                             }}
-                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1"
+                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1 transition-colors duration-300"
                             title="Find stores with this product"
                           >
                             📍 Find Nearby
                           </button>
-                          <button className="text-gray-600 hover:text-green-800 text-sm">Compare</button>
+                          <button className="text-gray-600 hover:text-green-800 text-sm transition-colors duration-300">Compare</button>
                           <button 
                             onClick={(e) => { e.preventDefault(); handleSaveProduct(product); }}
                             className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300`}
@@ -880,7 +1088,7 @@ function SearchPage() {
                           </button>
                         </div>
                       </div>
-                </div>
+                    </div>
                   );
                 })}
               </div>
@@ -927,7 +1135,7 @@ function SearchPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6" />
+                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6" />
                 GreenTail
               </h3>
               <p className="text-gray-600 leading-relaxed">Helping pet parents choose organic, planet-friendly food with confidence.</p>

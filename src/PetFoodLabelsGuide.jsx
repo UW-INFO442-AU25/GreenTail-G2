@@ -114,9 +114,7 @@ const PetFoodLabelsGuide = () => {
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/logos/logo.png" alt="GreenTail Logo" className="w-6 h-6 object-contain" />
-            </div>
+            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav>
@@ -196,7 +194,12 @@ const PetFoodLabelsGuide = () => {
                 
                 {/* Good Examples */}
                 <div className="mb-6">
-                  <h4 className="font-semibold text-green-800 mb-2">✅ Good Examples</h4>
+                  <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Good Examples
+                  </h4>
                   <div className="space-y-2">
                     {sections[activeSection].content.examples.good.map((example, index) => (
                       <div key={index} className="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -208,7 +211,12 @@ const PetFoodLabelsGuide = () => {
 
                 {/* Avoid Examples */}
                 <div>
-                  <h4 className="font-semibold text-red-800 mb-2">❌ Avoid These</h4>
+                  <h4 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    Avoid These
+                  </h4>
                   <div className="space-y-2">
                     {sections[activeSection].content.examples.avoid.map((example, index) => (
                       <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-3">
