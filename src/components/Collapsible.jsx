@@ -18,6 +18,16 @@ function Collapsible({
     setIsExpanded(!isExpanded);
   };
 
+  // Handle touch events for buttons
+  const handleTouchStart = (e) => {
+    e.currentTarget.classList.add('touch-active');
+  };
+
+  const handleTouchEnd = (e) => {
+    e.currentTarget.classList.remove('touch-active');
+    toggleExpanded();
+  };
+
   const baseStyles = variant === 'compact' 
     ? 'border-l-4 border-green-800 pl-4 py-2' 
     : 'border border-gray-200 rounded-lg p-4 bg-white shadow-sm';
@@ -26,7 +36,9 @@ function Collapsible({
     <div className={`collapsible-wrapper ${className} ${baseStyles}`}>
       <button
         onClick={toggleExpanded}
-        className="w-full flex justify-between items-center text-left"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="w-full flex justify-between items-center text-left min-h-[44px] min-w-[44px]"
         aria-expanded={isExpanded}
         aria-label={ariaLabel || `${isExpanded ? 'Collapse' : 'Expand'} ${title}`}
         aria-controls={`collapsible-content-${title.replace(/\s+/g, '-').toLowerCase()}`}

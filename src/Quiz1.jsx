@@ -10,6 +10,16 @@ function Quiz1() {
   const [selectedLifeStage, setSelectedLifeStage] = useState(quizData.lifeStage);
   const [selectedWeight, setSelectedWeight] = useState(quizData.weight);
 
+  // Handle touch events for buttons
+  const handleTouchStart = (e) => {
+    e.currentTarget.classList.add('touch-active');
+  };
+
+  const handleTouchEnd = (e, callback) => {
+    e.currentTarget.classList.remove('touch-active');
+    callback();
+  };
+
   const handleNext = () => {
     if (selectedPet && selectedLifeStage && selectedWeight) {
       updateQuizData('quiz1', {
@@ -71,6 +81,8 @@ function Quiz1() {
                   <button
                     key={pet}
                     onClick={() => setSelectedPet(pet)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedPet(pet))}
                     className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
                       selectedPet === pet
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -93,6 +105,8 @@ function Quiz1() {
                   <button
                     key={stage}
                     onClick={() => setSelectedLifeStage(stage)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedLifeStage(stage))}
                     className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
                       selectedLifeStage === stage
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -115,6 +129,8 @@ function Quiz1() {
                   <button
                     key={weight}
                     onClick={() => setSelectedWeight(weight)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedWeight(weight))}
                     className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
                       selectedWeight === weight
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -131,14 +147,18 @@ function Quiz1() {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleBack}
-                className="text-gray-600 hover:text-green-800 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-w-[44px] min-h-[44px]"
               >
                 Back
               </button>
               <button
                 onClick={handleNext}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => !(!selectedPet || !selectedLifeStage || !selectedWeight) && handleTouchEnd(e, handleNext)}
                 disabled={!selectedPet || !selectedLifeStage || !selectedWeight}
-                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-700 transition-colors duration-300"
+                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-700 transition-colors duration-300 min-w-[44px] min-h-[44px]"
               >
                 Next
               </button>

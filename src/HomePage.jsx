@@ -45,6 +45,16 @@ function HomePage() {
     navigate('/login');
   };
 
+  // Handle touch events for buttons and links
+  const handleTouchStart = (e) => {
+    e.currentTarget.classList.add('touch-active');
+  };
+
+  const handleTouchEnd = (e, callback) => {
+    e.currentTarget.classList.remove('touch-active');
+    if (callback) callback();
+  };
+
   // Intersection Observer for scroll-triggered animations
   // Optimization: Uses Intersection Observer API for efficient scroll detection
   // When element reaches 20% visibility, triggers animation
@@ -270,7 +280,9 @@ function HomePage() {
                   </div>
                   <button 
                     onClick={handleLogout}
-                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 transition-colors"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, handleLogout)}
+                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 transition-colors min-h-[44px] min-w-[44px]"
                     aria-label="Log out"
                   >
                     Logout
@@ -342,7 +354,9 @@ function HomePage() {
                   <Link 
                     to="/quiz/0" 
                     ref={el => sectionsRef.current['hero-button'] = el}
-                    className={`bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg relative overflow-hidden group ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e)}
+                    className={`bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg relative overflow-hidden group min-h-[44px] ${
                       isVisible['hero-button'] 
                         ? 'opacity-100 translate-y-0' 
                         : 'opacity-0 translate-y-5'
@@ -514,7 +528,9 @@ function HomePage() {
             >
               <Link 
                 to="/quiz/0" 
-                className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg inline-block transition-all duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e)}
+                className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg inline-block transition-all duration-300 min-h-[44px]"
                 style={{
                   transform: 'translateY(0)',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',

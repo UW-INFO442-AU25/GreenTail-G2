@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { useAuth } from './AuthContext';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
  * ComparePage - Redesigned per comparison_page_critique.md
@@ -29,6 +30,7 @@ const ComparePage = () => {
   
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
   
   // Animation state
   const [isVisible, setIsVisible] = useState({});
@@ -175,7 +177,9 @@ const ComparePage = () => {
               <h3 className="text-xl font-semibold text-gray-900">How We Calculate Scores</h3>
               <button 
                 onClick={() => setShowScoreInfo(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, () => setShowScoreInfo(false))}
+                className="text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -650,7 +654,9 @@ const ComparePage = () => {
                 <span className="text-sm font-medium text-gray-700">Overall Score</span>
                 <button 
                   onClick={() => setShowScoreInfo(true)}
-                  className="w-4 h-4 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center transition-colors group"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => setShowScoreInfo(true))}
+                  className="w-4 h-4 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center transition-colors group min-h-[44px] min-w-[44px]"
                   title="How we calculate scores"
                 >
                   <span className="text-xs text-white font-bold group-hover:text-green-100">i</span>
@@ -713,10 +719,18 @@ const ComparePage = () => {
         {/* Action Buttons */}
         <div className="px-6 pb-6">
           <div className="flex space-x-2">
-            <button className="flex-1 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+            <button 
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e)}
+              className="flex-1 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium min-h-[44px]"
+            >
               Buy Now
             </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button 
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
               <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
@@ -1008,7 +1022,9 @@ const ComparePage = () => {
                   {/* Primary CTA */}
                   <a 
                     href="#" 
-                    className="block w-full bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center mb-3 transition-all duration-300 ease"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e)}
+                    className="block w-full bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center mb-3 transition-all duration-300 ease min-h-[44px] flex items-center justify-center"
                     style={{
                       transform: 'translateY(0)',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -1113,7 +1129,9 @@ const ComparePage = () => {
                   </div>
                   <button 
                     onClick={handleLogout}
-                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 transition-colors"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, handleLogout)}
+                    className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 transition-colors min-h-[44px]"
                   >
                     Logout
                   </button>
@@ -1167,7 +1185,9 @@ const ComparePage = () => {
             >
               <button 
                 onClick={handleUseSavedItems}
-                className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-all duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleUseSavedItems)}
+                className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-all duration-300 min-h-[44px]"
                 disabled={savedItems.length < 2}
                 style={{
                   transform: 'translateY(0)',
@@ -1191,7 +1211,15 @@ const ComparePage = () => {
                   console.log('Remove all button clicked');
                   handleRemoveAll();
                 }}
-                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleTouchEnd(e, () => {
+                    handleRemoveAll();
+                  });
+                }}
+                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-all duration-300 min-h-[44px]"
                 type="button"
                 style={{
                   transform: 'translateY(0)',

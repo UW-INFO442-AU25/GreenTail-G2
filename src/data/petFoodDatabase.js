@@ -1,4 +1,3 @@
-// 宠物食品数据库
 const BASE = import.meta.env.BASE_URL || '/';
 export const petFoodDatabase = [
   {
@@ -8,21 +7,18 @@ export const petFoodDatabase = [
     image: `${BASE}img/Orijen.png`,
     price: 34.99,
     pricePer1000kcal: 2.85,
-    matchScore: 0, // 动态计算
+    matchScore: 0,
     matchLevel: "best", // best, great, good, eco-friendly
     
-    // 基本信息
     petType: ["Dog"],
     lifeStage: ["Adult", "Senior"],
     weightRange: ["10-25 lb", "26-50 lb", "51-90 lb", "90+ lb"],
     
-    // 原料信息
     mainProteins: ["Fish"],
-    avoidIngredients: [], // 不包含的原料
+    avoidIngredients: [],
     isGrainFree: true,
     isOrganic: true,
     
-    // 环保特性
     ecoFeatures: {
       lowFootprintProtein: true,
       recyclablePackaging: true,
@@ -30,24 +26,18 @@ export const petFoodDatabase = [
       localProduction: false
     },
     
-    // 喂养方式
     feedingStyle: ["Kibble"],
     
-    // 预算范围
     budgetRange: ["$25–$40", "$40–$60"],
     
-    // 购买渠道
     availableAt: ["MudBay", "Chewy", "Amazon"],
     preferredChannel: "MudBay",
     
-    // 描述和标签
     description: "High-protein, grain-free recipe with six different fish sources. Perfect for dogs with sensitivities.",
     tags: ["low-footprint protein", "recyclable bag", "certified organic", "grain-free", "high protein"],
     
-    // 替代蛋白
     hasAlternativeProteins: false,
     
-    // 适合经验水平
     experienceLevel: ["Tried a few", "Experienced"]
   },
   
@@ -169,7 +159,7 @@ export const petFoodDatabase = [
     id: 5,
     name: "Royal Canin Puppy",
     brand: "Royal Canin",
-    image: `${BASE}img/BlueBuffalo.png`, // 使用现有图片
+    image: `${BASE}img/BlueBuffalo.png`,
     price: 24.99,
     pricePer1000kcal: 2.10,
     matchScore: 0,
@@ -207,7 +197,7 @@ export const petFoodDatabase = [
     id: 6,
     name: "Hill's Science Diet Senior",
     brand: "Hill's Science Diet",
-    image: `${BASE}img/COREGrain.png`, // 使用现有图片
+    image: `${BASE}img/COREGrain.png`,
     price: 29.99,
     pricePer1000kcal: 2.35,
     matchScore: 0,
@@ -245,7 +235,7 @@ export const petFoodDatabase = [
     id: 7,
     name: "Purina Pro Plan Cat",
     brand: "Purina Pro Plan",
-    image: `${BASE}img/OpenFarm.png`, // 使用现有图片
+    image: `${BASE}img/OpenFarm.png`,
     price: 26.99,
     pricePer1000kcal: 2.25,
     matchScore: 0,
@@ -283,7 +273,7 @@ export const petFoodDatabase = [
     id: 8,
     name: "Wild Earth Dog Food",
     brand: "Wild Earth",
-    image: `${BASE}img/Orijen.png`, // 使用现有图片
+    image: `${BASE}img/Orijen.png`,
     price: 39.99,
     pricePer1000kcal: 3.20,
     matchScore: 0,
@@ -317,7 +307,6 @@ export const petFoodDatabase = [
     experienceLevel: ["Tried a few", "Experienced"]
   },
 
-  // 新增产品数据
   {
     id: 9,
     name: "Organic Chicken & Oat",
@@ -774,7 +763,6 @@ export const petFoodDatabase = [
     experienceLevel: ["Tried a few", "Experienced"]
   },
 
-  // 课堂项目展示 - 多样性产品
   {
     id: 21,
     name: "Insect Protein Power",
@@ -965,7 +953,6 @@ export const petFoodDatabase = [
     experienceLevel: ["Beginner", "Tried a few", "Experienced"]
   },
 
-  // 更多样化产品 - 特殊需求和创新概念
   {
     id: 26,
     name: "Lab-Grown Chicken Bites",
@@ -1157,23 +1144,24 @@ export const petFoodDatabase = [
   }
 ];
 
-// 匹配算法配置
+// Matching algorithm configuration
+// Weights define the importance of each factor in the match score calculation
+// Thresholds define the minimum scores required for each match level
 export const matchingConfig = {
   weights: {
-    petType: 20,           // 宠物类型匹配权重
-    lifeStage: 15,         // 生命阶段匹配权重
-    weightRange: 10,       // 体重范围匹配权重
-    avoidIngredients: 25,  // 避免原料匹配权重（最重要）
-    budget: 15,           // 预算匹配权重
-    ecoFeatures: 10,      // 环保特性匹配权重
-    feedingStyle: 5       // 喂养方式匹配权重
+    petType: 20,           // Weight for pet type match (Dog/Cat)
+    lifeStage: 15,         // Weight for life stage match (Puppy/Adult/Senior)
+    weightRange: 10,       // Weight for weight range match
+    avoidIngredients: 25,  // Weight for avoiding ingredients (most important)
+    budget: 15,           // Weight for budget match
+    ecoFeatures: 10,      // Weight for eco-friendly features match
+    feedingStyle: 5       // Weight for feeding style match (Kibble/Wet/etc.)
   },
   
-  // 匹配等级阈值
   thresholds: {
-    best: 85,      // 85分以上为最佳匹配
-    great: 70,     // 70-84分为很好选择
-    good: 55,      // 55-69分为好选择
-    eco: 60        // 60分以上且环保特性突出为环保选择
+    best: 85,      // 85+ points = Best match
+    great: 70,     // 70-84 points = Great choice
+    good: 55,      // 55-69 points = Good option
+    eco: 60        // 60+ points with strong eco features = Eco-friendly choice
   }
 };

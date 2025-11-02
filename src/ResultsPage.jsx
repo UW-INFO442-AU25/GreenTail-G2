@@ -7,6 +7,7 @@ import { petFoodDatabase } from './data/petFoodDatabase';
 import StoreMapModal from './components/StoreMapModal';
 import TransitionPlanModal from './components/TransitionPlanModal';
 import ContextualHelpBanner from './components/ContextualHelpBanner';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
  * ResultsPage - Redesigned per results_page_redesign_plan.md
@@ -28,6 +29,7 @@ function ResultsPage() {
   const { quizData } = useQuiz();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
   const [showHelpBanner, setShowHelpBanner] = useState(true);
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedProductForMap, setSelectedProductForMap] = useState(null);
@@ -78,7 +80,7 @@ function ResultsPage() {
     return Array.from(proteins).sort();
   }, []);
 
-  // 使用智能匹配算法获取最佳匹配产品
+  // Get best matching products using smart matching algorithm
   const matchedProducts = useMemo(() => {
     if (!quizData || !quizData.pet) {
       return [];
@@ -153,9 +155,10 @@ function ResultsPage() {
       );
     }
 
-    // Apply sorting
+    // Apply sorting based on user selection
     switch (sortBy) {
       case 'lowest':
+        // Sort by price (low to high), prioritizing "best match" products
         products.sort((a, b) => {
           if (a.matchLevel === 'best' && b.matchLevel !== 'best') return -1;
           if (b.matchLevel === 'best' && a.matchLevel !== 'best') return 1;
@@ -163,6 +166,7 @@ function ResultsPage() {
         });
         break;
       case 'highest':
+        // Sort by price (high to low), prioritizing "best match" products
         products.sort((a, b) => {
           if (a.matchLevel === 'best' && b.matchLevel !== 'best') return -1;
           if (b.matchLevel === 'best' && a.matchLevel !== 'best') return 1;
@@ -171,7 +175,7 @@ function ResultsPage() {
         break;
       case 'best':
       default:
-        // Best match sorting (preserve existing order from matching algorithm)
+        // Sort by match level first, then by match score (preserves algorithm priority)
         products.sort((a, b) => {
           const levelOrder = { 'best': 0, 'great': 1, 'good': 2, 'eco-friendly': 3, 'budget': 4 };
           const aLevel = levelOrder[a.matchLevel] || 5;
@@ -315,7 +319,6 @@ function ResultsPage() {
   }, []);
 
 
-  // 使用智能算法生成个性化描述
   const personalizedDescription = generatePersonalizedDescription(quizData);
 
   return (
@@ -370,7 +373,9 @@ function ResultsPage() {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearAllFilters}
-                      className="text-sm text-green-800 hover:text-green-900 hover:underline transition-colors duration-200"
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={(e) => handleTouchEnd(e, clearAllFilters)}
+                      className="text-sm text-green-800 hover:text-green-900 hover:underline transition-colors duration-200 min-h-[44px]"
                       aria-label="Clear all filters"
                     >
                       Clear all
@@ -538,7 +543,12 @@ function ResultsPage() {
                       setSelectedProductForMap(null);
                       setShowMapModal(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => {
+                      setSelectedProductForMap(null);
+                      setShowMapModal(true);
+                    })}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
                     style={{
                       transform: 'translateY(0)',
                       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -784,7 +794,9 @@ function ResultsPage() {
                           {/* Primary CTA: Add to Cart / Buy */}
                           <a 
                             href="#" 
-                            className="bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center transition-all duration-300 ease"
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={(e) => handleTouchEnd(e)}
+                            className="bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center transition-all duration-300 ease min-h-[44px] flex items-center justify-center"
                             style={{
                               transform: 'translateY(0)',
                               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -812,7 +824,12 @@ function ResultsPage() {
                                 setSelectedProductForMap(product.name);
                                 setShowMapModal(true);
                               }}
-                              className="text-gray-600 hover:text-green-800 flex items-center gap-1 transition-colors duration-300"
+                              onTouchStart={handleTouchStart}
+                              onTouchEnd={(e) => handleTouchEnd(e, () => {
+                                setSelectedProductForMap(product.name);
+                                setShowMapModal(true);
+                              })}
+                              className="text-gray-600 hover:text-green-800 flex items-center gap-1 transition-colors duration-300 min-h-[44px]"
                               title="Find stores with this product"
                             >
                               📍 Find Nearby
@@ -838,14 +855,12 @@ function ResultsPage() {
         </div>
       </div>
 
-      {/* 地图弹窗 */}
       <StoreMapModal 
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}
         selectedProduct={selectedProductForMap}
       />
 
-      {/* 转换计划弹窗 */}
       <TransitionPlanModal 
         isOpen={showTransitionPlan}
         onClose={() => setShowTransitionPlan(false)}

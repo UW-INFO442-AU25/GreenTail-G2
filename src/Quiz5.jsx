@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
 import ProgressBar from './ProgressBar';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 function Quiz5() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function Quiz5() {
   const [alternativeProteins, setAlternativeProteins] = useState(quizData.alternativeProteins);
   const [organicExperience, setOrganicExperience] = useState(quizData.organicExperience);
   const [zipCode, setZipCode] = useState(quizData.zipCode);
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
 
   const proteinOptions = ['No', 'Maybe', 'Yes'];
   const experienceOptions = ['Beginner', 'Tried a few', 'Experienced'];
@@ -72,7 +74,9 @@ function Quiz5() {
                   <button
                     key={option}
                     onClick={() => setAlternativeProteins(option)}
-                    className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setAlternativeProteins(option))}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       alternativeProteins === option
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -94,7 +98,9 @@ function Quiz5() {
                   <button
                     key={option}
                     onClick={() => setOrganicExperience(option)}
-                    className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setOrganicExperience(option))}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       organicExperience === option
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -130,13 +136,17 @@ function Quiz5() {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleBack}
-                className="text-gray-600 hover:text-green-800 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Back
               </button>
               <button
                 onClick={handleNext}
-                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleNext)}
+                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 See Best Matches
               </button>

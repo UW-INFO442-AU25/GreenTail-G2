@@ -6,7 +6,6 @@ const ShopsNearYouPage = () => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [zipCode, setZipCode] = useState('98105');
 
-  // 商店数据
   const stores = [
     {
       id: 1,

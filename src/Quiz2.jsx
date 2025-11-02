@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
 import ProgressBar from './ProgressBar';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 function Quiz2() {
   const navigate = useNavigate();
   const { quizData, updateQuizData } = useQuiz();
   const [avoidIngredients, setAvoidIngredients] = useState(quizData.avoidIngredients);
   const [feedingStyle, setFeedingStyle] = useState(quizData.feedingStyle);
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
 
   const ingredients = ['Chicken', 'Beef', 'Fish', 'Dairy', 'Grain', 'Pea/Lentil', 'Soy', 'None', 'Not sure'];
   const feedingStyles = ['Kibble', 'Wet', 'Freeze-dried', 'Fresh', 'Mix', 'Unsure'];
@@ -85,7 +87,9 @@ function Quiz2() {
                   <button
                     key={ingredient}
                     onClick={() => handleIngredientToggle(ingredient)}
-                    className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleIngredientToggle(ingredient))}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       avoidIngredients.includes(ingredient)
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -110,7 +114,9 @@ function Quiz2() {
                   <button
                     key={style}
                     onClick={() => setFeedingStyle(style)}
-                    className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setFeedingStyle(style))}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       feedingStyle === style
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -134,13 +140,17 @@ function Quiz2() {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleBack}
-                className="text-gray-600 hover:text-green-800 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Back
               </button>
               <button
                 onClick={handleNext}
-                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleNext)}
+                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Next
               </button>

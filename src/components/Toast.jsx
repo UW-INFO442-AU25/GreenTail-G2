@@ -8,7 +8,7 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
       setIsVisible(false);
       setTimeout(() => {
         onClose?.();
-      }, 500); // 等待动画完成
+      }, 500);
     }, duration);
 
     return () => clearTimeout(timer);
@@ -88,15 +88,12 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
       }`}
     >
       <div className={`${styles.bg} ${styles.border} rounded-xl shadow-2xl p-5 flex items-start space-x-4 relative overflow-hidden`}>
-        {/* 背景装饰 */}
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-50 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
         
-        {/* 图标 */}
         <div className="flex-shrink-0">
           {styles.icon}
         </div>
         
-        {/* 内容 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h4 className={`${styles.titleColor} text-sm font-semibold mb-1`}>

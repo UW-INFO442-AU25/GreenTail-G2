@@ -4,7 +4,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getStoresByZipCode, getMapCenterByZipCode, isValidZipCode, getZipCodeDisplayName } from '../utils/storeLocator';
 
-// 修复Leaflet默认图标问题
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -16,8 +15,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// 移除静态商店数据，现在使用动态数据
-
 const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   const [selectedStore, setSelectedStore] = useState(null);
   const [zipCode, setZipCode] = useState('98105');
@@ -25,14 +22,12 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   const [mapCenter, setMapCenter] = useState([47.6062, -122.3321]);
   const [zipCodeError, setZipCodeError] = useState('');
 
-  // 根据zipcode获取商店数据
   useEffect(() => {
     const storeData = getStoresByZipCode(zipCode);
     setStores(storeData);
     setMapCenter(getMapCenterByZipCode(zipCode));
   }, [zipCode]);
 
-  // 根据产品筛选商店
   const filteredStores = selectedProduct 
     ? stores.filter(store => 
         store.products.some(product => 
@@ -41,7 +36,6 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
       )
     : stores;
 
-  // 更新位置
   const handleUpdateLocation = () => {
     if (!isValidZipCode(zipCode)) {
       setZipCodeError('Please enter a valid ZIP code (e.g., 98105)');
@@ -66,12 +60,21 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
     window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, '_blank');
   };
 
+  // Handle touch events for buttons
+  const handleTouchStart = (e) => {
+    e.currentTarget.classList.add('touch-active');
+  };
+
+  const handleTouchEnd = (e, callback) => {
+    e.currentTarget.classList.remove('touch-active');
+    callback();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
-        {/* 头部 */}
         <div className="flex justify-between items-center p-6 border-b">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
@@ -83,14 +86,15 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={(e) => handleTouchEnd(e, onClose)}
+            className="text-gray-400 hover:text-gray-600 text-2xl font-bold min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             ×
           </button>
         </div>
 
         <div className="flex flex-col md:flex-row h-[calc(90vh-120px)]">
-          {/* 左侧：商店列表 */}
           <div className="md:w-1/3 w-full border-b md:border-b-0 md:border-r overflow-y-auto">
             <div className="p-4">
               <div className="mb-4">
@@ -111,7 +115,9 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                 )}
                 <button 
                   onClick={handleUpdateLocation}
-                  className="w-full mt-2 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, handleUpdateLocation)}
+                  className="w-full mt-2 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors min-h-[44px]"
                 >
                   🔍 Update Location
                 </button>
@@ -127,6 +133,8 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                         : 'border-gray-200 hover:border-green-300 hover:bg-green-25'
                     }`}
                     onClick={() => handleStoreClick(store)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleStoreClick(store))}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-gray-900">{store.name}</h3>
@@ -145,7 +153,12 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                           e.stopPropagation();
                           handleGetDirections(store.address);
                         }}
-                        className="flex-1 bg-green-800 text-white py-1 px-2 rounded text-xs hover:bg-green-700 transition-colors"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={(e) => {
+                          e.stopPropagation();
+                          handleTouchEnd(e, () => handleGetDirections(store.address));
+                        }}
+                        className="flex-1 bg-green-800 text-white py-1 px-2 rounded text-xs hover:bg-green-700 transition-colors min-h-[44px]"
                       >
                         📍 Directions
                       </button>
@@ -154,7 +167,12 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                           e.stopPropagation();
                           handleCallStore(store.phone);
                         }}
-                        className="flex-1 bg-gray-100 text-gray-700 py-1 px-2 rounded text-xs hover:bg-gray-200 transition-colors"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={(e) => {
+                          e.stopPropagation();
+                          handleTouchEnd(e, () => handleCallStore(store.phone));
+                        }}
+                        className="flex-1 bg-gray-100 text-gray-700 py-1 px-2 rounded text-xs hover:bg-gray-200 transition-colors min-h-[44px]"
                       >
                         📞 Call
                       </button>
@@ -165,13 +183,12 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
             </div>
           </div>
 
-          {/* 右侧：地图 */}
           <div className="md:w-2/3 w-full h-80 md:h-auto">
             <MapContainer
               center={mapCenter}
               zoom={12}
               style={{ height: '100%', width: '100%' }}
-              key={`${mapCenter[0]}-${mapCenter[1]}`} // 强制重新渲染地图
+              key={`${mapCenter[0]}-${mapCenter[1]}`}
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -216,7 +233,6 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           </div>
         </div>
 
-        {/* 底部信息 */}
         <div className="p-4 border-t bg-gray-50">
           <p className="text-sm text-gray-600 text-center">
             💡 Tip: Click on store markers or store cards to see more details

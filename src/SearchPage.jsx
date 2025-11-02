@@ -6,6 +6,7 @@ import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { getMatchLevelStyle, findBestMatches } from './utils/matchingAlgorithm';
 import StoreMapModal from './components/StoreMapModal';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
  * SearchPage - Enhanced with smooth animations per smooth_transition_recommendations.md
@@ -23,6 +24,7 @@ function SearchPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
   const [isVisible, setIsVisible] = useState({});
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
@@ -37,7 +39,6 @@ function SearchPage() {
     dietStyle: [],
     proteinType: [],
     priceRange: '',
-    // 右侧标签筛选器 - 产品特性和品质
     packaging: false,
     certifications: false,
     grainFree: false,
@@ -62,16 +63,16 @@ function SearchPage() {
   const [showComparePrompt, setShowComparePrompt] = useState(true);
   const savedCount = savedForCompare.length;
 
-  // 过滤和搜索产品
+  // Filter and search products based on user inputs
   const filteredProducts = useMemo(() => {
     let products = [...petFoodDatabase];
     
-    // 如果有 quiz 数据，先进行智能匹配
+    // If quiz data exists, use smart matching algorithm to prioritize results
     if (quizData && quizData.pet) {
       products = findBestMatches(quizData);
     }
 
-    // 搜索过滤
+    // Apply text search filter across product name, brand, and tags
     if (searchTerm) {
       products = products.filter(product => 
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,35 +81,35 @@ function SearchPage() {
       );
     }
 
-    // 物种过滤
+    // Filter by pet species (Dog, Cat)
     if (filters.species.length > 0) {
       products = products.filter(product => 
         filters.species.some(species => product.petType.includes(species))
       );
     }
 
-    // 生命阶段过滤
+    // Filter by life stage (Puppy, Adult, Senior)
     if (filters.lifeStage.length > 0) {
       products = products.filter(product => 
         filters.lifeStage.some(stage => product.lifeStage.includes(stage))
       );
     }
 
-    // 饮食方式过滤
+    // Filter by diet style (Kibble, Wet, Freeze-dried, etc.)
     if (filters.dietStyle.length > 0) {
       products = products.filter(product => 
         filters.dietStyle.some(style => product.feedingStyle.includes(style))
       );
     }
 
-    // 蛋白质类型过滤
+    // Filter by protein type (Chicken, Salmon, etc.)
     if (filters.proteinType.length > 0) {
       products = products.filter(product => 
         filters.proteinType.some(protein => product.mainProteins.includes(protein))
       );
     }
 
-    // 价格范围过滤
+    // Filter by price range
     if (filters.priceRange) {
       products = products.filter(product => {
         const price = product.price;
@@ -122,7 +123,6 @@ function SearchPage() {
       });
     }
 
-    // Premium 筛选 - 显示高端产品
     if (filters.premium) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -133,7 +133,6 @@ function SearchPage() {
       );
     }
 
-    // Packaging 筛选 - 显示有环保包装的产品
     if (filters.packaging) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -144,7 +143,6 @@ function SearchPage() {
       );
     }
 
-    // Certifications 筛选 - 显示有认证的产品
     if (filters.certifications) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -155,24 +153,20 @@ function SearchPage() {
       );
     }
 
-    // Grain Free 筛选 - 显示无谷物产品
     if (filters.grainFree) {
       products = products.filter(product => product.isGrainFree);
     }
 
-    // High Protein 筛选 - 显示高蛋白产品
     if (filters.highProtein) {
       products = products.filter(product => 
         product.tags.some(tag => tag.toLowerCase().includes('high protein'))
       );
     }
 
-    // Organic 筛选 - 显示有机产品
     if (filters.organic) {
       products = products.filter(product => product.isOrganic);
     }
 
-    // Sustainable 筛选 - 显示可持续产品
     if (filters.sustainable) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -183,7 +177,6 @@ function SearchPage() {
       );
     }
 
-    // Hypoallergenic 筛选 - 显示低敏产品
     if (filters.hypoallergenic) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -194,7 +187,6 @@ function SearchPage() {
       );
     }
 
-    // Locally Sourced 筛选 - 显示本地采购产品
     if (filters.locallySourced) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -205,7 +197,6 @@ function SearchPage() {
       );
     }
 
-    // Human Grade 筛选 - 显示人类级产品
     if (filters.humanGrade) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -215,7 +206,6 @@ function SearchPage() {
       );
     }
 
-    // Subscription 筛选 - 显示订阅产品
     if (filters.subscription) {
       products = products.filter(product => 
         product.tags.some(tag => 
@@ -225,10 +215,10 @@ function SearchPage() {
       );
     }
 
-    // 排序
+    // Sort products based on selected sort option
     switch (sortBy) {
       case 'lowest':
-        // 价格排序，但保持 Best match 在最上面
+        // Sort by price (low to high), but keep "best match" products at the top
         products.sort((a, b) => {
           if (a.matchLevel === 'best' && b.matchLevel !== 'best') return -1;
           if (b.matchLevel === 'best' && a.matchLevel !== 'best') return 1;
@@ -236,7 +226,7 @@ function SearchPage() {
         });
         break;
       case 'highest':
-        // 价格排序，但保持 Best match 在最上面
+        // Sort by price (high to low), but keep "best match" products at the top
         products.sort((a, b) => {
           if (a.matchLevel === 'best' && b.matchLevel !== 'best') return -1;
           if (b.matchLevel === 'best' && a.matchLevel !== 'best') return 1;
@@ -245,9 +235,8 @@ function SearchPage() {
         break;
       case 'best':
       default:
-        // 智能匹配排序：Best match 优先，然后按匹配分数排序
+        // Sort by match level first, then by match score within the same level
         products.sort((a, b) => {
-          // 首先按匹配等级排序
           const levelOrder = { 'best': 0, 'great': 1, 'good': 2, 'eco-friendly': 3, 'budget': 4 };
           const aLevel = levelOrder[a.matchLevel] || 5;
           const bLevel = levelOrder[b.matchLevel] || 5;
@@ -256,7 +245,7 @@ function SearchPage() {
             return aLevel - bLevel;
           }
           
-          // 相同等级内按匹配分数排序
+          // If same level, sort by match score (higher score first)
           return (b.matchScore || 0) - (a.matchScore || 0);
         });
         break;
@@ -469,7 +458,9 @@ function SearchPage() {
             </p>
             <button 
               onClick={clearFilters}
-              className="text-green-800 hover:underline text-sm mt-1 transition-colors duration-300"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
+              className="text-green-800 hover:underline text-sm mt-1 transition-colors duration-300 min-h-[44px]"
             >
               Clear filters
             </button>
@@ -507,13 +498,17 @@ function SearchPage() {
               </select>
             </div>
             
-            {/* 地图按钮 - Hover effect: translateY(-3px) + shadow */}
             <button
               onClick={() => {
                 setSelectedProductForMap(null);
                 setShowMapModal(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e, () => {
+                setSelectedProductForMap(null);
+                setShowMapModal(true);
+              })}
+              className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
               style={{
                 transform: 'translateY(0)',
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -794,7 +789,9 @@ function SearchPage() {
                 <div className="flex gap-2 mb-4">
                   <button 
                     onClick={() => {/* Apply filters logic */}}
-                    className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => {/* Apply filters logic */})}
+                    className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
                     style={{
                       transform: 'translateY(0)',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -815,7 +812,9 @@ function SearchPage() {
                   </button>
                   <button 
                     onClick={clearFilters}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
                     style={{
                       transform: 'translateY(0)',
                       transition: 'transform 0.3s ease, background-color 0.3s ease',
@@ -866,7 +865,9 @@ function SearchPage() {
               <div className="flex flex-wrap gap-2 mb-6">
                 <button 
                   onClick={() => handleTagFilter('premium')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('premium'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.premium 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -876,7 +877,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('packaging')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('packaging'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.packaging 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -886,7 +889,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('certifications')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('certifications'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.certifications 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -896,7 +901,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('grainFree')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('grainFree'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.grainFree 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -906,7 +913,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('highProtein')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('highProtein'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.highProtein 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -916,7 +925,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('organic')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('organic'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.organic 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -926,7 +937,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('sustainable')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('sustainable'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.sustainable 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -936,7 +949,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('hypoallergenic')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('hypoallergenic'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.hypoallergenic 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -946,7 +961,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('locallySourced')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('locallySourced'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.locallySourced 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -956,7 +973,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('humanGrade')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('humanGrade'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.humanGrade 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -966,7 +985,9 @@ function SearchPage() {
                 </button>
                 <button 
                   onClick={() => handleTagFilter('subscription')}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('subscription'))}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
                     filters.subscription 
                       ? 'bg-green-100 text-green-800 border border-green-300' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -1040,7 +1061,9 @@ function SearchPage() {
                         {/* Buy button with hover effect */}
                         <a 
                           href="#" 
-                          className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease"
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={(e) => handleTouchEnd(e)}
+                          className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px] flex items-center"
                           style={{
                             transform: 'translateY(0)',
                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -1065,15 +1088,28 @@ function SearchPage() {
                               setSelectedProductForMap(product.name);
                               setShowMapModal(true);
                             }}
-                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1 transition-colors duration-300"
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={(e) => handleTouchEnd(e, () => {
+                              setSelectedProductForMap(product.name);
+                              setShowMapModal(true);
+                            })}
+                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1 transition-colors duration-300 min-h-[44px]"
                             title="Find stores with this product"
                           >
                             📍 Find Nearby
                           </button>
-                          <button className="text-gray-600 hover:text-green-800 text-sm transition-colors duration-300">Compare</button>
+                          <button 
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={(e) => handleTouchEnd(e)}
+                            className="text-gray-600 hover:text-green-800 text-sm transition-colors duration-300 min-h-[44px]">Compare</button>
                           <button 
                             onClick={(e) => { e.preventDefault(); handleSaveProduct(product); }}
-                            className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300`}
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={(e) => {
+                              e.preventDefault();
+                              handleTouchEnd(e, () => handleSaveProduct(product));
+                            }}
+                            className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center`}
                             title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
                           >
                             {isProductSaved(product.id) ? (
@@ -1099,7 +1135,9 @@ function SearchPage() {
                   <p className="text-gray-600 mb-6">Please try adjusting your filter criteria or search keywords.</p>
                   <button 
                     onClick={clearFilters}
-                    className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
+                    className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px]"
                   >
                     Clear all filters
                   </button>
@@ -1116,13 +1154,17 @@ function SearchPage() {
           <span className="text-sm text-gray-800">You saved {savedCount} items</span>
           <button
             onClick={handleCompareNow}
-            className="bg-green-800 text-white text-sm px-4 py-2 rounded-full hover:bg-green-700 transition-colors"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={(e) => handleTouchEnd(e, handleCompareNow)}
+            className="bg-green-800 text-white text-sm px-4 py-2 rounded-full hover:bg-green-700 transition-colors min-h-[44px]"
           >
             Compare latest 2
           </button>
           <button
             onClick={() => setShowComparePrompt(false)}
-            className="text-gray-500 text-xs hover:text-gray-700"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={(e) => handleTouchEnd(e, () => setShowComparePrompt(false))}
+            className="text-gray-500 text-xs hover:text-gray-700 min-h-[44px]"
           >
             Dismiss
           </button>
@@ -1156,7 +1198,6 @@ function SearchPage() {
         </div>
       </footer>
 
-      {/* 地图弹窗 */}
       <StoreMapModal 
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}

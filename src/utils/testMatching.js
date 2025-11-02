@@ -1,7 +1,5 @@
-// 测试不同 quiz 答案的匹配结果
 import { findBestMatches } from './matchingAlgorithm.js';
 
-// 测试场景1: 预算敏感的狗狗主人
 const budgetDogOwner = {
   pet: "Dog",
   lifeStage: "Adult",
@@ -18,7 +16,6 @@ const budgetDogOwner = {
   zipCode: "98105"
 };
 
-// 测试场景2: 环保意识的猫咪主人
 const ecoCatOwner = {
   pet: "Cat",
   lifeStage: "Senior",
@@ -35,7 +32,6 @@ const ecoCatOwner = {
   zipCode: "10001"
 };
 
-// 测试场景3: 幼犬主人，避免谷物
 const puppyOwner = {
   pet: "Dog",
   lifeStage: "Puppy/Kitten",
@@ -52,7 +48,6 @@ const puppyOwner = {
   zipCode: "90210"
 };
 
-// 测试场景4: 高端用户，追求品质
 const premiumOwner = {
   pet: "Dog",
   lifeStage: "Adult",
@@ -69,36 +64,33 @@ const premiumOwner = {
   zipCode: "94102"
 };
 
-// 运行测试
-console.log("=== 测试场景1: 预算敏感的狗狗主人 ===");
+console.log("=== Test Scenario 1: Budget-conscious dog owner ===");
 const budgetResults = findBestMatches(budgetDogOwner);
-console.log("推荐产品:");
+console.log("Recommended products:");
 budgetResults.slice(0, 3).forEach((product, index) => {
-  console.log(`${index + 1}. ${product.brand} · ${product.name} - 匹配度: ${product.matchScore}% - 等级: ${product.matchLevel} - 价格: $${product.price}`);
+  console.log(`${index + 1}. ${product.brand} · ${product.name} - Match: ${product.matchScore}% - Level: ${product.matchLevel} - Price: $${product.price}`);
 });
 
-console.log("\n=== 测试场景2: 环保意识的猫咪主人 ===");
+console.log("\n=== Test Scenario 2: Eco-conscious cat owner ===");
 const ecoResults = findBestMatches(ecoCatOwner);
-console.log("推荐产品:");
+console.log("Recommended products:");
 ecoResults.slice(0, 3).forEach((product, index) => {
-  console.log(`${index + 1}. ${product.brand} · ${product.name} - 匹配度: ${product.matchScore}% - 等级: ${product.matchLevel} - 价格: $${product.price}`);
+  console.log(`${index + 1}. ${product.brand} · ${product.name} - Match: ${product.matchScore}% - Level: ${product.matchLevel} - Price: $${product.price}`);
 });
 
-console.log("\n=== 测试场景3: 幼犬主人，避免谷物 ===");
+console.log("\n=== Test Scenario 3: Puppy owner, avoiding grain ===");
 const puppyResults = findBestMatches(puppyOwner);
-console.log("推荐产品:");
+console.log("Recommended products:");
 puppyResults.slice(0, 3).forEach((product, index) => {
-  console.log(`${index + 1}. ${product.brand} · ${product.name} - 匹配度: ${product.matchScore}% - 等级: ${product.matchLevel} - 价格: $${product.price}`);
+  console.log(`${index + 1}. ${product.brand} · ${product.name} - Match: ${product.matchScore}% - Level: ${product.matchLevel} - Price: $${product.price}`);
 });
 
-console.log("\n=== 测试场景4: 高端用户，追求品质 ===");
+console.log("\n=== Test Scenario 4: Premium user seeking quality ===");
 const premiumResults = findBestMatches(premiumOwner);
-console.log("推荐产品:");
+console.log("Recommended products:");
 premiumResults.slice(0, 3).forEach((product, index) => {
-  console.log(`${index + 1}. ${product.brand} · ${product.name} - 匹配度: ${product.matchScore}% - 等级: ${product.matchLevel} - 价格: $${product.price}`);
+  console.log(`${index + 1}. ${product.brand} · ${product.name} - Match: ${product.matchScore}% - Level: ${product.matchLevel} - Price: $${product.price}`);
 });
-
-// 导出测试函数供其他文件使用
 export function runMatchingTests() {
   return {
     budgetDogOwner: findBestMatches(budgetDogOwner),

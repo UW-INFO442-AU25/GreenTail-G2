@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 const TransitionPlanModal = ({ isOpen, onClose, petType = 'Dog', currentFood = 'Regular', newFood = 'Organic' }) => {
   if (!isOpen) return null;
 
-  // 转换计划数据
   const transitionPlan = {
     Dog: {
       days: [

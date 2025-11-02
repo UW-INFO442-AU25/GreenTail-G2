@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ProgressBar from './ProgressBar';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
  * Quiz0 - Enhanced Quiz Landing Page per redesign proposal
@@ -24,6 +25,7 @@ function Quiz0() {
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
 
   const handleStartQuiz = () => {
     setIsStarting(true);
@@ -158,8 +160,10 @@ function Quiz0() {
             <div className="flex flex-col gap-4 items-center justify-center mb-8">
             <button 
               onClick={handleStartQuiz}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e, handleStartQuiz)}
                 ref={el => sectionsRef.current['hero-cta'] = el}
-                className={`bg-green-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 ease ${
+                className={`bg-green-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 ease min-h-[44px] ${
                   isVisible['hero-cta'] 
                     ? 'opacity-100 translate-y-0' 
                     : 'opacity-0 translate-y-5'

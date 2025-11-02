@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuiz } from './QuizContext';
 import ProgressBar from './ProgressBar';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 function Quiz4() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function Quiz4() {
   const [budget, setBudget] = useState(quizData.budget);
   const [organicPremium, setOrganicPremium] = useState(quizData.organicPremium);
   const [preferredBuying, setPreferredBuying] = useState(quizData.preferredBuying);
+  const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
 
   const budgetOptions = ['<$25', '$25–$40', '$40–$60', '$60+', 'Flexible'];
   const organicOptions = ['0%', '~5%', '~10%', '20%+', 'Not sure'];
@@ -73,7 +75,9 @@ function Quiz4() {
                   <button
                     key={option}
                     onClick={() => setBudget(option)}
-                    className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setBudget(option))}
+                    className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       budget === option
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -142,13 +146,17 @@ function Quiz4() {
             <div className="flex justify-between items-center">
               <button
                 onClick={handleBack}
-                className="text-gray-600 hover:text-green-800 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Back
               </button>
               <button
                 onClick={handleNext}
-                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, handleNext)}
+                className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Next
               </button>

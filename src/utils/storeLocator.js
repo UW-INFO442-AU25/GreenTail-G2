@@ -1,8 +1,5 @@
-// 基于zipcode的商店推荐系统
 export const getStoresByZipCode = (zipCode) => {
-  // 模拟不同zipcode的商店数据
   const storeDatabase = {
-    // 西雅图地区
     '98105': [
       {
         id: 1,
@@ -87,8 +84,7 @@ export const getStoresByZipCode = (zipCode) => {
         zipCode: '98101'
       }
     ],
-    // 其他地区
-    '90210': [ // 洛杉矶比佛利山庄
+    '90210': [
       {
         id: 7,
         name: 'Petco – Beverly Hills',
@@ -103,7 +99,7 @@ export const getStoresByZipCode = (zipCode) => {
         zipCode: '90210'
       }
     ],
-    '10001': [ // 纽约曼哈顿
+    '10001': [
       {
         id: 8,
         name: 'Petco – Manhattan',
@@ -120,35 +116,30 @@ export const getStoresByZipCode = (zipCode) => {
     ]
   };
 
-  // 如果找到精确匹配的zipcode
   if (storeDatabase[zipCode]) {
     return storeDatabase[zipCode];
   }
 
-  // 如果没有找到，返回默认的西雅图地区商店
   return storeDatabase['98105'] || [];
 };
 
-// 根据zipcode获取地图中心点
 export const getMapCenterByZipCode = (zipCode) => {
   const zipCodeCenters = {
-    '98105': [47.6689, -122.3844], // 西雅图
-    '98117': [47.6789, -122.3789], // 西雅图
-    '98101': [47.6080, -122.3351], // 西雅图
-    '90210': [34.0736, -118.4004], // 洛杉矶
-    '10001': [40.7505, -73.9934],  // 纽约
+    '98105': [47.6689, -122.3844],
+    '98117': [47.6789, -122.3789],
+    '98101': [47.6080, -122.3351],
+    '90210': [34.0736, -118.4004],
+    '10001': [40.7505, -73.9934],
   };
 
-  return zipCodeCenters[zipCode] || [47.6062, -122.3321]; // 默认西雅图
+  return zipCodeCenters[zipCode] || [47.6062, -122.3321];
 };
 
-// 验证zipcode格式
 export const isValidZipCode = (zipCode) => {
   const zipRegex = /^\d{5}(-\d{4})?$/;
   return zipRegex.test(zipCode);
 };
 
-// 获取zipcode的显示名称
 export const getZipCodeDisplayName = (zipCode) => {
   const zipCodeNames = {
     '98105': 'Seattle, WA (University District)',

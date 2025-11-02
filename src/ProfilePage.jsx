@@ -263,20 +263,20 @@ const ProfilePage = () => {
     }
   };
 
+  // Update user's ZIP code for location-based features (store locator, etc.)
   const handleUpdateZipCode = () => {
-    // 验证 ZIP 码格式（简单的5位数字验证）
+    // Validate ZIP code format (5 digits)
     const zipRegex = /^\d{5}$/;
     if (!zipRegex.test(zipCode)) {
       showError('Please enter a valid 5-digit ZIP code.');
       return;
     }
 
-    // 更新用户偏好设置
+    // Save ZIP code to user preferences if logged in
     if (user) {
       const userPersona = getUserPersona();
       if (userPersona) {
         userPersona.preferences.zipCode = zipCode;
-        // 这里可以保存到 localStorage 或其他存储
         localStorage.setItem('userPreferences', JSON.stringify(userPersona.preferences));
       }
     }
