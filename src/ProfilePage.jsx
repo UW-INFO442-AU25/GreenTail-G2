@@ -561,7 +561,11 @@ const ProfilePage = () => {
           <div className={getAnimationClass('saved-products', 200)}>
             {savedProducts.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">💚</div>
+                <div className="mb-4 flex justify-center">
+                  <svg className="w-16 h-16 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No saved products yet</h3>
                 <p className="text-gray-600 mb-6">Start exploring and save products you love!</p>
                 <Link
@@ -580,12 +584,29 @@ const ProfilePage = () => {
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="relative">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute top-3 right-3 flex space-x-2">
+                      <div className="relative inline-block w-full">
+                        {/* Floating shadow effect - soft glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-2xl transform translate-y-4 scale-110 -z-10"></div>
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-48 object-cover transition-all duration-500 ease-out relative z-10"
+                          style={{
+                            transform: 'translateY(-5px) scale(1)',
+                            filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))',
+                            transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-10px) scale(1.03)';
+                            e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.18))';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
+                            e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
+                          }}
+                        />
+                      </div>
+                      <div className="absolute top-3 right-3 flex space-x-2 z-20">
                         <button
                           onClick={() => handleRemoveProduct(product.id)}
                           className="bg-white/80 hover:bg-white rounded-full p-2 transition-colors duration-300"

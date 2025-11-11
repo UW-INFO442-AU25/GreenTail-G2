@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getStoresByZipCode, getMapCenterByZipCode, isValidZipCode, getZipCodeDisplayName } from '../utils/storeLocator';
+import { petFoodDatabase } from '../data/petFoodDatabase';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -21,6 +22,8 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   const [stores, setStores] = useState([]);
   const [mapCenter, setMapCenter] = useState([47.6062, -122.3321]);
   const [zipCodeError, setZipCodeError] = useState('');
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [selectedPhone, setSelectedPhone] = useState(null);
 
   useEffect(() => {
     const storeData = getStoresByZipCode(zipCode);
@@ -28,13 +31,34 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
     setMapCenter(getMapCenterByZipCode(zipCode));
   }, [zipCode]);
 
-  const filteredStores = selectedProduct 
-    ? stores.filter(store => 
-        store.products.some(product => 
-          product.toLowerCase().includes(selectedProduct.toLowerCase())
+  // Get brand name from product name
+  const getBrandFromProductName = (productName) => {
+    if (!productName) return null;
+    const product = petFoodDatabase.find(p => 
+      p.name.toLowerCase() === productName.toLowerCase() ||
+      p.name.toLowerCase().includes(productName.toLowerCase()) ||
+      productName.toLowerCase().includes(p.name.toLowerCase())
+    );
+    return product ? product.brand : null;
+  };
+
+  const filteredStores = useMemo(() => {
+    if (!selectedProduct) return stores;
+    
+    const brandName = getBrandFromProductName(selectedProduct);
+    const searchTerms = [selectedProduct.toLowerCase()];
+    if (brandName) {
+      searchTerms.push(brandName.toLowerCase());
+    }
+    
+    return stores.filter(store => 
+      store.products.some(product => 
+        searchTerms.some(term => 
+          product.toLowerCase().includes(term)
         )
       )
-    : stores;
+    );
+  }, [stores, selectedProduct]);
 
   const handleUpdateLocation = () => {
     if (!isValidZipCode(zipCode)) {
@@ -53,7 +77,13 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   };
 
   const handleCallStore = (phone) => {
+    setSelectedPhone(phone);
+    setShowPhoneModal(true);
+  };
+
+  const handleDialPhone = (phone) => {
     window.open(`tel:${phone.replace(/\D/g, '')}`, '_self');
+    setShowPhoneModal(false);
   };
 
   const handleGetDirections = (address) => {
@@ -143,9 +173,30 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                     
                     <p className="text-sm text-gray-600 mb-2">{store.address}</p>
                     
-                    <div className="text-sm text-gray-700 mb-3">
-                      <strong>Stocks:</strong> {store.products.join(', ')}
-                    </div>
+                    {store.hours && (
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Hours:</strong>
+                        <div className="text-gray-600 mt-1 space-y-0.5">
+                          {store.hours.split(';').map((period, idx) => (
+                            <div key={idx} className="text-xs">{period.trim()}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {store.website && (
+                      <div className="mb-3">
+                        <a 
+                          href={store.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs text-green-600 hover:text-green-800 hover:underline"
+                        >
+                          Visit Website →
+                        </a>
+                      </div>
+                    )}
 
                     <div className="flex gap-2">
                       <button
@@ -207,10 +258,17 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                     <div className="p-2">
                       <h3 className="font-semibold text-sm">{store.name}</h3>
                       <p className="text-xs text-gray-600 mb-1">{store.address}</p>
-                      <p className="text-xs text-gray-600 mb-2">{store.distance}</p>
-                      <div className="text-xs">
-                        <strong>Stocks:</strong> {store.products.join(', ')}
-                      </div>
+                      <p className="text-xs text-gray-600 mb-1">{store.distance}</p>
+                      {store.hours && (
+                        <div className="text-xs text-gray-600 mb-1">
+                          <strong>Hours:</strong>
+                          <div className="mt-0.5 space-y-0.5">
+                            {store.hours.split(';').map((period, idx) => (
+                              <div key={idx}>{period.trim()}</div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex gap-1 mt-2">
                         <button
                           onClick={() => handleGetDirections(store.address)}
@@ -239,6 +297,38 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           </p>
         </div>
       </div>
+
+      {/* Phone Modal */}
+      {showPhoneModal && selectedPhone && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4"
+          onClick={() => setShowPhoneModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Store Phone Number</h3>
+              <p className="text-2xl font-semibold text-green-800 mb-6">{selectedPhone}</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => handleDialPhone(selectedPhone)}
+                  className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  📞 Call Now
+                </button>
+                <button
+                  onClick={() => setShowPhoneModal(false)}
+                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

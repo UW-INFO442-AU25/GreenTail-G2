@@ -437,7 +437,7 @@ function SearchPage() {
       {/* Optimization: Fade-in on page load */}
       {quizData && quizData.pet && (
         <section 
-          className="bg-green-50 py-4"
+          className="bg-green-50 py-4 mt-16"
           ref={el => sectionsRef.current['search-context'] = el}
         >
           <div 
@@ -469,7 +469,7 @@ function SearchPage() {
       )}
 
       {/* Main Layout */}
-      <main className="pt-8 pb-20">
+      <main className="pt-24 pb-20">
         <div className="max-w-6xl mx-auto px-8">
           {/* Sort & Tags */}
           {/* Optimization: Fade-in on page load */}
@@ -531,78 +531,127 @@ function SearchPage() {
             {/* Active Filter Tags */}
             <div className="flex flex-wrap gap-2">
               {filters.species.map((species, index) => (
-                <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  {species} ✕
+                <span 
+                  key={index} 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleFilterChange('species', species, false)}
+                >
+                  {species} <span className="hover:text-red-600">✕</span>
                 </span>
               ))}
               {filters.lifeStage.map((stage, index) => (
-                <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  {stage} ✕
+                <span 
+                  key={index} 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleFilterChange('lifeStage', stage, false)}
+                >
+                  {stage} <span className="hover:text-red-600">✕</span>
                 </span>
               ))}
               {filters.dietStyle.map((style, index) => (
-                <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  {style} ✕
+                <span 
+                  key={index} 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleFilterChange('dietStyle', style, false)}
+                >
+                  {style} <span className="hover:text-red-600">✕</span>
                 </span>
               ))}
               {filters.proteinType.map((protein, index) => (
-                <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  {protein} ✕
+                <span 
+                  key={index} 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleFilterChange('proteinType', protein, false)}
+                >
+                  {protein} <span className="hover:text-red-600">✕</span>
                 </span>
               ))}
               {filters.premium && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Premium ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('premium')}
+                >
+                  Premium <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.packaging && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Packaging ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('packaging')}
+                >
+                  Packaging <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.certifications && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Certifications ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('certifications')}
+                >
+                  Certifications <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.grainFree && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Grain Free ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('grainFree')}
+                >
+                  Grain Free <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.highProtein && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  High Protein ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('highProtein')}
+                >
+                  High Protein <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.organic && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Organic ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('organic')}
+                >
+                  Organic <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.sustainable && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Sustainable ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('sustainable')}
+                >
+                  Sustainable <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.hypoallergenic && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Hypoallergenic ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('hypoallergenic')}
+                >
+                  Hypoallergenic <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.locallySourced && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Locally Sourced ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('locallySourced')}
+                >
+                  Locally Sourced <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.humanGrade && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Human Grade ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('humanGrade')}
+                >
+                  Human Grade <span className="hover:text-red-600">✕</span>
                 </span>
               )}
               {filters.subscription && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Subscription ✕
+                <span 
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
+                  onClick={() => handleTagFilter('subscription')}
+                >
+                  Subscription <span className="hover:text-red-600">✕</span>
                 </span>
               )}
             </div>
@@ -1030,22 +1079,29 @@ function SearchPage() {
                         </span>
                         <span className="text-xl font-semibold text-gray-900">${product.price}</span>
                       </div>
-                      {/* Product image with hover effect: scale(1.03) */}
-                      <img 
-                        src={product.image} 
-                        alt={product.name} 
-                        className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-400 ease"
-                        style={{
-                          transform: 'scale(1)',
-                          transition: 'transform 0.4s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.03)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      />
+                      {/* Product image with floating effect */}
+                      <div className="relative inline-block w-full mb-4">
+                        {/* Floating shadow effect - soft glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-2xl transform translate-y-4 scale-110 -z-10 rounded-lg"></div>
+                        <img 
+                          src={product.image} 
+                          alt={product.name} 
+                          className="w-full h-48 object-cover rounded-lg transition-all duration-500 ease-out relative z-10"
+                          style={{
+                            transform: 'translateY(-5px) scale(1)',
+                            filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))',
+                            transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-10px) scale(1.03)';
+                            e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.18))';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
+                            e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
+                          }}
+                        />
+                      </div>
                       <h4 className="font-semibold text-gray-900 mb-3 text-lg">
                         {product.name.includes(product.brand) ? product.name : `${product.brand} · ${product.name}`}
                       </h4>

@@ -348,7 +348,7 @@ function HomePage() {
                 }`}
                 style={{ transitionDelay: '400ms' }}
               >
-                <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-center">
                   {/* Action button: Staggered fade-in & slide-up */}
                   {/* Optimization: Button appears after description (delay 500ms) */}
                   <Link 
@@ -403,9 +403,9 @@ function HomePage() {
             </div>
             
             {/* Main Visual/Dog Image - Appears after fullscreen video ends */}
-            {/* Optimization: Image smoothly appears after video transition */}
+            {/* Optimization: Image smoothly appears after video transition, floating above background */}
             <div 
-              className="text-center"
+              className="text-center relative"
               ref={el => sectionsRef.current['hero-image'] = el}
             >
               <div 
@@ -416,21 +416,28 @@ function HomePage() {
                 }`}
                 style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
               >
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/hero-dog.png`}
-                  alt="Happy dog representing GreenTail's mission to help pets and the planet"
-                  className="max-w-full h-auto rounded-lg shadow-lg transition-transform duration-400 ease"
-                  style={{
-                    transform: 'scale(1)',
-                    transition: 'transform 0.4s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.03)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                />
+                <div className="relative inline-block">
+                  {/* Floating shadow effect - soft glow without box */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl transform translate-y-8 scale-125 -z-10"></div>
+                  <img 
+                    src={`${import.meta.env.BASE_URL}images/hero-dog.png`}
+                    alt="Happy dog representing GreenTail's mission to help pets and the planet"
+                    className="max-w-full h-auto transition-all duration-500 ease-out relative z-10"
+                    style={{
+                      transform: 'translateY(-10px) scale(1)',
+                      filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))',
+                      transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-20px) scale(1.05)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.2))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -741,7 +748,7 @@ function HomePage() {
               <p className="text-gray-600 leading-relaxed">Helping pet parents choose organic, planet-friendly food with confidence.</p>
             </div>
             <div>
-              <ul className="space-y-2">
+              <ul className="flex flex-wrap gap-4 md:gap-6">
                 <li><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Quiz</Link></li>
                 <li><Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Learn</Link></li>
                 <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Compare</Link></li>

@@ -631,11 +631,28 @@ const ComparePage = () => {
         <div className="relative p-6 pb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <img 
-                src={product.image} 
-                alt={product.name}
-                className="w-16 h-16 object-cover rounded-lg shadow-md"
-              />
+              <div className="relative inline-block">
+                {/* Floating shadow effect - soft glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-xl transform translate-y-2 scale-110 -z-10 rounded-lg"></div>
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="w-16 h-16 object-cover rounded-lg shadow-md transition-all duration-500 ease-out relative z-10"
+                  style={{
+                    transform: 'translateY(-3px) scale(1)',
+                    filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))',
+                    transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px) scale(1.05)';
+                    e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-3px) scale(1)';
+                    e.currentTarget.style.filter = 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))';
+                  }}
+                />
+              </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
                 <p className="text-sm text-gray-600">{product.brand}</p>

@@ -16,6 +16,7 @@ const AboutPage = () => {
   const { user, logout } = useAuth();
   const [isVisible, setIsVisible] = useState({});
   const [hasAnimated, setHasAnimated] = useState({});
+  const [showContactModal, setShowContactModal] = useState(false);
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
 
@@ -212,22 +213,29 @@ const AboutPage = () => {
                 }`}
                 style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
               >
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/earth-pets.png`} 
-                  alt="Earth with pets, symbolizing GreenTail's mission to help pet parents make sustainable choices" 
-                  className="w-full max-w-md mx-auto transform transition-transform duration-400 ease"
-                  style={{
-                    transform: 'scale(1)',
-                    transition: 'transform 0.4s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.03)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                  loading="eager"
-                />
+                <div className="relative inline-block w-full max-w-md mx-auto">
+                  {/* Floating shadow effect - soft glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl transform translate-y-8 scale-125 -z-10"></div>
+                  <img 
+                    src={`${import.meta.env.BASE_URL}images/earth-pets.png`} 
+                    alt="Earth with pets, symbolizing GreenTail's mission to help pet parents make sustainable choices" 
+                    className="w-full transition-all duration-500 ease-out relative z-10"
+                    style={{
+                      transform: 'translateY(-10px) scale(1)',
+                      filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))',
+                      transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-20px) scale(1.05)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.2))';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
+                      e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
+                    }}
+                    loading="eager"
+                  />
+                </div>
               </div>
             </div>
             {/* Title: Fade-in & Slide-up - 0.6s ease-out, from 20px below */}
@@ -556,34 +564,98 @@ const AboutPage = () => {
       </section>
 
       {/* About the data */}
-      <section className="py-20 bg-green-50">
-        <div className="max-w-6xl mx-auto px-8">
+      {/* Optimization: Scroll-triggered animations with gradient background and decorative elements */}
+      <section id="data" className="py-24 bg-gradient-to-br from-green-50 via-emerald-50/30 to-blue-50/20 relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-br from-green-100/40 to-emerald-100/40 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-blue-100/40 to-teal-100/40 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/2">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">About the data</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Products, prices, ingredients, packaging, and certifications come from retailer and brand pages. We harmonized names and computed $/1000 kcal for fair comparison. Where data is missing, we use mock placeholders.
-              </p>
-              <small className="text-gray-500">This is an INFO 442: Cooperative Software Development Autumn 2025 project; sources and prices may change.</small>
+            <div 
+              className="lg:w-1/2"
+              ref={el => sectionsRef.current['data-content'] = el}
+            >
+              <div 
+                className={`transition-all duration-800 ease-out ${
+                  isVisible['data-content'] 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-5'
+                }`}
+              >
+                <div className="inline-block mb-6">
+                  <h3 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-800 via-emerald-700 to-teal-600 bg-clip-text text-transparent mb-4">
+                    About the data
+                  </h3>
+                  <div className="w-24 h-1.5 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 rounded-full"></div>
+                </div>
+                <p 
+                  className="text-gray-600 mb-6 leading-relaxed text-lg"
+                  style={{
+                    opacity: isVisible['data-content'] ? 1 : 0,
+                    transform: isVisible['data-content'] ? 'translateY(0)' : 'translateY(10px)',
+                    transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
+                  }}
+                >
+                  Products, prices, ingredients, packaging, and certifications come from retailer and brand pages. We harmonized names and computed $/1000 kcal for fair comparison. Where data is missing, we use mock placeholders.
+                </p>
+                <p 
+                  className="text-gray-600 mb-6 leading-relaxed text-lg"
+                  style={{
+                    opacity: isVisible['data-content'] ? 1 : 0,
+                    transform: isVisible['data-content'] ? 'translateY(0)' : 'translateY(10px)',
+                    transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s',
+                  }}
+                >
+                  Store locations, availability, hours, and contact information in the "Find store nearby" feature are mock data generated for demonstration purposes. These stores and their product inventories are simulated and do not represent actual retail locations.
+                </p>
+                <small 
+                  className="text-gray-500"
+                  style={{
+                    opacity: isVisible['data-content'] ? 1 : 0,
+                    transform: isVisible['data-content'] ? 'translateY(0)' : 'translateY(10px)',
+                    transition: 'opacity 0.8s ease-out 0.6s, transform 0.8s ease-out 0.6s',
+                  }}
+                >
+                  This is an INFO 442: Cooperative Software Development Autumn 2025 project; sources and prices may change.
+                </small>
+              </div>
             </div>
-            {/* Data section image with hover effect */}
-            {/* Optimization: Image scale on hover (scale 1.03) */}
-            <div className="lg:w-1/2">
-              <img 
-                src={`${import.meta.env.BASE_URL}images/cat-dog.png`} 
-                alt="Cat and dog, representing the pets that GreenTail helps pet parents care for" 
-                className="w-full rounded-xl shadow-lg transition-transform duration-400 ease"
-                style={{
-                  transform: 'scale(1)',
-                  transition: 'transform 0.4s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.03)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              />
+            {/* Data section image with floating effect */}
+            <div 
+              className="lg:w-1/2 relative"
+              ref={el => sectionsRef.current['data-image'] = el}
+            >
+              <div 
+                className={`relative inline-block w-full transition-all duration-800 ease-out ${
+                  isVisible['data-image'] 
+                    ? 'opacity-100 translate-y-0 scale-100' 
+                    : 'opacity-0 translate-y-10 scale-105'
+                }`}
+              >
+                {/* Floating shadow effect - soft glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl transform translate-y-8 scale-125 -z-10"></div>
+                <img 
+                  src={`${import.meta.env.BASE_URL}images/cat-dog.png`} 
+                  alt="Cat and dog, representing the pets that GreenTail helps pet parents care for" 
+                  className="w-full rounded-xl transition-all duration-500 ease-out relative z-10"
+                  style={{
+                    transform: 'translateY(-10px) scale(1)',
+                    filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))',
+                    transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-20px) scale(1.05)';
+                    e.currentTarget.style.filter = 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.2))';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
+                    e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -593,26 +665,95 @@ const AboutPage = () => {
       <footer className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-8">Learn more</h3>
-          <ul className="space-y-4 mb-8">
-            <li>
+          <ul className="flex flex-wrap gap-4 md:gap-6 mb-8 items-center">
+            <li className="flex items-center">
               <a href="#" className="text-green-600 hover:text-green-800 font-medium">
                 Project deck ↗
               </a>
             </li>
-            <li>
+            <li className="flex items-center">
               <a href="https://github.com/kaibo-wang/GreenTail-G2" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 font-medium">
                 GitHub repo ↗
               </a>
             </li>
-            <li>
-              <a href="mailto:contact@greentail.com" className="text-green-600 hover:text-green-800 font-medium">
+            <li className="flex items-center">
+              <button 
+                onClick={() => setShowContactModal(true)}
+                className="text-green-600 hover:text-green-800 font-medium cursor-pointer p-0 border-0 bg-transparent inline-block"
+              >
                 Contact us ↗
-              </a>
+              </button>
             </li>
           </ul>
           <p className="text-gray-500">© 2025 GreenTail. INFO 442: Cooperative Software Development Autumn 2025.</p>
         </div>
       </footer>
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowContactModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close modal"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Kaibo Wang</p>
+                <a href="mailto:kwang37@uw.edu" className="text-green-600 hover:text-green-800">
+                  kwang37@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Lele Zhang</p>
+                <a href="mailto:lelez@uw.edu" className="text-green-600 hover:text-green-800">
+                  lelez@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Lanqi Zhang</p>
+                <a href="mailto:zha12935@uw.edu" className="text-green-600 hover:text-green-800">
+                  zha12935@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Sammi Huang</p>
+                <a href="mailto:shuang36@uw.edu" className="text-green-600 hover:text-green-800">
+                  shuang36@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Amber Lu</p>
+                <a href="mailto:yuyaol@uw.edu" className="text-green-600 hover:text-green-800">
+                  yuyaol@uw.edu
+                </a>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

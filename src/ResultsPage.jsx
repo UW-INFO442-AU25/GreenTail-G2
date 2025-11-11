@@ -732,22 +732,29 @@ function ResultsPage() {
                           <span className="text-xl font-semibold text-gray-900">${product.price}</span>
                         </div>
                         
-                        {/* Product Image - Phase 4: High-quality image with hover effect */}
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          className="w-full h-48 object-cover rounded-lg mb-4 transition-transform duration-400 ease"
-                          style={{
-                            transform: 'scale(1)',
-                            transition: 'transform 0.4s ease',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.03)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }}
-                        />
+                        {/* Product Image - Phase 4: High-quality image with floating effect */}
+                        <div className="relative inline-block w-full mb-4">
+                          {/* Floating shadow effect - soft glow */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-2xl transform translate-y-4 scale-110 -z-10 rounded-lg"></div>
+                          <img 
+                            src={product.image} 
+                            alt={product.name} 
+                            className="w-full h-48 object-cover rounded-lg transition-all duration-500 ease-out relative z-10"
+                            style={{
+                              transform: 'translateY(-5px) scale(1)',
+                              filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))',
+                              transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-10px) scale(1.03)';
+                              e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.18))';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
+                              e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
+                            }}
+                          />
+                        </div>
                         
                         {/* Brand & Name */}
                         <h3 className="font-semibold text-gray-900 mb-2 text-lg">

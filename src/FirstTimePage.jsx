@@ -53,7 +53,7 @@ const FirstTimePage = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
               </Link>
               <button onClick={scrollToVideo} className="text-gray-600 hover:text-green-800 transition-all duration-300 font-medium text-lg hover:translate-x-1">
-                Watch 2‑min overview →
+                Watch 5‑min overview →
               </button>
             </div>
           </div>
