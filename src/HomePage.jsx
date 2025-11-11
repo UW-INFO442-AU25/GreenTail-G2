@@ -202,7 +202,7 @@ function HomePage() {
       {/* Fullscreen Video Intro - Shows on page load */}
       {isFullscreenVideo && (
         <div 
-          className={`fixed inset-0 z-[100] bg-black ${
+          className={`fixed inset-0 z-[100] bg-black cursor-pointer ${
             isTransitioning 
               ? 'opacity-0' 
               : 'opacity-100'
@@ -216,6 +216,7 @@ function HomePage() {
               : 'scale(1)',
             transformOrigin: 'center center',
           }}
+          onClick={handleVideoEnd}
         >
           <video 
             ref={fullscreenVideoRef}
@@ -236,6 +237,10 @@ function HomePage() {
             }}
             aria-label="GreenTail introduction video"
           />
+          {/* Click to skip hint */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70 text-sm animate-pulse pointer-events-none">
+            Click anywhere to skip
+          </div>
         </div>
       )}
 
