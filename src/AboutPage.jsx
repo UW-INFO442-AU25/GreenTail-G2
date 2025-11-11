@@ -359,7 +359,7 @@ const AboutPage = () => {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-800 to-emerald-700 bg-clip-text text-transparent mb-6">
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
                 Why does it matter?
               </h2>
               <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-500 mx-auto rounded-full"></div>
@@ -446,7 +446,7 @@ const AboutPage = () => {
               }`}
             >
               <div className="inline-block">
-                <h2 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-green-800 via-emerald-700 to-teal-600 bg-clip-text text-transparent mb-8">
+                <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-8">
                   Our mission
                 </h2>
                 <div className="w-32 h-1.5 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 mx-auto rounded-full mb-8"></div>
@@ -487,7 +487,7 @@ const AboutPage = () => {
               >
                 <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.bgGradient} rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-500`}></div>
                 <div className="relative z-10">
-                  <h3 className={`text-2xl font-bold bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-4`}>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
                     {card.title}
                   </h3>
                   <p className="text-gray-600 text-lg leading-relaxed">{card.text}</p>
@@ -586,7 +586,7 @@ const AboutPage = () => {
                 }`}
               >
                 <div className="inline-block mb-6">
-                  <h3 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-800 via-emerald-700 to-teal-600 bg-clip-text text-transparent mb-4">
+                  <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                     About the data
                   </h3>
                   <div className="w-24 h-1.5 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 rounded-full"></div>

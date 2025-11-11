@@ -39,6 +39,9 @@ function HomePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const fullscreenVideoRef = useRef(null);
+  
+  // Contact modal state
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -92,6 +95,34 @@ function HomePage() {
       }
     };
   }, [hasAnimated]);
+
+  // Handle video skip - immediate transition without animation
+  const handleSkipVideo = () => {
+    setVideoEnded(true);
+    setIsFullscreenVideo(false);
+    setIsTransitioning(false);
+    setShowContent(true);
+    
+    // Trigger hero animations immediately
+    setIsVisible((prev) => ({
+      ...prev,
+      'hero-image': true,
+      'hero-title': true,
+      'hero-description': true,
+      'hero-button': true,
+      'hero-link': true,
+      'hero-features': true,
+    }));
+    setHasAnimated((prev) => ({
+      ...prev,
+      'hero-image': true,
+      'hero-title': true,
+      'hero-description': true,
+      'hero-button': true,
+      'hero-link': true,
+      'hero-features': true,
+    }));
+  };
 
   // Handle video end and transition to normal view
   const handleVideoEnd = () => {
@@ -202,21 +233,8 @@ function HomePage() {
       {/* Fullscreen Video Intro - Shows on page load */}
       {isFullscreenVideo && (
         <div 
-          className={`fixed inset-0 z-[100] bg-black cursor-pointer ${
-            isTransitioning 
-              ? 'opacity-0' 
-              : 'opacity-100'
-          }`}
-          style={{
-            transition: isTransitioning 
-              ? 'opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' 
-              : 'opacity 0.3s ease-in-out',
-            transform: isTransitioning 
-              ? 'scale(0.2)' 
-              : 'scale(1)',
-            transformOrigin: 'center center',
-          }}
-          onClick={handleVideoEnd}
+          className="fixed inset-0 z-[100] bg-black cursor-pointer"
+          onClick={handleSkipVideo}
         >
           <video 
             ref={fullscreenVideoRef}
@@ -744,7 +762,7 @@ function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12">
         <div className="max-w-6xl mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-center">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">
                 <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-6 h-6" />
@@ -752,13 +770,20 @@ function HomePage() {
               </h3>
               <p className="text-gray-600 leading-relaxed">Helping pet parents choose organic, planet-friendly food with confidence.</p>
             </div>
-            <div>
-              <ul className="flex flex-wrap gap-4 md:gap-6">
-                <li><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Quiz</Link></li>
-                <li><Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Learn</Link></li>
-                <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Compare</Link></li>
-                <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300">How We Evaluate</a></li>
-                <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Contact</Link></li>
+            <div className="flex items-center">
+              <ul className="flex flex-wrap gap-4 md:gap-6 items-center">
+                <li className="flex items-center"><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Quiz</Link></li>
+                <li className="flex items-center"><Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Learn</Link></li>
+                <li className="flex items-center"><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Compare</Link></li>
+                <li className="flex items-center"><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300">How We Evaluate</a></li>
+                <li className="flex items-center">
+                  <button 
+                    onClick={() => setShowContactModal(true)}
+                    className="text-gray-600 hover:text-green-800 transition-colors duration-300 cursor-pointer p-0 border-0 bg-transparent"
+                  >
+                    Contact
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
@@ -767,6 +792,72 @@ function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Contact Modal */}
+      {showContactModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowContactModal(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Contact Us</h3>
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close modal"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Kaibo Wang</p>
+                <a href="mailto:kwang37@uw.edu" className="text-green-600 hover:text-green-800">
+                  kwang37@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Lele Zhang</p>
+                <a href="mailto:lelez@uw.edu" className="text-green-600 hover:text-green-800">
+                  lelez@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Lanqi Zhang</p>
+                <a href="mailto:zha12935@uw.edu" className="text-green-600 hover:text-green-800">
+                  zha12935@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Sammi Huang</p>
+                <a href="mailto:shuang36@uw.edu" className="text-green-600 hover:text-green-800">
+                  shuang36@uw.edu
+                </a>
+              </div>
+              <div className="border-b border-gray-200 pb-3">
+                <p className="font-semibold text-gray-900">Amber Lu</p>
+                <a href="mailto:yuyaol@uw.edu" className="text-green-600 hover:text-green-800">
+                  yuyaol@uw.edu
+                </a>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowContactModal(false)}
+                className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
