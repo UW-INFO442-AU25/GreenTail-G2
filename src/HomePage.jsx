@@ -775,7 +775,6 @@ function HomePage() {
                 <li className="flex items-center"><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Quiz</Link></li>
                 <li className="flex items-center"><Link to="/first-time" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Learn</Link></li>
                 <li className="flex items-center"><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Compare</Link></li>
-                <li className="flex items-center"><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300">How We Evaluate</a></li>
                 <li className="flex items-center">
                   <button 
                     onClick={() => setShowContactModal(true)}
