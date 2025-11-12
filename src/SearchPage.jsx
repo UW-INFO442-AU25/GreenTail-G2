@@ -1238,8 +1238,8 @@ function SearchPage() {
               </h3>
               <p className="text-gray-600 leading-relaxed">Helping pet parents choose organic, planet-friendly food with confidence.</p>
             </div>
-            <div>
-              <ul className="space-y-2">
+            <div className="flex items-center justify-end">
+              <ul className="flex flex-wrap gap-4 md:gap-6 items-center">
                 <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Quiz</a></li>
                 <li><a href="#" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Learn</a></li>
                 <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300">Compare</Link></li>
