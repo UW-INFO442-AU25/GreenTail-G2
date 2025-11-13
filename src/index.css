@@ -23,6 +23,55 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth scrolling for main content */
+body {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Optimize scrolling performance */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling for scrollable containers */
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+  will-change: scroll-position;
+}
+
+/* Apple Liquid Glass Effect */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.liquid-glass:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.liquid-glass:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 4px 16px 0 rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
 }
 
 /* Custom animations */
@@ -183,6 +232,9 @@ html,
 body {
   -webkit-overflow-scrolling: touch;
   overflow-scrolling: touch;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Touch-friendly input and select */
@@ -209,5 +261,50 @@ textarea {
   min-width: 44px;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   touch-action: manipulation;
+}
+
+/* Responsive product grid - adaptive columns based on available space */
+.product-grid-adaptive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Hide scrollbar for horizontal scrollable elements */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  touch-action: pan-x;  /* Allow only horizontal panning */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Prevent page scroll when scrolling keyword buttons */
+.keyword-scroll-container {
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
+}
+
+/* Ensure minimum 1 column on mobile, 2 on tablet, up to 3 on desktop */
+@media (min-width: 768px) {
+  .product-grid-adaptive {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid-adaptive {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+/* Limit to 3 columns maximum on very large screens */
+@media (min-width: 1536px) {
+  .product-grid-adaptive {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 

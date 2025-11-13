@@ -94,7 +94,7 @@ const FirstTimePage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
+      <section className="pt-24 pb-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
         {/* Decorative background elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-20 left-20 w-64 h-64 bg-green-200 rounded-full blur-3xl"></div>

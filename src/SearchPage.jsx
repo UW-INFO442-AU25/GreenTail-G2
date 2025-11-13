@@ -4,7 +4,7 @@ import { useQuiz } from './QuizContext';
 import { useAuth } from './AuthContext';
 import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
-import { getMatchLevelStyle, findBestMatches } from './utils/matchingAlgorithm';
+import { getMatchLevelStyle, findBestMatches, getProductMatchLevel, calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
 import StoreMapModal from './components/StoreMapModal';
 import { useTouchHandlers } from './hooks/useInteractionMode';
 
@@ -215,6 +215,19 @@ function SearchPage() {
       );
     }
 
+    // Ensure all products have matchLevel based on quality score
+    // This ensures consistency with ComparePage scores
+    products = products.map(product => {
+      if (!product.matchLevel) {
+        product.matchLevel = getProductMatchLevel(product);
+      }
+      // Also ensure matchScore is set for sorting
+      if (product.matchScore === undefined) {
+        product.matchScore = calculateProductQualityScore(product);
+      }
+      return product;
+    });
+
     // Sort products based on selected sort option
     switch (sortBy) {
       case 'lowest':
@@ -235,18 +248,11 @@ function SearchPage() {
         break;
       case 'best':
       default:
-        // Sort by match level first, then by match score within the same level
+        // Sort by score (highest first) - products with higher scores appear at the top
         products.sort((a, b) => {
-          const levelOrder = { 'best': 0, 'great': 1, 'good': 2, 'eco-friendly': 3, 'budget': 4 };
-          const aLevel = levelOrder[a.matchLevel] || 5;
-          const bLevel = levelOrder[b.matchLevel] || 5;
-          
-          if (aLevel !== bLevel) {
-            return aLevel - bLevel;
-          }
-          
-          // If same level, sort by match score (higher score first)
-          return (b.matchScore || 0) - (a.matchScore || 0);
+          const scoreA = a.matchScore || calculateProductQualityScore(a);
+          const scoreB = b.matchScore || calculateProductQualityScore(b);
+          return scoreB - scoreA; // Higher score first
         });
         break;
     }
@@ -311,14 +317,14 @@ function SearchPage() {
       updated = [...savedProducts, productToSave];
       localStorage.setItem('savedProducts', JSON.stringify(updated));
       if (user) {
-        showSuccess('Saved to your profile');
+        showSuccess('Saved to your profile', 1500); // Faster toast - 1.5 seconds
       } else {
-        showSuccess('Saved locally. Sign in to sync across devices');
+        showSuccess('Saved locally. Sign in to sync across devices', 1500); // Faster toast - 1.5 seconds
       }
     } else {
       updated = savedProducts.filter(p => p.id !== product.id);
       localStorage.setItem('savedProducts', JSON.stringify(updated));
-      showSuccess('Removed from saved');
+      showSuccess('Removed from saved', 1500); // Faster toast - 1.5 seconds
     }
     setSavedForCompare(updated);
     // Re-open compare prompt on any heart click if there are at least 2 saved items
@@ -330,13 +336,64 @@ function SearchPage() {
     return savedProducts.find(p => p.id === productId);
   };
 
+  // Generate Google search URL for product
+  const getGoogleSearchUrl = (product) => {
+    const searchQuery = `${product.brand} ${product.name} ${product.preferredChannel}`;
+    const encodedQuery = encodeURIComponent(searchQuery);
+    return `https://www.google.com/search?q=${encodedQuery}`;
+  };
+
   // Compare now action - send last two saved items to compare page
-  const handleCompareNow = () => {
-    const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-    if (saved.length < 2) return;
-    const lastTwo = saved.slice(-2).map(p => p.id);
-    localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
-    navigate('/compare');
+  const handleCompareNow = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    try {
+      const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+      console.log('handleCompareNow: saved products:', saved);
+      
+      if (!saved || saved.length < 2) {
+        console.log('handleCompareNow: Not enough saved items', saved?.length);
+        alert('Please save at least 2 products to compare');
+        return false;
+      }
+      
+      const lastTwo = saved.slice(-2).map(p => {
+        // Handle both object format and ID format
+        return typeof p === 'object' && p.id ? p.id : p;
+      });
+      
+      console.log('handleCompareNow: last two IDs:', lastTwo);
+      
+      if (lastTwo.length < 2) {
+        console.error('handleCompareNow: Failed to extract 2 product IDs');
+        alert('Error: Could not extract product IDs');
+        return false;
+      }
+      
+      localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
+      console.log('handleCompareNow: Saved to localStorage:', lastTwo);
+      
+      // Force navigation using window.location as primary method
+      const baseUrl = window.location.origin;
+      const basePath = import.meta.env.BASE_URL || '/';
+      const compareUrl = `${baseUrl}${basePath}compare`.replace(/\/+/g, '/');
+      console.log('handleCompareNow: Navigating to:', compareUrl);
+      
+      // Use window.location for reliable navigation
+      window.location.href = compareUrl;
+      
+      return false; // Prevent default link behavior
+    } catch (error) {
+      console.error('handleCompareNow: Error:', error);
+      // Fallback: use window.location
+      const baseUrl = window.location.origin;
+      const basePath = import.meta.env.BASE_URL || '/';
+      window.location.href = `${baseUrl}${basePath}compare`.replace(/\/+/g, '/');
+      return false;
+    }
   };
 
   // Keep local state in sync when user removes elsewhere (future-proof)
@@ -412,7 +469,7 @@ function SearchPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header */}
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
@@ -469,8 +526,8 @@ function SearchPage() {
       )}
 
       {/* Main Layout */}
-      <main className="pt-24 pb-20">
-        <div className="max-w-6xl mx-auto px-8">
+      <main className="pt-24 pb-20 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 overflow-x-hidden">
           {/* Sort & Tags */}
           {/* Optimization: Fade-in on page load */}
           <div 
@@ -657,171 +714,187 @@ function SearchPage() {
             </div>
                 </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Sidebar Filters */}
             {/* Optimization: Fade-in on page load */}
             <aside 
-              className="w-full lg:w-64 flex-shrink-0"
+              className="w-full lg:w-48 flex-shrink-0"
               ref={el => sectionsRef.current['filter-sidebar'] = el}
             >
               <div 
-                className={`bg-white rounded-xl p-6 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
+                className={`bg-white rounded-xl p-4 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
                   isVisible['filter-sidebar'] 
                     ? 'opacity-100 translate-x-0' 
                     : 'opacity-0 -translate-x-5'
                 }`}
                 style={{ transitionDelay: '500ms' }}
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter by</h3>
+                <h3 className="text-base font-semibold text-gray-900 mb-3">Filter by</h3>
                 
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">SPECIES</p>
-                  <label className="flex items-center gap-2 mb-2">
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-2">SPECIES</p>
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.species.includes('Dog')}
                       onChange={(e) => handleFilterChange('species', 'Dog', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Dog</span>
+                    <span className="text-xs">Dog</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       checked={filters.species.includes('Cat')}
                       onChange={(e) => handleFilterChange('species', 'Cat', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Cat</span>
+                    <span className="text-xs">Cat</span>
                   </label>
                 </div>
 
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">LIFE STAGE</p>
-                  <label className="flex items-center gap-2 mb-2">
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-2">LIFE STAGE</p>
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.lifeStage.includes('Puppy/Kitten')}
                       onChange={(e) => handleFilterChange('lifeStage', 'Puppy/Kitten', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Puppy/Kitten</span>
+                    <span className="text-xs">Puppy/Kitten</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.lifeStage.includes('Adult')}
                       onChange={(e) => handleFilterChange('lifeStage', 'Adult', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Adult</span>
+                    <span className="text-xs">Adult</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       checked={filters.lifeStage.includes('Senior')}
                       onChange={(e) => handleFilterChange('lifeStage', 'Senior', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Senior</span>
+                    <span className="text-xs">Senior</span>
                   </label>
               </div>
 
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">DIET STYLE</p>
-                  <label className="flex items-center gap-2 mb-2">
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-2">DIET STYLE</p>
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.dietStyle.includes('Kibble')}
                       onChange={(e) => handleFilterChange('dietStyle', 'Kibble', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Kibble</span>
+                    <span className="text-xs">Kibble</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.dietStyle.includes('Wet')}
                       onChange={(e) => handleFilterChange('dietStyle', 'Wet', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Wet/Canned</span>
+                    <span className="text-xs">Wet/Canned</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.dietStyle.includes('Freeze-dried')}
                       onChange={(e) => handleFilterChange('dietStyle', 'Freeze-dried', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Freeze-dried</span>
+                    <span className="text-xs">Freeze-dried</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       checked={filters.dietStyle.includes('Fresh')}
                       onChange={(e) => handleFilterChange('dietStyle', 'Fresh', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Fresh</span>
+                    <span className="text-xs">Fresh</span>
                   </label>
                 </div>
 
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">PROTEIN TYPE</p>
-                  <label className="flex items-center gap-2 mb-2">
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-2">PROTEIN TYPE</p>
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.proteinType.includes('Chicken')}
                       onChange={(e) => handleFilterChange('proteinType', 'Chicken', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Chicken</span>
+                    <span className="text-xs">Chicken</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.proteinType.includes('Fish')}
                       onChange={(e) => handleFilterChange('proteinType', 'Fish', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Salmon</span>
+                    <span className="text-xs">Salmon</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="checkbox" 
                       checked={filters.proteinType.includes('Turkey')}
                       onChange={(e) => handleFilterChange('proteinType', 'Turkey', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Turkey</span>
+                    <span className="text-xs">Turkey</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       checked={filters.proteinType.includes('Beef')}
                       onChange={(e) => handleFilterChange('proteinType', 'Beef', e.target.checked)}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">Beef</span>
+                    <span className="text-xs">Beef</span>
                   </label>
               </div>
 
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">PRICE RANGE</p>
-                  <label className="flex items-center gap-2 mb-2">
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-gray-700 mb-2">PRICE RANGE</p>
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="radio" 
                       name="price" 
                       checked={filters.priceRange === 'under20'}
                       onChange={() => handlePriceRangeChange('under20')}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">$ &lt; 20</span>
+                    <span className="text-xs">$ &lt; 20</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="radio" 
                       name="price" 
                       checked={filters.priceRange === '20-30'}
                       onChange={() => handlePriceRangeChange('20-30')}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">$20–30</span>
+                    <span className="text-xs">$20–30</span>
                   </label>
-                  <label className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="radio" 
                       name="price" 
                       checked={filters.priceRange === '30-40'}
                       onChange={() => handlePriceRangeChange('30-40')}
+                      className="w-4 h-4"
                     />
-                    <span className="text-sm">$30–40</span>
+                    <span className="text-xs">$30–40</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input 
@@ -829,8 +902,9 @@ function SearchPage() {
                       name="price" 
                       checked={filters.priceRange === 'over40'}
                       onChange={() => handlePriceRangeChange('over40')}
+                      className="w-4 h-4"
                     />
-                      <span className="text-sm">$ &gt; 40</span>
+                      <span className="text-xs">$ &gt; 40</span>
                   </label>
                 </div>
 
@@ -840,7 +914,7 @@ function SearchPage() {
                     onClick={() => {/* Apply filters logic */}}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => {/* Apply filters logic */})}
-                    className="flex-1 bg-green-800 text-white py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
+                    className="flex-1 bg-green-800 text-white py-1.5 px-3 rounded-lg text-xs font-medium transition-all duration-300 ease min-h-[32px]"
                     style={{
                       transform: 'translateY(0)',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -863,7 +937,7 @@ function SearchPage() {
                     onClick={clearFilters}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
+                    className="flex-1 bg-gray-200 text-gray-700 py-1.5 px-3 rounded-lg text-xs font-medium transition-all duration-300 ease min-h-[32px]"
                     style={{
                       transform: 'translateY(0)',
                       transition: 'transform 0.3s ease, background-color 0.3s ease',
@@ -892,7 +966,7 @@ function SearchPage() {
 
             {/* Product Results */}
             {/* Optimization: Search input fades in on page load */}
-            <section className="flex-1 min-h-0">
+            <section className="flex-1 min-h-0 overflow-x-hidden">
               <div 
                 className="mb-6"
                 ref={el => sectionsRef.current['search-input'] = el}
@@ -911,147 +985,169 @@ function SearchPage() {
                 />
               </div>
               
-              <div className="flex flex-wrap gap-2 mb-6">
-                <button 
-                  onClick={() => handleTagFilter('premium')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('premium'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.premium 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Premium
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('packaging')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('packaging'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.packaging 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Packaging
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('certifications')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('certifications'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.certifications 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Certifications
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('grainFree')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('grainFree'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.grainFree 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Grain Free
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('highProtein')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('highProtein'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.highProtein 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  High Protein
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('organic')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('organic'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.organic 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Organic
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('sustainable')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('sustainable'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.sustainable 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Sustainable
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('hypoallergenic')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('hypoallergenic'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.hypoallergenic 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Hypoallergenic
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('locallySourced')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('locallySourced'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.locallySourced 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Locally Sourced
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('humanGrade')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('humanGrade'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.humanGrade 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Human Grade
-                </button>
-                <button 
-                  onClick={() => handleTagFilter('subscription')}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('subscription'))}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 min-h-[44px] ${
-                    filters.subscription 
-                      ? 'bg-green-100 text-green-800 border border-green-300' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Subscription
-                </button>
+              {/* Keyword filter buttons - horizontal scrollable (only this section scrolls) */}
+              <div 
+                className="mb-6 w-full overflow-x-auto scrollbar-hide keyword-scroll-container" 
+                style={{ 
+                  scrollbarWidth: 'none', 
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                  overflowY: 'hidden',
+                  maxWidth: '100%',
+                  position: 'relative'
+                }}
+              >
+                <div className="inline-flex gap-2 pb-2" style={{ width: 'max-content', display: 'inline-flex' }}>
+                  <button 
+                    onClick={() => handleTagFilter('premium')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('premium'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.premium 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Premium
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('packaging')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('packaging'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.packaging 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Packaging
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('certifications')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('certifications'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.certifications 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Certifications
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('grainFree')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('grainFree'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.grainFree 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Grain Free
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('highProtein')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('highProtein'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.highProtein 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    High Protein
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('organic')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('organic'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.organic 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Organic
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('sustainable')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('sustainable'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.sustainable 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Sustainable
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('hypoallergenic')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('hypoallergenic'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.hypoallergenic 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Hypoallergenic
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('locallySourced')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('locallySourced'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.locallySourced 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Locally Sourced
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('humanGrade')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('humanGrade'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.humanGrade 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Human Grade
+                  </button>
+                  <button 
+                    onClick={() => handleTagFilter('subscription')}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => handleTagFilter('subscription'))}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
+                      filters.subscription 
+                        ? 'bg-green-100 text-green-800 border border-green-300' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Subscription
+                  </button>
+                </div>
               </div>
               
               {/* Product Grid */}
               {/* Optimization: Staggered fade-in on scroll for product cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* Responsive grid: adaptive columns based on available space, 1-3 columns depending on screen size */}
+              <div className="product-grid-adaptive gap-4">
                 {filteredProducts.map((product, index) => {
                   const matchStyle = getMatchLevelStyle(product.matchLevel);
                   const productKey = `product-${product.id}`;
+                  const productScore = product.matchScore || calculateProductQualityScore(product);
+                  const rating5 = convertTo5PointRating(productScore);
+                  // Determine color based on rating
+                  const ratingColor = productScore >= 80 ? 'bg-green-800 text-white' : 
+                                     productScore >= 60 ? 'bg-blue-600 text-white' : 
+                                     productScore >= 55 ? 'bg-yellow-600 text-white' : 
+                                     'bg-gray-600 text-white';
+                  
                   return (
                     <div 
                       key={product.id} 
@@ -1074,10 +1170,30 @@ function SearchPage() {
                       }}
                     >
                       <div className="flex justify-between items-start mb-4">
-                        <span className={`${matchStyle.bgColor} ${matchStyle.textColor} px-3 py-1 rounded text-sm font-semibold`}>
-                          {matchStyle.label}
+                        <span className={`${ratingColor} px-3 py-1 rounded text-sm font-semibold`}>
+                          {rating5}/5.0
                         </span>
-                        <span className="text-xl font-semibold text-gray-900">${product.price}</span>
+                        {/* Favorite button - positioned at top right */}
+                        <button 
+                          onClick={(e) => { e.preventDefault(); handleSaveProduct(product); }}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={(e) => {
+                            e.preventDefault();
+                            handleTouchEnd(e, () => handleSaveProduct(product));
+                          }}
+                          className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center`}
+                          title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
+                        >
+                          {isProductSaved(product.id) ? (
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                          ) : (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                          )}
+                        </button>
                       </div>
                       {/* Product image with floating effect */}
                       <div className="relative inline-block w-full mb-4">
@@ -1112,73 +1228,98 @@ function SearchPage() {
                           </span>
                         ))}
                       </div>
-                      <p className="text-sm text-gray-600 mb-4">$/1000 kcal: ${product.pricePer1000kcal}</p>
-                      <div className="flex justify-between items-center mt-auto">
-                        {/* Buy button with hover effect */}
-                        <a 
-                          href="#" 
-                          onTouchStart={handleTouchStart}
-                          onTouchEnd={(e) => handleTouchEnd(e)}
-                          className="bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px] flex items-center"
-                          style={{
-                            transform: 'translateY(0)',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                            transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-                            e.currentTarget.style.backgroundColor = '#065f46'; // green-700
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                            e.currentTarget.style.backgroundColor = '#166534'; // green-800
-                          }}
-                        >
-                          Buy on {product.preferredChannel}
-                        </a>
-                        <div className="flex items-center gap-2">
-                          <button 
-                            onClick={() => {
-                              setSelectedProductForMap(product.name);
-                              setShowMapModal(true);
-                            }}
-                            onTouchStart={handleTouchStart}
-                            onTouchEnd={(e) => handleTouchEnd(e, () => {
-                              setSelectedProductForMap(product.name);
-                              setShowMapModal(true);
-                            })}
-                            className="text-gray-600 hover:text-green-800 text-sm flex items-center gap-1 transition-colors duration-300 min-h-[44px]"
-                            title="Find stores with this product"
-                          >
-                            📍 Find Nearby
-                          </button>
-                          <button 
+                      <p className="text-sm text-gray-600 mb-4">
+                        <span className="font-semibold text-gray-900">${product.price}</span> • $/1000 kcal: <span className="font-semibold text-gray-900">${product.pricePer1000kcal}</span>
+                      </p>
+                      <div className="mt-auto space-y-3">
+                        {/* First row: Buy now and Compare buttons */}
+                        <div className="flex gap-2">
+                          {/* Buy now button */}
+                          <a 
+                            href={getGoogleSearchUrl(product)}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onTouchStart={handleTouchStart}
                             onTouchEnd={(e) => handleTouchEnd(e)}
-                            className="text-gray-600 hover:text-green-800 text-sm transition-colors duration-300 min-h-[44px]">Compare</button>
+                            className="flex-1 bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px] flex items-center justify-center"
+                            style={{
+                              transform: 'translateY(0)',
+                              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                              transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-2px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                              e.currentTarget.style.backgroundColor = '#065f46'; // green-700
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                              e.currentTarget.style.backgroundColor = '#166534'; // green-800
+                            }}
+                          >
+                            Buy now
+                          </a>
+                          {/* Compare button with liquid glass effect */}
                           <button 
-                            onClick={(e) => { e.preventDefault(); handleSaveProduct(product); }}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Compare button clicked, product:', product.id);
+                              // Save product ID to localStorage for ComparePage
+                              try {
+                                const selection = [product.id];
+                                localStorage.setItem('compareSelection', JSON.stringify(selection));
+                                console.log('Saved to localStorage:', selection);
+                                console.log('Navigating to /compare');
+                                navigate('/compare', { replace: false });
+                              } catch (error) {
+                                console.error('Error navigating to compare page:', error);
+                                // Fallback: use window.location
+                                window.location.href = '/compare';
+                              }
+                            }}
                             onTouchStart={handleTouchStart}
                             onTouchEnd={(e) => {
                               e.preventDefault();
-                              handleTouchEnd(e, () => handleSaveProduct(product));
+                              e.stopPropagation();
+                              handleTouchEnd(e, () => {
+                                console.log('Compare button touched, product:', product.id);
+                                try {
+                                  const selection = [product.id];
+                                  localStorage.setItem('compareSelection', JSON.stringify(selection));
+                                  console.log('Saved to localStorage:', selection);
+                                  console.log('Navigating to /compare');
+                                  navigate('/compare', { replace: false });
+                                } catch (error) {
+                                  console.error('Error navigating to compare page:', error);
+                                  // Fallback: use window.location
+                                  window.location.href = '/compare';
+                                }
+                              });
                             }}
-                            className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center`}
-                            title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
+                            className="flex-1 liquid-glass text-gray-800 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px]"
                           >
-                            {isProductSaved(product.id) ? (
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                              </svg>
-                            ) : (
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                              </svg>
-                            )}
+                            Compare
                           </button>
                         </div>
+                        {/* Second row: Find store nearby button */}
+                        <button 
+                          onClick={() => {
+                            setSelectedProductForMap(product.name);
+                            setShowMapModal(true);
+                          }}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={(e) => handleTouchEnd(e, () => {
+                            setSelectedProductForMap(product.name);
+                            setShowMapModal(true);
+                          })}
+                          className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-300 min-h-[44px] flex items-center justify-center gap-1"
+                          title="Find stores with this product"
+                        >
+                          📍 Find store nearby
+                        </button>
                       </div>
                     </div>
                   );
@@ -1204,15 +1345,46 @@ function SearchPage() {
         </div>
       </main>
 
-      {/* Compare suggestion bar */}
+      {/* Compare suggestion bar - Floating style */}
       {savedCount >= 2 && showComparePrompt && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white border border-green-200 shadow-xl rounded-full px-5 py-3 flex items-center gap-4">
-          <span className="text-sm text-gray-800">You saved {savedCount} items</span>
+        <div className="fixed bottom-6 left-1/2 z-40 liquid-glass shadow-2xl rounded-full px-4 py-2 flex items-center gap-3 backdrop-blur-xl" style={{ transform: 'translateX(-50%)' }}>
+          <span className="text-xs text-gray-800 font-medium whitespace-nowrap">You saved {savedCount} items</span>
           <button
-            onClick={handleCompareNow}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={(e) => handleTouchEnd(e, handleCompareNow)}
-            className="bg-green-800 text-white text-sm px-4 py-2 rounded-full hover:bg-green-700 transition-colors min-h-[44px]"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Compare latest 2 button clicked');
+              
+              // Save products to localStorage first
+              try {
+                const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+                console.log('Saved products:', saved);
+                
+                if (saved.length >= 2) {
+                  const lastTwo = saved.slice(-2).map(p => {
+                    return typeof p === 'object' && p.id ? p.id : p;
+                  });
+                  console.log('Last two IDs:', lastTwo);
+                  localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
+                  console.log('Saved to localStorage, now navigating...');
+                  
+                  // Use window.location for guaranteed navigation
+                  const basePath = import.meta.env.BASE_URL || '/';
+                  const comparePath = `${basePath}compare`.replace(/\/+/g, '/');
+                  console.log('Navigating to:', comparePath);
+                  window.location.href = comparePath;
+                } else {
+                  console.error('Not enough saved items');
+                  alert('Please save at least 2 products to compare');
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                // Fallback navigation
+                window.location.href = '/compare';
+              }
+            }}
+            className="bg-green-800 text-white text-xs px-3 py-1.5 rounded-full hover:bg-green-700 transition-all duration-300 min-h-[36px] shadow-lg hover:shadow-xl hover:scale-105 whitespace-nowrap cursor-pointer"
           >
             Compare latest 2
           </button>
@@ -1220,7 +1392,7 @@ function SearchPage() {
             onClick={() => setShowComparePrompt(false)}
             onTouchStart={handleTouchStart}
             onTouchEnd={(e) => handleTouchEnd(e, () => setShowComparePrompt(false))}
-            className="text-gray-500 text-xs hover:text-gray-700 min-h-[44px]"
+            className="text-gray-600 text-xs hover:text-gray-800 transition-colors min-h-[36px] font-medium whitespace-nowrap"
           >
             Dismiss
           </button>

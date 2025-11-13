@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getStoresByZipCode, getMapCenterByZipCode, isValidZipCode, getZipCodeDisplayName } from '../utils/storeLocator';
+import { getStoresByZipCode, getMapCenterByZipCode, isValidZipCode, getZipCodeDisplayName, getSupportedZipCodes } from '../utils/storeLocator';
 import { petFoodDatabase } from '../data/petFoodDatabase';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -24,6 +24,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   const [zipCodeError, setZipCodeError] = useState('');
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [selectedPhone, setSelectedPhone] = useState(null);
+  const [showZipCodeInfo, setShowZipCodeInfo] = useState(false);
 
   useEffect(() => {
     const storeData = getStoresByZipCode(zipCode);
@@ -128,7 +129,41 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
           <div className="md:w-1/3 w-full border-b md:border-b-0 md:border-r overflow-y-auto">
             <div className="p-4">
               <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <label htmlFor="zipcode-input" className="text-sm font-medium text-gray-700">ZIP Code</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowZipCodeInfo(!showZipCodeInfo)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => handleTouchEnd(e, () => setShowZipCodeInfo(!showZipCodeInfo))}
+                    className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors min-w-[20px] min-h-[20px]"
+                    title="Supported ZIP codes"
+                    aria-label="Show supported ZIP codes"
+                  >
+                    <svg className="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+                {showZipCodeInfo && (
+                  <div 
+                    className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs max-h-48 overflow-y-auto"
+                    style={{
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#93c5fd #dbeafe',
+                      WebkitOverflowScrolling: 'touch'
+                    }}
+                  >
+                    <p className="font-semibold text-blue-900 mb-2 sticky top-0 bg-blue-50 pb-1 z-10">Supported ZIP Codes:</p>
+                    <div className="space-y-1 text-blue-800">
+                      {getSupportedZipCodes().map((zip) => (
+                        <div key={zip.code} className="py-0.5">• {zip.code} - {zip.name}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <input
+                  id="zipcode-input"
                   type="text"
                   placeholder="Enter ZIP Code (e.g., 98105)"
                   value={zipCode}
@@ -159,7 +194,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                     key={store.id}
                     className={`p-4 border rounded-lg cursor-pointer transition-all ${
                       selectedStore?.id === store.id
-                        ? 'border-green-800 bg-green-50'
+                        ? 'border-green-600 bg-green-100'
                         : 'border-gray-200 hover:border-green-300 hover:bg-green-25'
                     }`}
                     onClick={() => handleStoreClick(store)}

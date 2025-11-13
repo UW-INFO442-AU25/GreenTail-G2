@@ -22,6 +22,10 @@ import ShopsNearYouPage from './src/ShopsNearYouPage';
 import TestPage from './src/TestPage';
 import PetFoodLabelsGuide from './src/PetFoodLabelsGuide';
 import OrganicPetFoodGuide from './src/OrganicPetFoodGuide';
+import CookieConsent from './src/components/CookieConsent';
+import CookiePolicyPage from './src/CookiePolicyPage';
+import PrivacyPolicyPage from './src/PrivacyPolicyPage';
+import TermsOfServicePage from './src/TermsOfServicePage';
 
 function App() {
   return (
@@ -49,7 +53,11 @@ function App() {
               <Route path="/test" element={<TestPage />} />
               <Route path="/pet-food-labels-guide" element={<PetFoodLabelsGuide />} />
               <Route path="/organic-pet-food-guide" element={<OrganicPetFoodGuide />} />
+              <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             </Routes>
+            <CookieConsent />
           </Router>
         </QuizProvider>
       </ToastProvider>

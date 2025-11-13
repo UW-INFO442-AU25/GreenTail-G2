@@ -32,12 +32,16 @@ function HomePage() {
   // Control expand/collapse for additional "Why Choose GreenTail" cards
   // Optimization reason: Default show 2 core cards only, rest collapsed to ensure max 2 themes per screen
   const [showMoreTips, setShowMoreTips] = useState(false);
+  const [moreTipsExpanded, setMoreTipsExpanded] = useState(false);
+  const [transparencyExpanded, setTransparencyExpanded] = useState(false);
   
   // Fullscreen video state - controls the video intro sequence
-  const [isFullscreenVideo, setIsFullscreenVideo] = useState(true);
-  const [videoEnded, setVideoEnded] = useState(false);
+  // Check if user has already seen the video
+  const hasSeenVideo = localStorage.getItem('hasSeenIntroVideo') === 'true';
+  const [isFullscreenVideo, setIsFullscreenVideo] = useState(!hasSeenVideo);
+  const [videoEnded, setVideoEnded] = useState(hasSeenVideo);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(hasSeenVideo);
   const fullscreenVideoRef = useRef(null);
   
   // Contact modal state
@@ -98,6 +102,9 @@ function HomePage() {
 
   // Handle video skip - immediate transition without animation
   const handleSkipVideo = () => {
+    // Mark video as seen in localStorage
+    localStorage.setItem('hasSeenIntroVideo', 'true');
+    
     setVideoEnded(true);
     setIsFullscreenVideo(false);
     setIsTransitioning(false);
@@ -126,6 +133,9 @@ function HomePage() {
 
   // Handle video end and transition to normal view
   const handleVideoEnd = () => {
+    // Mark video as seen in localStorage
+    localStorage.setItem('hasSeenIntroVideo', 'true');
+    
     setVideoEnded(true);
     
     // Start the transition: zoom out and fade (very fast transition)
@@ -329,7 +339,7 @@ function HomePage() {
 
       {/* Hero Section */}
       {/* Optimization: Initial load animations - hero image, title, description, buttons with staggered timing */}
-      <section className="bg-gradient-to-br from-blue-50 via-blue-100 to-green-50 pt-32 pb-20 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-blue-50 via-blue-100 to-green-50 pt-24 pb-20 relative overflow-hidden">
         {/* Decorative background elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-20 left-20 w-64 h-64 bg-green-200 rounded-full blur-3xl"></div>
@@ -468,7 +478,7 @@ function HomePage() {
           {/* Hero features: Staggered fade-in */}
           {/* Optimization: Features appear sequentially after hero content */}
           <div 
-            className="grid grid-cols-2 gap-4 mt-8"
+            className="grid grid-cols-2 gap-x-8 gap-y-5 mt-8"
             ref={el => sectionsRef.current['hero-features'] = el}
           >
             {[
@@ -480,19 +490,15 @@ function HomePage() {
               <div
                 key={feature.key}
                 ref={el => sectionsRef.current[feature.key] = el}
-                className={`transition-all duration-500 ease-out ${
+                className={`flex items-center gap-2 py-3 transition-all duration-500 ease-out ${
                   isVisible[feature.key] 
                     ? 'opacity-100 translate-y-0' 
                     : 'opacity-0 translate-y-5'
                 }`}
                 style={{ transitionDelay: isVisible[feature.key] ? `${feature.delay}ms` : '0ms' }}
               >
-                <div className="flex items-center gap-3 p-4 bg-white/70 rounded-2xl border border-green-200/50 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                    <img src={`${import.meta.env.BASE_URL}icons/${feature.icon}`} alt={feature.text} className="w-3 h-3" />
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium">{feature.text}</span>
-                </div>
+                <img src={`${import.meta.env.BASE_URL}icons/${feature.icon}`} alt={feature.text} className="w-4 h-4" />
+                <span className="text-sm text-gray-700 font-medium">{feature.text}</span>
               </div>
             ))}
           </div>
@@ -538,7 +544,7 @@ function HomePage() {
                 }}
               >
                 <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors duration-300">
-                  <img src={`${import.meta.env.BASE_URL}icons/${step.icon}`} alt={step.title} className="w-8 h-8" />
+                  <img src={`${import.meta.env.BASE_URL}icons/${step.icon}`} alt={step.title} className="w-8 h-8 object-contain flex-shrink-0" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">{step.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{step.text}</p>
@@ -645,30 +651,70 @@ function HomePage() {
           </div>
 
           {/* Secondary information: Collapsed display, users can actively expand for more tips */}
-          <div className="max-w-2xl mx-auto">
-            <Collapsible 
-              title="More helpful tips" 
-              defaultExpanded={false}
-              ariaLabel="Expand to view more GreenTail usage tips"
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-start">
+              <button
+                onClick={() => setMoreTipsExpanded(!moreTipsExpanded)}
+                className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors min-h-[36px]"
+                aria-expanded={moreTipsExpanded}
+                aria-label={moreTipsExpanded ? 'Collapse more helpful tips' : 'Expand to view more GreenTail usage tips'}
+              >
+                <span className="font-medium">More helpful tips</span>
+                <svg
+                  className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
+                    moreTipsExpanded ? 'transform rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+            <div
+              className={`overflow-hidden transition-all duration-500 ${
+                moreTipsExpanded ? 'max-h-screen opacity-100 mt-4' : 'max-h-0 opacity-0'
+              }`}
+              aria-hidden={!moreTipsExpanded}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <img src={`${import.meta.env.BASE_URL}icons/check-icon.svg`} alt="Checklist icon" className="w-5 h-5" />
+                {moreTipsExpanded && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {[
+                      { key: 'tip-1', icon: 'check-icon.svg', title: 'Read the label', text: 'Ingredients order matters; look for clear sourcing and certifications.', delay: 0 },
+                      { key: 'tip-2', icon: 'location-icon.svg', title: 'Budget & eco swaps', text: 'Try a best-match topper first; pick recyclable or compostable bags.', delay: 150 },
+                    ].map((tip) => (
+                      <div
+                        key={tip.key}
+                        className="text-center p-6 bg-white rounded-xl shadow-lg relative overflow-hidden group transition-all duration-300 ease"
+                        style={{
+                          transform: moreTipsExpanded ? 'translateY(0)' : 'translateY(20px)',
+                          opacity: moreTipsExpanded ? 1 : 0,
+                          transition: `transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease`,
+                          transitionDelay: moreTipsExpanded ? `${tip.delay}ms` : '0ms',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-8px)';
+                          e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                        }}
+                      >
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-800 to-green-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" aria-hidden="true"></div>
+                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <img src={`${import.meta.env.BASE_URL}icons/${tip.icon}`} alt={`${tip.title} icon`} className="w-6 h-6" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-green-800 mb-3">{tip.title}</h4>
+                        <p className="text-gray-600 text-sm leading-relaxed">{tip.text}</p>
+                      </div>
+                    ))}
                   </div>
-                  <h4 className="text-base font-semibold text-green-800 mb-2">Read the label</h4>
-                  <p className="text-gray-600 text-sm">Ingredients order matters; look for clear sourcing and certifications.</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <img src={`${import.meta.env.BASE_URL}icons/location-icon.svg`} alt="Location icon" className="w-5 h-5" />
-                  </div>
-                  <h4 className="text-base font-semibold text-green-800 mb-2">Budget & eco swaps</h4>
-                  <p className="text-gray-600 text-sm">Try a best-match topper first; pick recyclable or compostable bags.</p>
-                </div>
+                )}
               </div>
-            </Collapsible>
-          </div>
+            </div>
         </div>
       </section>
 
@@ -719,32 +765,70 @@ function HomePage() {
 
           {/* Detailed trust information: Collapsed display */}
           <div className="max-w-3xl mx-auto mb-8">
-            <Collapsible 
-              title="Learn about our transparency commitment" 
-              defaultExpanded={false}
-              ariaLabel="Expand to view detailed information about GreenTail's transparency commitment"
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={() => setTransparencyExpanded(!transparencyExpanded)}
+                className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors min-h-[36px]"
+                aria-expanded={transparencyExpanded}
+                aria-label={transparencyExpanded ? 'Collapse transparency commitment' : 'Expand to view detailed information about GreenTail\'s transparency commitment'}
+              >
+                <span className="font-medium">Learn about our transparency commitment</span>
+                <svg
+                  className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
+                    transparencyExpanded ? 'transform rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+            <div
+              className={`overflow-hidden transition-all duration-500 ${
+                transparencyExpanded ? 'max-h-screen opacity-100 mt-4' : 'max-h-0 opacity-0'
+              }`}
+              aria-hidden={!transparencyExpanded}
             >
-              <div className="space-y-4 mt-4">
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1" aria-hidden="true">
-                    <img src={`${import.meta.env.BASE_URL}icons/yes-icon.svg`} alt="" className="w-3 h-3 filter brightness-0 invert" />
+              {transparencyExpanded && (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    style={{
+                      transform: transparencyExpanded ? 'translateY(0)' : 'translateY(20px)',
+                      opacity: transparencyExpanded ? 1 : 0,
+                      transition: `transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease`,
+                      transitionDelay: transparencyExpanded ? '0ms' : '0ms',
+                    }}
+                  >
+                    <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1" aria-hidden="true">
+                      <img src={`${import.meta.env.BASE_URL}icons/yes-icon.svg`} alt="" className="w-3 h-3 filter brightness-0 invert" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-2">Receipts included</h4>
+                      <p className="text-gray-600 leading-relaxed">Every product page explains why it appears, full transparency.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-1">Receipts included</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">Every product page explains why it appears, full transparency.</p>
+                  <div className="flex items-start gap-4 p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    style={{
+                      transform: transparencyExpanded ? 'translateY(0)' : 'translateY(20px)',
+                      opacity: transparencyExpanded ? 1 : 0,
+                      transition: `transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease`,
+                      transitionDelay: transparencyExpanded ? '150ms' : '0ms',
+                    }}
+                  >
+                    <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1" aria-hidden="true">
+                      <img src={`${import.meta.env.BASE_URL}icons/yes-icon.svg`} alt="" className="w-3 h-3 filter brightness-0 invert" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-2">Independent</h4>
+                      <p className="text-gray-600 leading-relaxed">Scores exist whether or not there's a buy link.</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-5 h-5 bg-green-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1" aria-hidden="true">
-                    <img src={`${import.meta.env.BASE_URL}icons/yes-icon.svg`} alt="" className="w-3 h-3 filter brightness-0 invert" />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-1">Independent</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">Scores exist whether or not there's a buy link.</p>
-                  </div>
-                </div>
-              </div>
-            </Collapsible>
+              )}
+            </div>
           </div>
 
           <div className="text-center">

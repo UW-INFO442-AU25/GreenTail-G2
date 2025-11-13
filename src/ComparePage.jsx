@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { useAuth } from './AuthContext';
 import { useTouchHandlers } from './hooks/useInteractionMode';
+import { calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
 
 /**
  * ComparePage - Redesigned per comparison_page_critique.md
@@ -23,20 +24,45 @@ const ComparePage = () => {
   const [selectedProducts, setSelectedProducts] = useState({
     first: null,
     second: null,
-    third: null
+    third: null,
+    fourth: null,
+    fifth: null
   });
   const [savedItems, setSavedItems] = useState([]);
   const [showScoreInfo, setShowScoreInfo] = useState(false);
+  const [isComparisonTableExpanded, setIsComparisonTableExpanded] = useState(false);
+  const [showSavedItemsPreview, setShowSavedItemsPreview] = useState(false);
   
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { handleTouchStart, handleTouchEnd } = useTouchHandlers();
+  
+  // Maximum number of products based on login status
+  const maxProducts = user ? 5 : 3;
+  
+  // Clear products beyond limit when login status changes
+  useEffect(() => {
+    if (!user && (selectedProducts.fourth || selectedProducts.fifth)) {
+      setSelectedProducts(prev => ({
+        ...prev,
+        fourth: null,
+        fifth: null
+      }));
+    }
+  }, [user, selectedProducts.fourth, selectedProducts.fifth]);
   
   // Animation state
   const [isVisible, setIsVisible] = useState({});
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+
+  // Generate Google search URL for product
+  const getGoogleSearchUrl = (product) => {
+    const searchQuery = `${product.brand} ${product.name} ${product.preferredChannel}`;
+    const encodedQuery = encodeURIComponent(searchQuery);
+    return `https://www.google.com/search?q=${encodedQuery}`;
+  };
 
   const handleLogout = () => {
     logout();
@@ -61,23 +87,88 @@ const ComparePage = () => {
   }, []);
 
   // If navigated from Search with preselection, auto-apply and show results
+  // Otherwise, if there are saved items, auto-apply them
   useEffect(() => {
     try {
       const selection = JSON.parse(localStorage.getItem('compareSelection') || 'null');
-      if (selection && Array.isArray(selection) && selection.length >= 2) {
+      if (selection && Array.isArray(selection) && selection.length >= 1) {
+        // Priority 1: Use compareSelection if available (from Search page navigation)
+        // If only one product is selected, set it as first
         const first = petFoodDatabase.find(p => p.id === selection[0]) || null;
-        const second = petFoodDatabase.find(p => p.id === selection[1]) || null;
+        const second = selection[1] ? petFoodDatabase.find(p => p.id === selection[1]) : null;
         const third = selection[2] ? petFoodDatabase.find(p => p.id === selection[2]) : null;
-        setSelectedProducts({ first, second, third });
+        const fourth = maxProducts >= 4 && selection[3] ? petFoodDatabase.find(p => p.id === selection[3]) : null;
+        const fifth = maxProducts >= 5 && selection[4] ? petFoodDatabase.find(p => p.id === selection[4]) : null;
+        setSelectedProducts({ first, second, third, fourth, fifth });
         // Clear once consumed
         localStorage.removeItem('compareSelection');
+        
+        // Scroll to product selection area
+        setTimeout(() => {
+          const selectArea = document.getElementById('product-selection-area');
+          if (selectArea) {
+            selectArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      } else {
+        // Priority 2: Auto-load saved items if available (at least 2 items)
+        const saved = localStorage.getItem('savedProducts');
+        if (saved) {
+          try {
+            const parsedSaved = JSON.parse(saved);
+            if (parsedSaved && Array.isArray(parsedSaved) && parsedSaved.length >= 2) {
+              // Convert saved items to product objects from database
+              // Saved items are full product objects, but we should match them with database for consistency
+              const firstProduct = parsedSaved[0];
+              const secondProduct = parsedSaved[1];
+              const thirdProduct = parsedSaved[2] || null;
+              
+              // Find products in database by ID (handle both string and number IDs)
+              const getProductFromDatabase = (savedProduct) => {
+                try {
+                  if (!savedProduct) return null;
+                  const productId = typeof savedProduct === 'object' && savedProduct.id 
+                    ? (typeof savedProduct.id === 'string' ? parseInt(savedProduct.id) : savedProduct.id)
+                    : (typeof savedProduct === 'number' ? savedProduct : null);
+                  if (!productId) return null;
+                  return petFoodDatabase.find(p => p.id === productId) || null;
+                } catch (err) {
+                  console.error('Error getting product from database:', err, savedProduct);
+                  return null;
+                }
+              };
+              
+              const first = getProductFromDatabase(firstProduct);
+              const second = getProductFromDatabase(secondProduct);
+              const third = thirdProduct ? getProductFromDatabase(thirdProduct) : null;
+              const fourth = maxProducts >= 4 && parsedSaved[3] ? getProductFromDatabase(parsedSaved[3]) : null;
+              const fifth = maxProducts >= 5 && parsedSaved[4] ? getProductFromDatabase(parsedSaved[4]) : null;
+              
+              if (first && second) {
+                console.log('ComparePage: Auto-loading saved items:', { first, second, third, fourth, fifth });
+                setSelectedProducts({ first, second, third, fourth, fifth });
+              } else {
+                console.log('ComparePage: Could not load saved items - first:', first, 'second:', second);
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing saved products for auto-load:', error);
+          }
+        }
       }
     } catch (e) {
-      // ignore
+      console.error('Error in compare selection effect:', e);
+      // Don't let errors prevent page from loading
     }
   }, []);
 
   const handleProductSelect = (position, productId) => {
+    // Check if position is allowed based on login status
+    const positionIndex = ['first', 'second', 'third', 'fourth', 'fifth'].indexOf(position);
+    if (positionIndex >= maxProducts) {
+      return; // Don't allow selection beyond max
+    }
+
     if (productId === '') {
       setSelectedProducts(prev => ({
         ...prev,
@@ -99,9 +190,11 @@ const ComparePage = () => {
     console.log('ComparePage: handleUseSavedItems called, savedItems:', savedItems);
     if (savedItems.length >= 2) {
       const newSelection = {
-        first: savedItems[0],
-        second: savedItems[1],
-        third: savedItems[2] || null
+        first: savedItems[0] || null,
+        second: savedItems[1] || null,
+        third: savedItems[2] || null,
+        fourth: maxProducts >= 4 ? (savedItems[3] || null) : null,
+        fifth: maxProducts >= 5 ? (savedItems[4] || null) : null
       };
       console.log('ComparePage: Setting selected products:', newSelection);
       setSelectedProducts(newSelection);
@@ -115,7 +208,9 @@ const ComparePage = () => {
     setSelectedProducts({
       first: null,
       second: null,
-      third: null
+      third: null,
+      fourth: null,
+      fifth: null
     });
     console.log('ComparePage: All products removed');
     
@@ -130,38 +225,147 @@ const ComparePage = () => {
   };
 
   const getProductScore = (product) => {
-    let score = 0;
-    if (product.isOrganic) score += 20;
-    if (product.isGrainFree) score += 15;
-    if (product.ecoFeatures?.recyclablePackaging) score += 10;
-    if (product.ecoFeatures?.lowFootprintProtein) score += 15;
-    if (product.price < 30) score += 10;
-    if (product.pricePer1000kcal < 3) score += 10;
-    if (product.tags?.includes('premium')) score += 10;
-    if (product.tags?.includes('sustainable')) score += 10;
-    return Math.min(score, 100);
+    // Use the unified quality score calculation
+    return calculateProductQualityScore(product);
   };
+
+  // Generate recommendation reason text (defined before useMemo)
+  const generateRecommendationReason = (product, first, second, qualityScore, avgQualityScore) => {
+    const reasons = [];
+    
+    if (qualityScore >= 80) {
+      reasons.push('High quality');
+    }
+    
+    const priceDiff = Math.abs(product.price - (first.price + second.price) / 2) / ((first.price + second.price) / 2);
+    if (priceDiff <= 0.2) {
+      reasons.push('Similar price');
+    }
+    
+    if (first.isOrganic && second.isOrganic && product.isOrganic) {
+      reasons.push('Organic');
+    }
+    
+    if (first.isGrainFree && second.isGrainFree && product.isGrainFree) {
+      reasons.push('Grain-free');
+    }
+    
+    if (product.ecoFeatures?.recyclablePackaging && 
+        first.ecoFeatures?.recyclablePackaging && 
+        second.ecoFeatures?.recyclablePackaging) {
+      reasons.push('Eco-friendly');
+    }
+    
+    return reasons.length > 0 ? reasons.join(', ') : 'Good match';
+  };
+
+  // Recommend third product based on first two selections
+  const getRecommendedThirdProducts = useMemo(() => {
+    if (!selectedProducts.first || !selectedProducts.second) {
+      return [];
+    }
+
+    const first = selectedProducts.first;
+    const second = selectedProducts.second;
+    const selectedIds = [first.id, second.id];
+
+    // Calculate average characteristics of first two products
+    const avgPrice = (first.price + second.price) / 2;
+    const avgPricePer1000kcal = (first.pricePer1000kcal + second.pricePer1000kcal) / 2;
+    const avgQualityScore = (calculateProductQualityScore(first) + calculateProductQualityScore(second)) / 2;
+
+    // Find common features
+    const commonTags = first.tags?.filter(tag => 
+      second.tags?.some(t => t.toLowerCase() === tag.toLowerCase())
+    ) || [];
+    const bothOrganic = first.isOrganic && second.isOrganic;
+    const bothGrainFree = first.isGrainFree && second.isGrainFree;
+
+    // Score and rank potential third products
+    const recommendations = petFoodDatabase
+      .filter(product => !selectedIds.includes(product.id))
+      .map(product => {
+        let score = 0;
+        const qualityScore = calculateProductQualityScore(product);
+
+        // Similar quality level (prefer products with similar quality)
+        const qualityDiff = Math.abs(qualityScore - avgQualityScore);
+        score += Math.max(0, 50 - qualityDiff); // Closer quality = higher score
+
+        // Similar price range (within 20% of average)
+        const priceDiff = Math.abs(product.price - avgPrice) / avgPrice;
+        if (priceDiff <= 0.2) score += 20;
+        else if (priceDiff <= 0.4) score += 10;
+
+        // Similar value (price per 1000kcal)
+        const valueDiff = Math.abs(product.pricePer1000kcal - avgPricePer1000kcal) / avgPricePer1000kcal;
+        if (valueDiff <= 0.2) score += 15;
+        else if (valueDiff <= 0.4) score += 7;
+
+        // Match common features
+        if (bothOrganic && product.isOrganic) score += 10;
+        if (bothGrainFree && product.isGrainFree) score += 10;
+        
+        // Bonus for matching common tags
+        const matchingTags = product.tags?.filter(tag => 
+          commonTags.some(ct => ct.toLowerCase() === tag.toLowerCase())
+        ) || [];
+        score += matchingTags.length * 3;
+
+        // Bonus for high quality products
+        if (qualityScore >= 80) score += 15;
+        else if (qualityScore >= 60) score += 8;
+
+        // Bonus for eco-friendly if both are eco-friendly
+        const bothEco = first.ecoFeatures && second.ecoFeatures;
+        if (bothEco && product.ecoFeatures) {
+          if (product.ecoFeatures.recyclablePackaging) score += 5;
+          if (product.ecoFeatures.lowFootprintProtein) score += 5;
+        }
+
+        return {
+          product,
+          score,
+          qualityScore,
+          reason: generateRecommendationReason(product, first, second, qualityScore, avgQualityScore)
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5); // Top 5 recommendations
+
+    return recommendations;
+  }, [selectedProducts.first, selectedProducts.second]);
 
   const getScoreBreakdown = (product) => {
     const breakdown = [];
+    const tags = product.tags || [];
+    const tagStrings = tags.map(t => t.toLowerCase());
+    
+    // Core quality factors
     if (product.isOrganic) breakdown.push({ factor: 'Organic Certified', points: 20, earned: true });
     if (product.isGrainFree) breakdown.push({ factor: 'Grain-Free Formula', points: 15, earned: true });
-    if (product.ecoFeatures?.recyclablePackaging) breakdown.push({ factor: 'Recyclable Packaging', points: 10, earned: true });
-    if (product.ecoFeatures?.lowFootprintProtein) breakdown.push({ factor: 'Low-Carbon Protein', points: 15, earned: true });
-    if (product.price < 30) breakdown.push({ factor: 'Budget-Friendly Price', points: 10, earned: true });
-    if (product.pricePer1000kcal < 3) breakdown.push({ factor: 'Good Value per Calorie', points: 10, earned: true });
-    if (product.tags?.includes('premium')) breakdown.push({ factor: 'Premium Quality', points: 10, earned: true });
-    if (product.tags?.includes('sustainable')) breakdown.push({ factor: 'Sustainable Practices', points: 10, earned: true });
+    if (product.ecoFeatures?.certified) breakdown.push({ factor: 'Eco Certification', points: 10, earned: true });
+    if (tagStrings.some(t => t.includes('certified organic'))) breakdown.push({ factor: 'Certified Organic Tag', points: 5, earned: true });
     
-    // Add factors that weren't earned
-    if (!product.isOrganic) breakdown.push({ factor: 'Organic Certified', points: 20, earned: false });
-    if (!product.isGrainFree) breakdown.push({ factor: 'Grain-Free Formula', points: 15, earned: false });
-    if (!product.ecoFeatures?.recyclablePackaging) breakdown.push({ factor: 'Recyclable Packaging', points: 10, earned: false });
-    if (!product.ecoFeatures?.lowFootprintProtein) breakdown.push({ factor: 'Low-Carbon Protein', points: 15, earned: false });
-    if (product.price >= 30) breakdown.push({ factor: 'Budget-Friendly Price', points: 10, earned: false });
-    if (product.pricePer1000kcal >= 3) breakdown.push({ factor: 'Good Value per Calorie', points: 10, earned: false });
-    if (!product.tags?.includes('premium')) breakdown.push({ factor: 'Premium Quality', points: 10, earned: false });
-    if (!product.tags?.includes('sustainable')) breakdown.push({ factor: 'Sustainable Practices', points: 10, earned: false });
+    // Eco-friendly features
+    if (product.ecoFeatures?.recyclablePackaging) breakdown.push({ factor: 'Recyclable Packaging', points: 10, earned: true });
+    if (product.ecoFeatures?.lowFootprintProtein) breakdown.push({ factor: 'Low-Carbon Protein', points: 12, earned: true });
+    if (product.ecoFeatures?.localProduction) breakdown.push({ factor: 'Local Production', points: 8, earned: true });
+    if (tagStrings.some(t => t.includes('sustainable'))) breakdown.push({ factor: 'Sustainable Practices', points: 8, earned: true });
+    
+    // Value factors
+    if (product.price <= 35) breakdown.push({ factor: 'Reasonable Price (≤$35)', points: 8, earned: true });
+    if (product.pricePer1000kcal <= 3.5) breakdown.push({ factor: 'Good Value per Calorie (≤$3.5)', points: 8, earned: true });
+    if (product.pricePer1000kcal <= 2.5) breakdown.push({ factor: 'Excellent Value (≤$2.5)', points: 4, earned: true });
+    
+    // Premium and quality indicators
+    if (tagStrings.some(t => t.includes('premium'))) breakdown.push({ factor: 'Premium Quality', points: 8, earned: true });
+    if (tagStrings.some(t => t.includes('high protein'))) breakdown.push({ factor: 'High Protein', points: 6, earned: true });
+    if (tagStrings.some(t => t.includes('human-grade'))) breakdown.push({ factor: 'Human-Grade', points: 6, earned: true });
+    
+    // Additional quality bonuses
+    if (tagStrings.some(t => t.includes('hypoallergenic'))) breakdown.push({ factor: 'Hypoallergenic', points: 5, earned: true });
+    if (tagStrings.some(t => t.includes('limited ingredient'))) breakdown.push({ factor: 'Limited Ingredient', points: 5, earned: true });
     
     return breakdown;
   };
@@ -174,7 +378,7 @@ const ComparePage = () => {
         <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">How We Calculate Scores</h3>
+              <h3 className="text-xl font-semibold text-gray-900">How We Calculate Ratings</h3>
               <button 
                 onClick={() => setShowScoreInfo(false)}
                 onTouchStart={handleTouchStart}
@@ -189,9 +393,9 @@ const ComparePage = () => {
             
             <div className="space-y-4">
               <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">Our Scoring System (Total: 100 points)</h4>
+                <h4 className="font-medium text-green-800 mb-2">Our Rating System (5.0 scale)</h4>
                 <p className="text-sm text-green-700">
-                  We evaluate products based on quality, sustainability, and value to help you make informed decisions.
+                  We evaluate products based on quality, sustainability, and value. Ratings are calculated from a 100-point scoring system and converted to a 5.0 scale for easy comparison.
                 </p>
               </div>
               
@@ -283,19 +487,19 @@ const ComparePage = () => {
               </div>
               
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h5 className="font-medium text-gray-900 mb-2">Score Ranges</h5>
+                <h5 className="font-medium text-gray-900 mb-2">Rating Ranges</h5>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-green-600 rounded"></div>
-                    <span><strong>80-100:</strong> Excellent choice</span>
+                    <span><strong>4.0-5.0:</strong> Excellent choice (80-100 points)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                    <span><strong>60-79:</strong> Good option</span>
+                    <span><strong>3.0-3.9:</strong> Good option (60-79 points)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 bg-red-500 rounded"></div>
-                    <span><strong>0-59:</strong> Consider alternatives</span>
+                    <span><strong>0-2.9:</strong> Consider alternatives (0-59 points)</span>
                   </div>
                 </div>
               </div>
@@ -394,8 +598,10 @@ const ComparePage = () => {
     const isOrganic1 = product1.isOrganic || product1.ecoFeatures?.certified;
     const isOrganic2 = product2.isOrganic || product2.ecoFeatures?.certified;
     
-    // Generate qualitative summary
-    const summary = `${product1.brand} ${product1.name} is a ${
+    // Generate qualitative summary with product names and contrast marker
+    const product1Name = `${product1.brand} ${product1.name}`;
+    const product2Name = `${product2.brand} ${product2.name}`;
+    const summaryText = `${product1Name} is a ${
       isPremium1 ? 'premium, protein-dense' : 'balanced'
     } formula ideal for ${
       product1.lifeStage?.[0] || 'adult'
@@ -403,7 +609,25 @@ const ComparePage = () => {
       isOrganic1 ? 'ingredient sourcing and organic certification' : 
       product1.ecoFeatures?.lowFootprintProtein ? 'sustainable protein sources' :
       'nutritional balance'
-    }. In contrast, ${product2.brand} ${product2.name} offers a ${
+    }. In contrast, ${product2Name} offers a ${
+      isPremium1 ? 'strong, balanced nutritional profile' : 'premium, high-quality'
+    } at a ${
+      isPremium1 ? 'more accessible' : 'higher'
+    } price point, making it a ${
+      isPremium1 ? 'versatile choice for a wide range' : 'premium option for discerning'
+    } of ${product2.lifeStage?.[0] || 'adult'} ${product2.petType?.[0] || 'pets'}.`;
+
+    const textBeforeContrast = `${product1Name} is a ${
+      isPremium1 ? 'premium, protein-dense' : 'balanced'
+    } formula ideal for ${
+      product1.lifeStage?.[0] || 'adult'
+    } ${product1.petType?.[0] || 'pets'} and owners prioritizing ${
+      isOrganic1 ? 'ingredient sourcing and organic certification' : 
+      product1.ecoFeatures?.lowFootprintProtein ? 'sustainable protein sources' :
+      'nutritional balance'
+    }.`;
+
+    const textAfterContrast = `${product2Name} offers a ${
       isPremium1 ? 'strong, balanced nutritional profile' : 'premium, high-quality'
     } at a ${
       isPremium1 ? 'more accessible' : 'higher'
@@ -476,7 +700,13 @@ const ComparePage = () => {
     };
 
     return {
-      summary,
+      summary: summaryText,
+      summaryData: {
+        product1Name,
+        product2Name,
+        textBeforeContrast,
+        textAfterContrast
+      },
       products: products.map((product, index) => ({
         product,
         position: index === 0 ? 'first' : index === 1 ? 'second' : 'third',
@@ -623,63 +853,60 @@ const ComparePage = () => {
 
   const renderProductCard = (product, index) => {
     const score = getProductScore(product);
+    const rating5 = convertTo5PointRating(score);
     const scoreColor = score >= 80 ? 'text-green-700' : score >= 60 ? 'text-yellow-600' : 'text-red-600';
     
     return (
       <div key={index} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
         {/* Product Header */}
         <div className="relative p-6 pb-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="relative inline-block">
-                {/* Floating shadow effect - soft glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-xl transform translate-y-2 scale-110 -z-10 rounded-lg"></div>
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-16 h-16 object-cover rounded-lg shadow-md transition-all duration-500 ease-out relative z-10"
-                  style={{
-                    transform: 'translateY(-3px) scale(1)',
-                    filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))',
-                    transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-6px) scale(1.05)';
-                    e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px) scale(1)';
-                    e.currentTarget.style.filter = 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))';
-                  }}
-                />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-                <p className="text-sm text-gray-600">{product.brand}</p>
-              </div>
+          {/* Score details button - Top right corner, above image and name */}
+          <div className="flex justify-end mb-3">
+            <button 
+              onClick={() => setShowScoreInfo(true)}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={(e) => handleTouchEnd(e, () => setShowScoreInfo(true))}
+              className="text-xs text-gray-500 hover:text-green-700 underline transition-colors duration-200"
+              title="Score details"
+            >
+              Score details
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="relative inline-block">
+              {/* Floating shadow effect - soft glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-xl transform translate-y-2 scale-110 -z-10 rounded-lg"></div>
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-16 h-16 object-cover rounded-lg shadow-md transition-all duration-500 ease-out relative z-10"
+                style={{
+                  transform: 'translateY(-3px) scale(1)',
+                  filter: 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))',
+                  transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px) scale(1.05)';
+                  e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.15))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px) scale(1)';
+                  e.currentTarget.style.filter = 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))';
+                }}
+              />
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-green-800">${product.price}</div>
-              <div className="text-sm text-gray-500">${product.pricePer1000kcal}/1000kcal</div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-gray-900">{product.name}</h3>
+              <p className="text-sm text-gray-600">{product.brand}</p>
             </div>
           </div>
 
-          {/* Overall Score */}
+          {/* Overall Rating */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Overall Score</span>
-                <button 
-                  onClick={() => setShowScoreInfo(true)}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={(e) => handleTouchEnd(e, () => setShowScoreInfo(true))}
-                  className="w-4 h-4 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center transition-colors group min-h-[44px] min-w-[44px]"
-                  title="How we calculate scores"
-                >
-                  <span className="text-xs text-white font-bold group-hover:text-green-100">i</span>
-                </button>
-              </div>
-              <span className={`text-lg font-bold ${scoreColor}`}>{score}/100</span>
+              <span className="text-sm font-medium text-gray-700">Overall Rating</span>
+              <span className={`text-2xl font-bold ${scoreColor}`}>{rating5}/5.0</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
@@ -694,22 +921,22 @@ const ComparePage = () => {
 
         {/* Product Features */}
         <div className="px-6 pb-4">
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${product.isOrganic ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-              <span className="text-sm text-gray-700">Organic</span>
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="text-gray-400">•</span>
+              <span className={product.isOrganic ? 'text-gray-700' : 'text-gray-400'}>Organic</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${product.isGrainFree ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-              <span className="text-sm text-gray-700">Grain-Free</span>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="text-gray-400">•</span>
+              <span className={product.isGrainFree ? 'text-gray-700' : 'text-gray-400'}>Grain-Free</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${product.ecoFeatures?.recyclablePackaging ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-              <span className="text-sm text-gray-700">Eco-Friendly</span>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="text-gray-400">•</span>
+              <span className={product.ecoFeatures?.recyclablePackaging ? 'text-gray-700' : 'text-gray-400'}>Eco-Friendly</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${product.price < 30 ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-              <span className="text-sm text-gray-700">Budget-Friendly</span>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="text-gray-400">•</span>
+              <span className={product.price < 30 ? 'text-gray-700' : 'text-gray-400'}>Budget-Friendly</span>
             </div>
           </div>
 
@@ -726,23 +953,36 @@ const ComparePage = () => {
           </div>
 
           {/* Key Info */}
-          <div className="space-y-2 text-sm text-gray-600">
+          <div className="space-y-2 text-sm text-gray-600 mb-4">
             <div><span className="font-medium">Life Stage:</span> {product.lifeStage?.join(', ')}</div>
             <div><span className="font-medium">Main Proteins:</span> {product.mainProteins?.join(', ')}</div>
-            <div><span className="font-medium">Available At:</span> {product.availableAt?.join(', ')}</div>
+          </div>
+
+          {/* Price Information */}
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm text-gray-500">Price</span>
+              <div className="text-right">
+                <div className="text-base font-semibold text-gray-900">${product.price}</div>
+                <div className="text-xs text-gray-500">${product.pricePer1000kcal}/1000kcal</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="px-6 pb-6">
           <div className="flex space-x-2">
-            <button 
+            <a 
+              href={product ? getGoogleSearchUrl(product) : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
               onTouchStart={handleTouchStart}
               onTouchEnd={(e) => handleTouchEnd(e)}
-              className="flex-1 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium min-h-[44px]"
+              className="flex-1 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium min-h-[44px] flex items-center justify-center"
             >
               Buy Now
-            </button>
+            </a>
             <button 
               onTouchStart={handleTouchStart}
               onTouchEnd={(e) => handleTouchEnd(e)}
@@ -787,70 +1027,115 @@ const ComparePage = () => {
         </h3>
           
           {/* Qualitative Summary */}
-          <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
-            <p className="text-gray-700 leading-relaxed">{verdict.summary}</p>
+          <div className="bg-white rounded-lg p-6 mb-6 shadow-md border border-gray-100">
+            <div className="space-y-4">
+              {verdict.summaryData ? (
+                <>
+                  {/* First Product */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-2 h-2 rounded-full bg-green-600 mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-gray-700 leading-relaxed text-base">
+                        <span className="font-bold text-gray-900 text-lg">{verdict.summaryData.product1Name}</span>
+                        {verdict.summaryData.textBeforeContrast.split(verdict.summaryData.product1Name)[1]}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Divider */}
+                  <div className="flex items-center gap-3 my-4">
+                    <div className="flex-1 h-px bg-gray-200"></div>
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3">In contrast</span>
+                    <div className="flex-1 h-px bg-gray-200"></div>
+                  </div>
+                  
+                  {/* Second Product */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-gray-700 leading-relaxed text-base">
+                        <span className="font-bold text-gray-900 text-lg">{verdict.summaryData.product2Name}</span>
+                        {verdict.summaryData.textAfterContrast.split(verdict.summaryData.product2Name)[1]}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-700 leading-relaxed">{verdict.summary}</p>
+              )}
             </div>
+          </div>
 
-          {/* Pros & Cons Framework */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {verdict.products.map((item, index) => (
-              <div 
-                key={index} 
-                className={`bg-white rounded-lg p-4 shadow-sm transition-all duration-800 ease-out ${
-                  isVisible['verdict-section'] 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-5'
-                }`}
-                style={{ 
-                  transitionDelay: `${600 + index * 150}ms`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
-                }}
-              >
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm">
-                  {item.product.brand} {item.product.name}
-                </h4>
-                
-                {/* Pros */}
-                <div className="mb-4">
-                  <div className="text-xs font-semibold text-green-800 mb-2">Pros:</div>
-                  <ul className="space-y-1">
-                    {item.pros.map((pro, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                        <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>{pro}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                {/* Cons */}
-                <div>
-                  <div className="text-xs font-semibold text-red-800 mb-2">Cons:</div>
-                  <ul className="space-y-1">
-                    {item.cons.map((con, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                        <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                        <span>{con}</span>
-                      </li>
-                    ))}
-                    {item.cons.length === 0 && (
-                      <li className="text-sm text-gray-500 italic">No significant drawbacks</li>
-                    )}
-                  </ul>
-                </div>
+          {/* Pros & Cons Framework - Horizontal Scrollable */}
+          <div className="w-full">
+            <div className={`overflow-x-auto scrollbar-hide ${verdict.products.length > 3 ? '' : 'overflow-x-hidden'}`} style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              overflowY: 'hidden'
+            }}>
+              <div className={`${verdict.products.length > 3 ? 'inline-flex' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-4 pb-4`} style={verdict.products.length > 3 ? { width: 'max-content' } : {}}>
+                {verdict.products.map((item, index) => (
+                  <div 
+                    key={index} 
+                    className={`bg-white rounded-lg p-4 shadow-sm transition-all duration-800 ease-out ${
+                      isVisible['verdict-section'] 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-5'
+                    } ${verdict.products.length > 3 ? 'flex-shrink-0' : ''}`}
+                    style={{ 
+                      transitionDelay: `${600 + index * 150}ms`,
+                      ...(verdict.products.length > 3 ? { width: 'calc((100vw - 4rem) / 3)', minWidth: '300px', maxWidth: '380px' } : {})
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                    }}
+                  >
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                      {item.product.brand} {item.product.name}
+                    </h4>
+                    
+                    {/* Pros */}
+                    <div className="mb-4">
+                      <div className="text-xs font-semibold text-green-800 mb-2">Pros:</div>
+                      <ul className="space-y-1">
+                        {item.pros.map((pro, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                            <svg className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <span>{pro}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    {/* Cons */}
+                    <div>
+                      <div className="text-xs font-semibold text-red-800 mb-2">Cons:</div>
+                      <ul className="space-y-1">
+                        {item.cons.map((con, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                            <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            <span>{con}</span>
+                          </li>
+                        ))}
+                        {item.cons.length === 0 && (
+                          <li className="text-sm text-gray-500 italic">No significant drawbacks</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
@@ -897,17 +1182,37 @@ const ComparePage = () => {
       );
     }
 
+    // Display products: first 3 visible, all 5 in horizontal scroll if needed
     return (
       <div className="space-y-8">
+        {/* Product Cards - Always horizontal scroll */}
+        {products.length > 0 && (
+          <div className="w-full">
+            <div className="overflow-x-auto scrollbar-hide" style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              overflowY: 'hidden'
+            }}>
+              <div className="inline-flex gap-6 pb-4" style={{ width: 'max-content' }}>
+                {products.map((product, index) => (
+                  <div 
+                    key={product.id} 
+                    className="flex-shrink-0"
+                    style={{ width: '380px', maxWidth: '380px' }}
+                  >
+                    {renderProductCard(product, index)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Analyst's Verdict - Phase 1: Enhanced insights */}
         {renderAnalystsVerdict(products)}
-        
-        {/* Product Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {products.map((product, index) => renderProductCard(product, index))}
-        </div>
 
-        {/* Comprehensive Comparison Table - Phase 2: Detailed side-by-side */}
+        {/* Comprehensive Comparison Table - Phase 2: Detailed side-by-side (Collapsible) */}
         {generateComparisonTable && (
           <div 
             className="bg-white rounded-xl shadow-lg overflow-hidden mb-8"
@@ -921,27 +1226,48 @@ const ComparePage = () => {
               }`}
               style={{ transitionDelay: '400ms' }}
             >
-              <div className="p-6 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-xl font-bold text-gray-900">Detailed Comparison</h3>
-                <p className="text-sm text-gray-600 mt-1">Side-by-side comparison of key attributes</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+              {/* Collapsible Header */}
+              <div 
+                className="p-6 border-b border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => setIsComparisonTableExpanded(!isComparisonTableExpanded)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={(e) => handleTouchEnd(e, () => setIsComparisonTableExpanded(!isComparisonTableExpanded))}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Detailed Comparison</h3>
+                    <p className="text-sm text-gray-600 mt-1">Side-by-side comparison of key attributes</p>
+                  </div>
+                  <svg 
+                    className={`w-6 h-6 text-gray-600 transition-transform duration-300 ${isComparisonTableExpanded ? 'transform rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              
+              {/* Collapsible Content */}
+              {isComparisonTableExpanded && (
+                <div className="overflow-x-auto">
+                  <table className="w-full" style={{ tableLayout: 'fixed' }}>
                   <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200" style={{ width: '25%' }}>
                         Attribute
                       </th>
                   {products.map((product, index) => (
-                        <th key={index} className="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200 min-w-[200px]">
+                        <th key={index} className="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200" style={{ width: `${75 / products.length}%` }}>
                           <div className="flex flex-col items-center">
                             <img 
                               src={product.image} 
                               alt={product.name}
                               className="w-16 h-16 object-cover rounded-lg mb-2"
                             />
-                            <div className="font-semibold text-xs">{product.brand}</div>
-                            <div className="text-xs text-gray-600">{product.name}</div>
+                            <div className="font-semibold text-xs break-words">{product.brand}</div>
+                            <div className="text-xs text-gray-600 break-words px-2">{product.name}</div>
                           </div>
                     </th>
                   ))}
@@ -950,10 +1276,14 @@ const ComparePage = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                     {generateComparisonTable.map((section, sectionIndex) => (
                       <React.Fragment key={sectionIndex}>
-                        {/* Section Header */}
-                        <tr className="bg-green-50">
+                        {/* Section Header - Subtle separator, not a highlight */}
+                        <tr className="bg-gray-50 border-t-2 border-gray-300">
                           <td colSpan={products.length + 1} className="px-6 py-3">
-                            <h4 className="text-sm font-bold text-green-800">{section.section}</h4>
+                            <div className="flex items-center gap-2">
+                              <div className="h-px flex-1 bg-gray-300"></div>
+                              <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">{section.section}</h4>
+                              <div className="h-px flex-1 bg-gray-300"></div>
+                            </div>
                           </td>
                         </tr>
                         {/* Section Rows */}
@@ -968,29 +1298,37 @@ const ComparePage = () => {
                               transition: 'opacity 0.3s ease-out, transform 0.3s ease-out',
                             }}
                           >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900" style={{ width: '25%' }}>
                               {row.attribute}
                     </td>
-                            {row.values.map((value, valueIndex) => (
-                              <td 
-                                key={valueIndex} 
-                                className={`px-6 py-4 whitespace-nowrap text-sm text-center ${
-                                  (Array.isArray(row.highlight) && row.highlight.includes(valueIndex)) ||
-                                  (typeof row.highlight === 'number' && row.highlight === valueIndex)
-                                    ? 'font-bold text-green-800 bg-green-50' 
-                                    : 'text-gray-700'
-                                }`}
-                              >
-                                {value}
-                      </td>
-                    ))}
+                            {row.values.map((value, valueIndex) => {
+                              const isHighlighted = (Array.isArray(row.highlight) && row.highlight.includes(valueIndex)) ||
+                                                   (typeof row.highlight === 'number' && row.highlight === valueIndex);
+                              return (
+                                <td 
+                                  key={valueIndex} 
+                                  className={`px-6 py-4 text-sm text-center relative ${
+                                    isHighlighted
+                                      ? 'font-bold text-green-700 bg-green-100 border-l-4 border-green-600' 
+                                      : 'text-gray-700'
+                                  }`}
+                                  style={{ width: `${75 / products.length}%`, wordBreak: 'break-word' }}
+                                >
+                                  {isHighlighted && (
+                                    <span className="absolute top-1 right-1 text-green-600 text-xs">✓</span>
+                                  )}
+                                  <div className="break-words">{value}</div>
+                                </td>
+                              );
+                            })}
                   </tr>
                         ))}
                       </React.Fragment>
                 ))}
-              </tbody>
-            </table>
-              </div>
+                  </tbody>
+                </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1038,7 +1376,9 @@ const ComparePage = () => {
                   
                   {/* Primary CTA */}
                   <a 
-                    href="#" 
+                    href={product ? getGoogleSearchUrl(product) : '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e)}
                     className="block w-full bg-green-800 text-white px-4 py-3 rounded-lg text-sm font-medium text-center mb-3 transition-all duration-300 ease min-h-[44px] flex items-center justify-center"
@@ -1057,26 +1397,10 @@ const ComparePage = () => {
                       e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
                       e.currentTarget.style.backgroundColor = '#166534'; // green-800
                     }}
-                    aria-label={`Add ${product.name} to cart`}
+                    aria-label={`Buy ${product.name} now`}
                   >
-                    Add to Cart • Buy on {product.preferredChannel}
+                    Buy Now
                   </a>
-                  
-                  {/* Secondary CTAs */}
-                  <div className="space-y-2">
-                    <a 
-                      href="#" 
-                      className="block text-sm text-green-800 hover:text-green-900 hover:underline transition-colors duration-200"
-                    >
-                      View Full Product Details →
-                    </a>
-                    <a 
-                      href="#" 
-                      className="block text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors duration-200"
-                    >
-                      Read Customer Reviews →
-                    </a>
-                  </div>
                 </div>
               ))}
             </div>
@@ -1090,7 +1414,7 @@ const ComparePage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header 
-        className="bg-white shadow-sm border-b"
+        className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50"
         ref={el => sectionsRef.current['compare-header'] = el}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1167,7 +1491,7 @@ const ComparePage = () => {
       </header>
 
       {/* Compare Section */}
-      <section className="py-12">
+      <section className="pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div 
             className="text-center mb-8"
@@ -1252,53 +1576,136 @@ const ComparePage = () => {
               </button>
             </div>
 
+            {!user && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <span className="font-semibold">Not logged in:</span> Compare up to 3 products. <Link to="/login" className="underline hover:text-blue-900">Login</Link> to compare up to 5 products.
+                </p>
+              </div>
+            )}
             <div 
-              className={`grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 transition-all duration-1000 ease-out ${
+              className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 transition-all duration-1000 ease-out ${
                 isVisible['compare-selector'] 
                   ? 'opacity-100 translate-y-0' 
                   : 'opacity-0 translate-y-5'
               }`}
-              style={{ transitionDelay: '800ms' }}
+              style={{ transitionDelay: '800ms', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}
             >
-              <div>
+              <div className="min-w-0 flex-shrink-0">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select first food
                 </label>
                 <select 
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
+                  className="w-full border border-gray-300 rounded-md pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
+                  style={{ paddingRight: '1.5rem' }}
                   value={selectedProducts.first?.id || ''}
                   onChange={(e) => handleProductSelect('first', e.target.value)}
                 >
                   <option value="">Select first food</option>
-                  {petFoodDatabase.map(product => (
-                    <option key={product.id} value={product.id}>
-                      {product.name}
-                    </option>
-                  ))}
+                  {/* Only show products that are not already selected in second or third */}
+                  {petFoodDatabase
+                    .filter(product => {
+                      if (selectedProducts.second && product.id === selectedProducts.second.id) return false;
+                      if (selectedProducts.third && product.id === selectedProducts.third.id) return false;
+                      return true;
+                    })
+                    .map(product => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
                 </select>
               </div>
 
-              <div>
+              <div className="relative min-w-0 flex-shrink-0">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select second food
+                  Select second food {savedItems.length > 0 && (
+                    <span className="text-xs font-normal text-gray-500">(From your saved items)</span>
+                  )}
                 </label>
-                <select 
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
-                  value={selectedProducts.second?.id || ''}
-                  onChange={(e) => handleProductSelect('second', e.target.value)}
-                >
-                  <option value="">Select second food</option>
-                  {petFoodDatabase.map(product => (
-                    <option key={product.id} value={product.id}>
-                      {product.name}
-                    </option>
-                  ))}
-                </select>
+                {savedItems.length > 0 ? (
+                  <>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
+                      value={selectedProducts.second?.id || ''}
+                      onChange={(e) => handleProductSelect('second', e.target.value)}
+                      onFocus={() => setShowSavedItemsPreview(true)}
+                      onBlur={() => setTimeout(() => setShowSavedItemsPreview(false), 200)}
+                    >
+                      <option value="">Select second food</option>
+                      {/* Only show saved items */}
+                      {savedItems.map(savedItem => {
+                        const product = typeof savedItem === 'object' && savedItem.id 
+                          ? petFoodDatabase.find(p => p.id === savedItem.id) || savedItem
+                          : petFoodDatabase.find(p => p.id === savedItem);
+                        if (!product) return null;
+                        // Exclude if already selected in first, third, fourth, or fifth
+                        if (selectedProducts.first && product.id === selectedProducts.first.id) return null;
+                        if (selectedProducts.third && product.id === selectedProducts.third.id) return null;
+                        if (selectedProducts.fourth && product.id === selectedProducts.fourth.id) return null;
+                        if (selectedProducts.fifth && product.id === selectedProducts.fifth.id) return null;
+                        return (
+                          <option key={product.id} value={product.id}>
+                            {product.name} {product.brand ? `(${product.brand})` : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {/* Preview of saved items */}
+                    {showSavedItemsPreview && savedItems.length > 0 && (
+                      <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                        <div className="p-3 border-b border-gray-200 bg-gray-50">
+                          <h4 className="text-sm font-semibold text-gray-700">Saved in Profile ({savedItems.length})</h4>
+                        </div>
+                        <div className="p-2">
+                          {savedItems.map((savedItem, index) => {
+                            const product = typeof savedItem === 'object' && savedItem.id 
+                              ? petFoodDatabase.find(p => p.id === savedItem.id) || savedItem
+                              : petFoodDatabase.find(p => p.id === savedItem);
+                            if (!product) return null;
+                            // Exclude if already selected
+                            if (selectedProducts.first && product.id === selectedProducts.first.id) return null;
+                            if (selectedProducts.third && product.id === selectedProducts.third.id) return null;
+                            if (selectedProducts.fourth && product.id === selectedProducts.fourth.id) return null;
+                            if (selectedProducts.fifth && product.id === selectedProducts.fifth.id) return null;
+                            return (
+                              <div 
+                                key={product.id || index}
+                                className="p-2 hover:bg-gray-50 rounded cursor-pointer flex items-center gap-3"
+                                onClick={() => {
+                                  handleProductSelect('second', product.id);
+                                  setShowSavedItemsPreview(false);
+                                }}
+                              >
+                                <img 
+                                  src={product.image} 
+                                  alt={product.name}
+                                  className="w-12 h-12 object-cover rounded"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900 truncate">{product.name}</div>
+                                  <div className="text-xs text-gray-500">{product.brand}</div>
+                                  <div className="text-xs text-gray-600">${product.price}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-500 text-sm">
+                    No saved items in your profile. Save products from Search page to compare them here.
+                  </div>
+                )}
               </div>
 
-              <div>
+              <div className="min-w-0 flex-shrink-0">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select third food
+                  Select third food {selectedProducts.first && selectedProducts.second && (
+                    <span className="text-xs font-normal text-gray-500">(Recommended based on your selections)</span>
+                  )}
                 </label>
                 <select 
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
@@ -1306,12 +1713,51 @@ const ComparePage = () => {
                   onChange={(e) => handleProductSelect('third', e.target.value)}
                 >
                   <option value="">Select third food</option>
-                  {petFoodDatabase.map(product => (
-                    <option key={product.id} value={product.id}>
-                      {product.name}
-                    </option>
-                  ))}
+                  {selectedProducts.first && selectedProducts.second ? (
+                    getRecommendedThirdProducts.length > 0 ? (
+                      <optgroup label="Recommended for you">
+                        {getRecommendedThirdProducts.map(({ product, reason }) => (
+                          <option key={product.id} value={product.id}>
+                            {product.name} - {reason}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ) : (
+                      <option value="" disabled>No recommendations available. Please select first and second food.</option>
+                    )
+                  ) : (
+                    <option value="" disabled>Please select first and second food to see recommendations</option>
+                  )}
                 </select>
+                {selectedProducts.first && selectedProducts.second && getRecommendedThirdProducts.length > 0 && (
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-xs font-medium text-green-800 mb-2">💡 Top Recommendation:</p>
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={getRecommendedThirdProducts[0].product.image} 
+                        alt={getRecommendedThirdProducts[0].product.name}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-gray-900 truncate">
+                          {getRecommendedThirdProducts[0].product.name}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {getRecommendedThirdProducts[0].product.brand} • ${getRecommendedThirdProducts[0].product.price}
+                        </div>
+                        <div className="text-xs text-green-700 mt-1">
+                          {getRecommendedThirdProducts[0].reason}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleProductSelect('third', getRecommendedThirdProducts[0].product.id)}
+                        className="px-3 py-1 bg-green-800 text-white text-xs rounded hover:bg-green-700 transition-colors whitespace-nowrap"
+                      >
+                        Select
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

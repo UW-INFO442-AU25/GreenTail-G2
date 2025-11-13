@@ -290,6 +290,75 @@ export const getStoresByZipCode = (zipCode) => {
         website: 'https://www.petsmart.com/',
         zipCode: '98122'
       }
+    ],
+    '98119': [
+      {
+        id: 22,
+        name: 'MudBay – Queen Anne',
+        address: '1815 Queen Anne Ave N, Seattle, WA 98109',
+        lat: 47.6280,
+        lng: -122.3560,
+        distance: '0.4 mi',
+        phone: '(206) 285‑1234',
+        hours: 'Mon–Fri 10:00 AM–7:30 PM; Sat 9:00 AM–7:00 PM; Sun 9:00 AM–7:00 PM',
+        products: ['Orijen', 'EcoBite', 'PurePaw', 'FarmFresh', 'GreenTail', 'MeadowMix', 'WhiskerWell', 'VitalBites', 'TummyTender', 'OceanWhisk', 'PupStart', 'WhiskerBoost', 'BugBites', 'PrimalPaws', 'PlantPaws', 'SimpleSoul', 'TinyWhiskers', 'HeritageHounds', 'GutGuard', 'FreshBox'],
+        website: 'https://www.mudbay.com/stores/',
+        zipCode: '98119'
+      },
+      {
+        id: 23,
+        name: 'Petco – Queen Anne',
+        address: '1900 Queen Anne Ave N, Seattle, WA 98109',
+        lat: 47.6300,
+        lng: -122.3580,
+        distance: '0.5 mi',
+        phone: '(206) 286‑5678',
+        hours: 'Mon–Sat 9:00 AM–9:00 PM; Sun 10:00 AM–7:00 PM',
+        products: ['Orijen', 'Blue Buffalo', 'Wellness', 'Open Farm', 'Royal Canin', 'Hill\'s Science Diet', 'Purina Pro Plan', 'EcoBite', 'PurePaw', 'FarmFresh', 'GreenTail', 'MeadowMix', 'WhiskerWell', 'VitalBites', 'TummyTender', 'OceanWhisk', 'PupStart', 'WhiskerBoost', 'BugBites', 'PrimalPaws', 'PlantPaws', 'SimpleSoul', 'TinyWhiskers', 'FutureFeast', 'SlimPaws', 'HeritageHounds', 'GutGuard', 'FreshBox'],
+        website: 'https://www.petco.com/',
+        zipCode: '98119'
+      },
+      {
+        id: 24,
+        name: 'PetSmart – Lower Queen Anne',
+        address: '2000 1st Ave N, Seattle, WA 98109',
+        lat: 47.6250,
+        lng: -122.3600,
+        distance: '0.8 mi',
+        phone: '(206) 287‑9012',
+        hours: 'Mon–Sat 9:00 AM–9:00 PM; Sun 10:00 AM–7:00 PM',
+        products: ['Blue Buffalo', 'Wellness', 'Open Farm', 'Royal Canin', 'Hill\'s Science Diet', 'EcoBite', 'PurePaw', 'FarmFresh', 'MeadowMix', 'WhiskerWell', 'VitalBites', 'TummyTender', 'OceanWhisk', 'PupStart', 'WhiskerBoost', 'BugBites', 'PrimalPaws', 'PlantPaws', 'SimpleSoul', 'TinyWhiskers', 'FutureFeast', 'SlimPaws', 'HeritageHounds', 'GutGuard'],
+        website: 'https://www.petsmart.com/',
+        zipCode: '98119'
+      }
+    ],
+    '98109': [
+      {
+        id: 25,
+        name: 'MudBay – South Lake Union',
+        address: '400 Fairview Ave N, Seattle, WA 98109',
+        lat: 47.6200,
+        lng: -122.3400,
+        distance: '0.3 mi',
+        phone: '(206) 223‑4567',
+        hours: 'Mon–Fri 10:00 AM–7:30 PM; Sat 9:00 AM–7:00 PM; Sun 9:00 AM–7:00 PM',
+        products: ['Orijen', 'EcoBite', 'PurePaw', 'FarmFresh', 'GreenTail', 'MeadowMix', 'WhiskerWell', 'VitalBites', 'TummyTender', 'OceanWhisk', 'PupStart', 'WhiskerBoost', 'BugBites', 'PrimalPaws', 'PlantPaws', 'SimpleSoul', 'TinyWhiskers', 'HeritageHounds', 'GutGuard', 'FreshBox'],
+        website: 'https://www.mudbay.com/stores/',
+        zipCode: '98109'
+      },
+      {
+        id: 26,
+        name: 'Petco – South Lake Union',
+        address: '500 Westlake Ave N, Seattle, WA 98109',
+        lat: 47.6220,
+        lng: -122.3380,
+        distance: '0.5 mi',
+        phone: '(206) 224‑7890',
+        hours: 'Mon–Sat 9:00 AM–9:00 PM; Sun 10:00 AM–7:00 PM',
+        products: ['Orijen', 'Blue Buffalo', 'Wellness', 'Open Farm', 'Royal Canin', 'Hill\'s Science Diet', 'Purina Pro Plan', 'EcoBite', 'PurePaw', 'FarmFresh', 'GreenTail', 'MeadowMix', 'WhiskerWell', 'VitalBites', 'TummyTender', 'OceanWhisk', 'PupStart', 'WhiskerBoost', 'BugBites', 'PrimalPaws', 'PlantPaws', 'SimpleSoul', 'TinyWhiskers', 'FutureFeast', 'SlimPaws', 'HeritageHounds', 'GutGuard', 'FreshBox'],
+        website: 'https://www.petco.com/',
+        zipCode: '98109'
+      }
     ]
   };
 
@@ -311,6 +380,8 @@ export const getMapCenterByZipCode = (zipCode) => {
     '98112': [47.6250, -122.3200],
     '98115': [47.6780, -122.3100],
     '98122': [47.6250, -122.2900],
+    '98119': [47.6280, -122.3560],
+    '98109': [47.6200, -122.3400],
   };
 
   return zipCodeCenters[zipCode] || [47.6062, -122.3321];
@@ -332,7 +403,25 @@ export const getZipCodeDisplayName = (zipCode) => {
     '98112': 'Seattle, WA (Capitol Hill)',
     '98115': 'Seattle, WA (Ravenna)',
     '98122': 'Seattle, WA (Madison Valley)',
+    '98119': 'Seattle, WA (Queen Anne)',
+    '98109': 'Seattle, WA (South Lake Union)',
   };
 
   return zipCodeNames[zipCode] || `ZIP Code ${zipCode}`;
+};
+
+export const getSupportedZipCodes = () => {
+  return [
+    { code: '98105', name: 'Seattle, WA (University District)' },
+    { code: '98117', name: 'Seattle, WA (Crown Hill)' },
+    { code: '98101', name: 'Seattle, WA (Downtown)' },
+    { code: '98103', name: 'Seattle, WA (Wallingford)' },
+    { code: '98112', name: 'Seattle, WA (Capitol Hill)' },
+    { code: '98115', name: 'Seattle, WA (Ravenna)' },
+    { code: '98122', name: 'Seattle, WA (Madison Valley)' },
+    { code: '98119', name: 'Seattle, WA (Queen Anne)' },
+    { code: '98109', name: 'Seattle, WA (South Lake Union)' },
+    { code: '90210', name: 'Beverly Hills, CA' },
+    { code: '10001', name: 'New York, NY (Manhattan)' },
+  ];
 };

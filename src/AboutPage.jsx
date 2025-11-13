@@ -122,7 +122,7 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -190,7 +190,7 @@ const AboutPage = () => {
 
       {/* Hero Section */}
       {/* Optimization: Initial load animations - hero image, title, description, buttons with staggered timing */}
-      <section className="py-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
+      <section className="pt-24 pb-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
         {/* Decorative background elements */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-20 left-20 w-64 h-64 bg-green-200 rounded-full blur-3xl"></div>

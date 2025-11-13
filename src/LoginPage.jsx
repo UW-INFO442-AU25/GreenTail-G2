@@ -146,7 +146,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-green-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -180,7 +180,7 @@ const LoginPage = () => {
       </header>
 
       {/* Login Section */}
-      <main className="flex justify-center items-center py-16 px-4">
+      <main className="flex justify-center items-center pt-24 pb-16 px-4">
         <div className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center justify-center mb-6">

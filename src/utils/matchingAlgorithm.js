@@ -180,23 +180,77 @@ function calculateEcoFeaturesScore(product, quizData) {
 }
 
 /**
- * Determine match level
- * @param {number} matchScore - Match score
+ * Calculate product quality score (used in ComparePage)
+ * This score is based on product features, not user preferences
  * @param {Object} product - Product information
- * @param {Object} quizData - User answers
+ * @returns {number} Quality score (0-100)
+ */
+export function calculateProductQualityScore(product) {
+  let score = 0;
+  
+  // Core quality factors (50 points)
+  if (product.isOrganic) score += 20;
+  if (product.isGrainFree) score += 15;
+  if (product.ecoFeatures?.certified) score += 10;
+  if (product.tags?.some(tag => tag.toLowerCase().includes('certified organic'))) score += 5;
+  
+  // Eco-friendly features (30 points)
+  if (product.ecoFeatures?.recyclablePackaging) score += 10;
+  if (product.ecoFeatures?.lowFootprintProtein) score += 12;
+  if (product.ecoFeatures?.localProduction) score += 8;
+  if (product.tags?.some(tag => tag.toLowerCase().includes('sustainable'))) score += 8;
+  
+  // Value factors (20 points) - more lenient thresholds
+  if (product.price <= 35) score += 8; // Increased from 30 to 35
+  if (product.pricePer1000kcal <= 3.5) score += 8; // Increased from 3 to 3.5
+  if (product.pricePer1000kcal <= 2.5) score += 4; // Bonus for excellent value
+  
+  // Premium and quality indicators (20 points)
+  if (product.tags?.some(tag => tag.toLowerCase().includes('premium'))) score += 8;
+  if (product.tags?.some(tag => tag.toLowerCase().includes('high protein'))) score += 6;
+  if (product.tags?.some(tag => tag.toLowerCase().includes('human-grade'))) score += 6;
+  
+  // Additional quality bonuses (10 points)
+  if (product.tags?.some(tag => tag.toLowerCase().includes('hypoallergenic'))) score += 5;
+  if (product.tags?.some(tag => tag.toLowerCase().includes('limited ingredient'))) score += 5;
+  
+  return Math.min(score, 100);
+}
+
+/**
+ * Convert 100-point score to 5.0-point rating
+ * @param {number} score100 - Score out of 100
+ * @returns {number} Rating out of 5.0 (rounded to 1 decimal place)
+ */
+export function convertTo5PointRating(score100) {
+  // Convert 0-100 to 0-5.0
+  const rating = (score100 / 100) * 5.0;
+  // Round to 1 decimal place
+  return Math.round(rating * 10) / 10;
+}
+
+/**
+ * Determine match level based on score
+ * @param {number} score - Match score or quality score
+ * @param {Object} product - Product information
+ * @param {Object} quizData - User answers (optional)
  * @returns {string} Match level
  */
 function determineMatchLevel(matchScore, product, quizData) {
   const thresholds = matchingConfig.thresholds;
 
-  if (product.matchLevel === 'budget' && isBudgetFriendly(product, quizData)) {
-    return 'budget';
+  // If quizData exists, use match-based logic
+  if (quizData) {
+    if (product.matchLevel === 'budget' && isBudgetFriendly(product, quizData)) {
+      return 'budget';
+    }
+
+    if (matchScore >= thresholds.eco && hasStrongEcoFeatures(product, quizData)) {
+      return 'eco-friendly';
+    }
   }
 
-  if (matchScore >= thresholds.eco && hasStrongEcoFeatures(product, quizData)) {
-    return 'eco-friendly';
-  }
-
+  // Determine level based on score thresholds
   if (matchScore >= thresholds.best) {
     return 'best';
   } else if (matchScore >= thresholds.great) {
@@ -206,6 +260,22 @@ function determineMatchLevel(matchScore, product, quizData) {
   } else {
     return 'good';
   }
+}
+
+/**
+ * Get match level for a product based on quality score (when no quiz data)
+ * @param {Object} product - Product information
+ * @returns {string} Match level
+ */
+export function getProductMatchLevel(product) {
+  // If product already has matchLevel and matchScore from quiz, use those
+  if (product.matchLevel && product.matchScore !== undefined) {
+    return product.matchLevel;
+  }
+
+  // Otherwise, calculate quality score and determine level
+  const qualityScore = calculateProductQualityScore(product);
+  return determineMatchLevel(qualityScore, product, null);
 }
 
 /**
