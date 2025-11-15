@@ -37,15 +37,45 @@ function HomePage() {
   
   // Fullscreen video state - controls the video intro sequence
   // Check if user has already seen the video
+  // Note: Video should show on first visit only
   const hasSeenVideo = localStorage.getItem('hasSeenIntroVideo') === 'true';
   const [isFullscreenVideo, setIsFullscreenVideo] = useState(!hasSeenVideo);
   const [videoEnded, setVideoEnded] = useState(hasSeenVideo);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showContent, setShowContent] = useState(hasSeenVideo);
+  
+  // Debug: Log video state on mount
+  useEffect(() => {
+    const localStorageValue = localStorage.getItem('hasSeenIntroVideo');
+    console.log('HomePage mounted - Video state:', {
+      hasSeenVideo,
+      isFullscreenVideo,
+      showContent,
+      localStorageValue,
+      shouldShowVideo: !hasSeenVideo
+    });
+    
+    // Force check: if localStorage is cleared, video should show
+    if (!localStorageValue && !isFullscreenVideo) {
+      console.warn('WARNING: localStorage is empty but video is not showing! Forcing video to show...');
+      setIsFullscreenVideo(true);
+      setShowContent(false);
+    }
+  }, []);
   const fullscreenVideoRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   
   // Contact modal state
   const [showContactModal, setShowContactModal] = useState(false);
+  
+  // Handle scroll effect for header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -180,9 +210,22 @@ function HomePage() {
     if (fullscreenVideoRef.current && isFullscreenVideo) {
       const video = fullscreenVideoRef.current;
       
+      console.log('Video element found, attempting to play:', {
+        src: video.src,
+        isFullscreenVideo,
+        hasSeenVideo: localStorage.getItem('hasSeenIntroVideo')
+      });
+      
       // Ensure video is muted and set to autoplay (required for autoplay policy)
       video.muted = true;
       video.playsInline = true;
+      
+      // Add error handler
+      video.onerror = (e) => {
+        console.error('Video error:', e);
+        console.error('Video src:', video.src);
+        console.error('Video error details:', video.error);
+      };
       
       // Load and play the video
       const playPromise = video.play();
@@ -191,15 +234,15 @@ function HomePage() {
         playPromise
           .then(() => {
             // Video is playing
-            console.log('Video is playing');
+            console.log('Video is playing successfully');
           })
           .catch((error) => {
             // Autoplay was prevented
             console.warn('Autoplay prevented:', error);
             // Try to play again after user interaction is detected
             const handleInteraction = () => {
-              video.play().catch(() => {
-                // Ignore if still can't play
+              video.play().catch((err) => {
+                console.error('Failed to play video after interaction:', err);
               });
               document.removeEventListener('click', handleInteraction);
               document.removeEventListener('touchstart', handleInteraction);
@@ -207,6 +250,29 @@ function HomePage() {
             document.addEventListener('click', handleInteraction, { once: true });
             document.addEventListener('touchstart', handleInteraction, { once: true });
           });
+      }
+    } else {
+      const localStorageValue = localStorage.getItem('hasSeenIntroVideo');
+      console.log('Video not showing because:', {
+        hasRef: !!fullscreenVideoRef.current,
+        isFullscreenVideo,
+        hasSeenVideo: localStorageValue,
+        localStorageValue,
+        shouldShowVideo: !localStorageValue
+      });
+      
+      // If video should show but ref is not ready, try again after a short delay
+      if (isFullscreenVideo && !fullscreenVideoRef.current) {
+        console.log('Video ref not ready, will retry in 100ms...');
+        setTimeout(() => {
+          if (fullscreenVideoRef.current && isFullscreenVideo) {
+            console.log('Retrying video play...');
+            const video = fullscreenVideoRef.current;
+            video.muted = true;
+            video.playsInline = true;
+            video.play().catch(err => console.warn('Retry play failed:', err));
+          }
+        }, 100);
       }
     }
   }, [isFullscreenVideo]);
@@ -245,23 +311,46 @@ function HomePage() {
         <div 
           className="fixed inset-0 z-[100] bg-black cursor-pointer"
           onClick={handleSkipVideo}
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10000,
+            backgroundColor: 'black'
+          }}
         >
           <video 
             ref={fullscreenVideoRef}
-            src={`${import.meta.env.BASE_URL}images/homepage.mp4`}
+            src={`${import.meta.env.BASE_URL || '/'}images/homepage.mp4`}
             className="w-full h-full object-cover"
             autoPlay
             muted
             playsInline
             preload="auto"
             onEnded={handleVideoEnd}
+            onError={(e) => {
+              console.error('Video load error:', e);
+              const videoSrc = `${import.meta.env.BASE_URL || '/'}images/homepage.mp4`;
+              console.error('Video src:', videoSrc);
+              console.error('Full video element:', fullscreenVideoRef.current);
+              if (fullscreenVideoRef.current) {
+                console.error('Video error code:', fullscreenVideoRef.current.error?.code);
+                console.error('Video error message:', fullscreenVideoRef.current.error?.message);
+              }
+            }}
             onLoadedData={() => {
+              console.log('Video loaded successfully');
               // Ensure video plays when loaded
               if (fullscreenVideoRef.current) {
-                fullscreenVideoRef.current.play().catch(() => {
-                  // Autoplay prevented, will handle in useEffect
+                fullscreenVideoRef.current.play().catch((err) => {
+                  console.warn('Autoplay prevented on loadedData:', err);
                 });
               }
+            }}
+            onCanPlay={() => {
+              console.log('Video can play');
             }}
             aria-label="GreenTail introduction video"
           />
@@ -279,20 +368,22 @@ function HomePage() {
         }`}
       >
         {/* Header */}
-        <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
+        <header className={`bg-white fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'shadow-lg backdrop-blur-sm bg-white/95' : 'shadow-md'
+        }`} id="main-header">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-6 md:px-8 py-4">
           <div className="flex items-center gap-2">
             <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
             <span className="text-2xl font-bold text-green-800">GreenTail</span>
           </div>
           <nav role="navigation" aria-label="Main navigation menu">
             <ul className="flex gap-8 items-center" role="menubar">
-              <li role="none"><Link to="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-green-800" aria-label="Go to homepage" role="menuitem">Home</Link></li>
-              <li role="none"><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium" aria-label="Start quiz" role="menuitem">Quiz</Link></li>
-              <li role="none"><Link to="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium" aria-label="Search products" role="menuitem">Search</Link></li>
-              <li role="none"><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium" aria-label="Compare products" role="menuitem">Compare</Link></li>
-              <li role="none"><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium" aria-label="About us" role="menuitem">About</Link></li>
-              <li role="none"><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium" aria-label="User profile" role="menuitem">Profile</Link></li>
+              <li role="none"><Link to="/" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 relative font-medium after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-0.5 after:bg-emerald-600 after:scale-x-100" aria-label="Go to homepage" role="menuitem">Home</Link></li>
+              <li role="none"><Link to="/quiz" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 font-medium relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300" aria-label="Start quiz" role="menuitem">Quiz</Link></li>
+              <li role="none"><Link to="/search" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 font-medium relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300" aria-label="Search products" role="menuitem">Search</Link></li>
+              <li role="none"><Link to="/compare" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 font-medium relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300" aria-label="Compare products" role="menuitem">Compare</Link></li>
+              <li role="none"><Link to="/about" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 font-medium relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300" aria-label="About us" role="menuitem">About</Link></li>
+              <li role="none"><Link to="/profile" className="text-gray-600 hover:text-emerald-600 transition-colors duration-300 font-medium relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-emerald-600 hover:after:w-full after:transition-all after:duration-300" aria-label="User profile" role="menuitem">Profile</Link></li>
               {user ? (
                 <li className="flex items-center gap-2">
                   <div className="flex items-center gap-2">
@@ -325,7 +416,7 @@ function HomePage() {
                 <li>
                   <Link 
                     to="/login" 
-                    className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium"
+                    className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-900 transition-colors font-medium"
                     aria-label="Log in"
                   >
                     Login
@@ -339,11 +430,12 @@ function HomePage() {
 
       {/* Hero Section */}
       {/* Optimization: Initial load animations - hero image, title, description, buttons with staggered timing */}
-      <section className="bg-gradient-to-br from-blue-50 via-blue-100 to-green-50 pt-24 pb-20 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-green-200 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-200 rounded-full blur-3xl"></div>
+      <section className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 pt-24 pb-28 relative overflow-hidden">
+        {/* Decorative background elements with darker overlay */}
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-emerald-300 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-emerald-400 rounded-full blur-3xl"></div>
         </div>
         
         <div className={`max-w-6xl mx-auto px-8 relative z-10 transition-opacity duration-1000 ${
@@ -355,6 +447,7 @@ function HomePage() {
             <div 
               className="space-y-8"
               ref={el => sectionsRef.current['hero-content'] = el}
+              style={{ paddingTop: '2rem' }}
             >
               <div 
                 ref={el => sectionsRef.current['hero-title'] = el}
@@ -365,7 +458,7 @@ function HomePage() {
                 }`}
                 style={{ transitionTimingFunction: 'ease-out' }}
               >
-                <h1 className="text-5xl font-extrabold text-gray-900 leading-tight tracking-tight mb-12">
+                <h1 className="text-6xl md:text-7xl font-bold text-white leading-tight tracking-tight mb-6 drop-shadow-lg">
                   Feed well. Do right by the planet.
                 </h1>
               </div>
@@ -389,34 +482,34 @@ function HomePage() {
                     ref={el => sectionsRef.current['hero-button'] = el}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e)}
-                    className={`bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg relative overflow-hidden group min-h-[44px] ${
+                    className={`bg-white text-emerald-600 px-8 py-4 rounded-lg font-bold text-lg relative overflow-hidden group min-h-[44px] shadow-lg hover:shadow-xl ${
                       isVisible['hero-button'] 
                         ? 'opacity-100 translate-y-0' 
                         : 'opacity-0 translate-y-5'
                     }`}
                     style={{ 
                       transitionDelay: '800ms',
-                      transition: 'transform 0.8s ease-out, opacity 0.8s ease-out',
+                      transition: 'transform 0.3s ease-out, opacity 0.8s ease-out, box-shadow 0.3s ease',
                       transform: 'translateY(0)',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-3px)';
-                      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+                      e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.3)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                      e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
                     }}
                     aria-label="Start 90-second quiz to get personalized recommendations"
                   >
                     <span className="relative z-10">Take the 90-sec Quiz</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-500"></div>
                   </Link>
                   <Link 
                     to="/first-time" 
                     ref={el => sectionsRef.current['hero-link'] = el}
-                    className={`text-gray-600 hover:text-green-800 font-medium text-lg transition-all duration-500 ${
+                    className={`text-white/90 hover:text-white font-medium text-lg transition-all duration-500 ${
                       isVisible['hero-link'] 
                         ? 'opacity-100 translate-x-0' 
                         : 'opacity-0 translate-x-5'
@@ -440,6 +533,7 @@ function HomePage() {
             <div 
               className="text-center relative"
               ref={el => sectionsRef.current['hero-image'] = el}
+              style={{ paddingTop: '2rem' }}
             >
               <div 
                 className={`transition-all duration-1500 ease-out ${
@@ -478,27 +572,84 @@ function HomePage() {
           {/* Hero features: Staggered fade-in */}
           {/* Optimization: Features appear sequentially after hero content */}
           <div 
-            className="grid grid-cols-2 gap-x-8 gap-y-5 mt-8"
+            className="grid grid-cols-2 gap-4 md:gap-6 mt-8"
             ref={el => sectionsRef.current['hero-features'] = el}
           >
             {[
-              { key: 'hero-feature-1', icon: 'leaf.svg', text: 'Low-footprint proteins', delay: 800 },
-              { key: 'hero-feature-2', icon: 'recycle-icon.svg', text: 'Recyclable packaging', delay: 950 },
-              { key: 'hero-feature-3', icon: 'check-icon.svg', text: 'Trusted certifications', delay: 1100 },
-              { key: 'hero-feature-4', icon: 'location-icon.svg', text: 'Made closer to you', delay: 1250 },
+              { key: 'hero-feature-1', icon: 'leaf.svg', text: 'Low-footprint proteins', delay: 800, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-9 h-9" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+              )},
+              { key: 'hero-feature-2', icon: 'recycle-icon.svg', text: 'Recyclable packaging', delay: 950, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-9 h-9" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18.5 2L16 6l4 1-2 3 3 1-2.5 4"/>
+                  <path d="M5.5 2L8 6l-4 1 2 3-3 1 2.5 4"/>
+                  <circle cx="12" cy="16" r="6"/>
+                  <path d="M10 16l1 2 2-2"/>
+                </svg>
+              )},
+              { key: 'hero-feature-3', icon: 'check-icon.svg', text: 'Trusted certifications', delay: 1100, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-9 h-9" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              )},
+              { key: 'hero-feature-4', icon: 'location-icon.svg', text: 'Made closer to you', delay: 1250, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-9 h-9" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              )},
             ].map((feature) => (
               <div
                 key={feature.key}
                 ref={el => sectionsRef.current[feature.key] = el}
-                className={`flex items-center gap-2 py-3 transition-all duration-500 ease-out ${
+                className={`flex items-center gap-5 transition-all duration-300 ease-out ${
                   isVisible[feature.key] 
                     ? 'opacity-100 translate-y-0' 
                     : 'opacity-0 translate-y-5'
                 }`}
-                style={{ transitionDelay: isVisible[feature.key] ? `${feature.delay}ms` : '0ms' }}
+                style={{ 
+                  transitionDelay: isVisible[feature.key] ? `${feature.delay}ms` : '0ms',
+                  cursor: 'default',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateX(10px)';
+                  const iconWrapper = e.currentTarget.querySelector('.icon-wrapper');
+                  if (iconWrapper) {
+                    iconWrapper.style.transform = 'scale(1.15) rotate(-5deg)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateX(0)';
+                  const iconWrapper = e.currentTarget.querySelector('.icon-wrapper');
+                  if (iconWrapper) {
+                    iconWrapper.style.transform = 'scale(1) rotate(0deg)';
+                  }
+                }}
               >
-                <img src={`${import.meta.env.BASE_URL}icons/${feature.icon}`} alt={feature.text} className="w-4 h-4" />
-                <span className="text-sm text-gray-700 font-medium">{feature.text}</span>
+                <div 
+                  className="icon-wrapper w-16 h-16 bg-white/95 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ 
+                    transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                  }}
+                >
+                  {feature.svgIcon}
+                </div>
+                <div className="flex-1">
+                  <h3 
+                    className="text-xl md:text-[22px] text-white font-semibold leading-snug"
+                    style={{
+                      letterSpacing: '-0.3px',
+                      textShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                    }}
+                  >
+                    {feature.text}
+                  </h3>
+                </div>
               </div>
             ))}
           </div>
@@ -507,8 +658,8 @@ function HomePage() {
 
       {/* How It Works Section */}
       {/* Optimization: Scroll-triggered title animation, staggered card animations */}
-      <section className="py-20 bg-gray-50" aria-labelledby="how-it-works-heading">
-        <div className="max-w-6xl mx-auto px-8">
+      <section className="py-20 md:py-28 bg-gray-50" aria-labelledby="how-it-works-heading">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
           <div 
             className="flex justify-center items-center mb-16 relative"
             ref={el => sectionsRef.current['how-it-works-title'] = el}
@@ -520,34 +671,51 @@ function HomePage() {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 id="how-it-works-heading" className="text-4xl font-bold text-center text-gray-900">How it works</h2>
+              <h2 id="how-it-works-heading" className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">How it works</h2>
             </div>
             <ReadingTime minutes={2} className="absolute right-0 hidden md:block" />
           </div>
           {/* How it works cards: Staggered fade-in on scroll */}
           {/* Optimization: Cards appear sequentially when scrolling into view */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {[
-              { key: 'how-step-1', icon: 'paw-icon.svg', title: 'Tell us about your pet', text: "Share your pet's age, size, dietary needs, and your sustainability priorities.", delay: 0 },
-              { key: 'how-step-2', icon: 'search-icon.svg', title: 'We analyze products', text: 'Our algorithm scores products on environmental impact, nutrition, and value.', delay: 150 },
-              { key: 'how-step-3', icon: 'heart-icon.svg', title: 'Get personalized picks', text: "Receive recommendations that match your pet's needs and your values.", delay: 300 },
+              { key: 'how-step-1', icon: 'paw-icon.svg', title: 'Tell us about your pet', text: "Share your pet's age, size, dietary needs, and your sustainability priorities.", delay: 0, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="9" r="2"/>
+                  <circle cx="15" cy="9" r="2"/>
+                  <circle cx="9" cy="15" r="2"/>
+                  <circle cx="15" cy="15" r="2"/>
+                  <path d="M12 5v14"/>
+                </svg>
+              )},
+              { key: 'how-step-2', icon: 'search-icon.svg', title: 'We analyze products', text: 'Our algorithm scores products on environmental impact, nutrition, and value.', delay: 150, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
+              )},
+              { key: 'how-step-3', icon: 'heart-icon.svg', title: 'Get personalized picks', text: "Receive recommendations that match your pet's needs and your values.", delay: 300, svgIcon: (
+                <svg viewBox="0 0 24 24" className="w-8 h-8" fill="#059669" stroke="#059669" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>
+                </svg>
+              )},
             ].map((step) => (
               <div
                 key={step.key}
-                className="text-center group transition-all duration-300 ease"
+                className="text-center group transition-all duration-300 ease bg-white rounded-xl p-8 border border-gray-200 hover:shadow-xl hover:-translate-y-2"
                 ref={el => sectionsRef.current[step.key] = el}
                 style={{
                   transform: isVisible[step.key] ? 'translateY(0)' : 'translateY(20px)',
                   opacity: isVisible[step.key] ? 1 : 0,
-                  transition: `transform 0.5s ease-out, opacity 0.5s ease-out`,
+                  transition: `transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease`,
                   transitionDelay: isVisible[step.key] ? `${step.delay}ms` : '0ms',
                 }}
               >
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors duration-300">
-                  <img src={`${import.meta.env.BASE_URL}icons/${step.icon}`} alt={step.title} className="w-8 h-8 object-contain flex-shrink-0" />
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-emerald-200 transition-colors duration-300 p-4">
+                  {step.svgIcon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{step.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{step.text}</p>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-3">{step.title}</h3>
+                <p className="text-lg text-gray-600 leading-relaxed">{step.text}</p>
               </div>
             ))}
           </div>
@@ -566,19 +734,19 @@ function HomePage() {
                 to="/quiz/0" 
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e)}
-                className="bg-green-800 text-white px-8 py-4 rounded-lg font-semibold text-lg inline-block transition-all duration-300 min-h-[44px]"
+                className="bg-green-800 text-white px-8 py-4 rounded-lg font-bold text-lg inline-block transition-all duration-300 min-h-[44px] shadow-lg hover:shadow-xl"
                 style={{
                   transform: 'translateY(0)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
                   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-3px)';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
+                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.3)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
                 }}
                 aria-label="Start quiz"
               >
@@ -594,8 +762,8 @@ function HomePage() {
 
       {/* Why Choose GreenTail Section */}
       {/* Optimization: Scroll-triggered title animation, staggered card animations */}
-      <section className="py-20" aria-labelledby="why-choose-heading">
-        <div className="max-w-6xl mx-auto px-8">
+      <section className="py-20 md:py-28" aria-labelledby="why-choose-heading">
+        <div className="max-w-7xl mx-auto px-6 md:px-8">
           <div 
             className="flex justify-center items-center mb-16 relative"
             ref={el => sectionsRef.current['why-choose-title'] = el}
@@ -607,7 +775,7 @@ function HomePage() {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 id="why-choose-heading" className="text-4xl font-bold text-center text-gray-900">Why choose GreenTail?</h2>
+              <h2 id="why-choose-heading" className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">Why choose GreenTail?</h2>
             </div>
             <ReadingTime minutes={1} className="absolute right-0 hidden md:block" />
           </div>
@@ -621,7 +789,7 @@ function HomePage() {
             ].map((card) => (
               <div
                 key={card.key}
-                className="text-center p-6 bg-white rounded-xl shadow-lg relative overflow-hidden group transition-all duration-300 ease"
+                className="text-center p-8 bg-white rounded-xl shadow-lg border border-gray-200 relative overflow-hidden group transition-all duration-300 ease"
                 role="article"
                 aria-label={card.ariaLabel}
                 ref={el => sectionsRef.current[card.key] = el}
@@ -633,19 +801,19 @@ function HomePage() {
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.15)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
                 }}
               >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-800 to-green-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" aria-hidden="true"></div>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <img src={`${import.meta.env.BASE_URL}icons/${card.icon}`} alt={`${card.title} icon`} className="w-6 h-6" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-emerald-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" aria-hidden="true"></div>
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 p-4">
+                  <img src={`${import.meta.env.BASE_URL}icons/${card.icon}`} alt={`${card.title} icon`} className="w-8 h-8 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-green-800 mb-3">{card.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{card.text}</p>
+                <h3 className="text-2xl font-semibold text-emerald-600 mb-3">{card.title}</h3>
+                <p className="text-lg text-gray-600 leading-relaxed mb-4">{card.text}</p>
               </div>
             ))}
           </div>
@@ -933,7 +1101,7 @@ function HomePage() {
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowContactModal(false)}
-                className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-900 transition-colors"
               >
                 Close
               </button>

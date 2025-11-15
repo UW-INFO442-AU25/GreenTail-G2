@@ -181,38 +181,145 @@ function calculateEcoFeaturesScore(product, quizData) {
 
 /**
  * Calculate product quality score (used in ComparePage)
- * This score is based on product features, not user preferences
+ * This score is based on product features, aligned with GreenTail's core values:
+ * 1. Sustainability (40 points) - Highest priority
+ * 2. Organic & Certifications (30 points) - Core value
+ * 3. Pet Health (20 points) - Important but secondary
+ * 4. Value/Affordability (10 points) - Lower priority
  * @param {Object} product - Product information
  * @returns {number} Quality score (0-100)
  */
 export function calculateProductQualityScore(product) {
   let score = 0;
   
-  // Core quality factors (50 points)
-  if (product.isOrganic) score += 20;
-  if (product.isGrainFree) score += 15;
-  if (product.ecoFeatures?.certified) score += 10;
-  if (product.tags?.some(tag => tag.toLowerCase().includes('certified organic'))) score += 5;
+  // ============================================
+  // SUSTAINABILITY FEATURES (40 points) - GreenTail's #1 Priority
+  // ============================================
+  // Low-footprint proteins (15 points) - Core sustainability feature
+  if (product.ecoFeatures?.lowFootprintProtein) {
+    score += 15;
+  } else if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('low-footprint') || 
+           lowerTag.includes('sustainable protein') ||
+           lowerTag.includes('insect') ||
+           lowerTag.includes('plant-based');
+  })) {
+    score += 10; // Partial credit for sustainable protein mentions
+  }
   
-  // Eco-friendly features (30 points)
-  if (product.ecoFeatures?.recyclablePackaging) score += 10;
-  if (product.ecoFeatures?.lowFootprintProtein) score += 12;
-  if (product.ecoFeatures?.localProduction) score += 8;
-  if (product.tags?.some(tag => tag.toLowerCase().includes('sustainable'))) score += 8;
+  // Recyclable/compostable packaging (12 points) - Core sustainability feature
+  if (product.ecoFeatures?.recyclablePackaging) {
+    score += 12;
+  } else if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('recyclable') || 
+           lowerTag.includes('compostable') ||
+           lowerTag.includes('eco-friendly packaging');
+  })) {
+    score += 8; // Partial credit
+  }
   
-  // Value factors (20 points) - more lenient thresholds
-  if (product.price <= 35) score += 8; // Increased from 30 to 35
-  if (product.pricePer1000kcal <= 3.5) score += 8; // Increased from 3 to 3.5
-  if (product.pricePer1000kcal <= 2.5) score += 4; // Bonus for excellent value
+  // Local production (8 points) - Reduces carbon footprint
+  if (product.ecoFeatures?.localProduction) {
+    score += 8;
+  } else if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('locally sourced') || 
+           lowerTag.includes('made nearby') ||
+           lowerTag.includes('local production');
+  })) {
+    score += 5; // Partial credit
+  }
   
-  // Premium and quality indicators (20 points)
-  if (product.tags?.some(tag => tag.toLowerCase().includes('premium'))) score += 8;
-  if (product.tags?.some(tag => tag.toLowerCase().includes('high protein'))) score += 6;
-  if (product.tags?.some(tag => tag.toLowerCase().includes('human-grade'))) score += 6;
+  // General sustainability indicators (5 points)
+  if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('sustainable') || 
+           lowerTag.includes('eco-friendly') ||
+           lowerTag.includes('carbon neutral') ||
+           lowerTag.includes('environmentally friendly');
+  })) {
+    score += 5;
+  }
   
-  // Additional quality bonuses (10 points)
-  if (product.tags?.some(tag => tag.toLowerCase().includes('hypoallergenic'))) score += 5;
-  if (product.tags?.some(tag => tag.toLowerCase().includes('limited ingredient'))) score += 5;
+  // ============================================
+  // ORGANIC & CERTIFICATIONS (30 points) - Core Transparency Value
+  // ============================================
+  // Organic certification (18 points) - Highest priority for GreenTail
+  if (product.isOrganic) {
+    score += 18;
+  } else if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('organic') || 
+           lowerTag.includes('certified organic');
+  })) {
+    score += 12; // Partial credit if mentioned in tags but not flagged
+  }
+  
+  // Credible certifications (12 points) - Transparency and trust
+  if (product.ecoFeatures?.certified) {
+    score += 12;
+  } else if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('certified') || 
+           lowerTag.includes('usda') ||
+           lowerTag.includes('usda organic') ||
+           lowerTag.includes('certification');
+  })) {
+    score += 8; // Partial credit
+  }
+  
+  // ============================================
+  // PET HEALTH FEATURES (20 points) - Important but Secondary
+  // ============================================
+  // Grain-free (8 points) - Health benefit
+  if (product.isGrainFree) {
+    score += 8;
+  } else if (product.tags?.some(tag => tag.toLowerCase().includes('grain-free'))) {
+    score += 5; // Partial credit
+  }
+  
+  // High protein (5 points) - Nutritional quality
+  if (product.tags?.some(tag => tag.toLowerCase().includes('high protein'))) {
+    score += 5;
+  }
+  
+  // Hypoallergenic/Limited ingredient (4 points) - Special dietary needs
+  if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('hypoallergenic') || 
+           lowerTag.includes('limited ingredient') ||
+           lowerTag.includes('single protein');
+  })) {
+    score += 4;
+  }
+  
+  // Human-grade quality (3 points) - Premium nutrition
+  if (product.tags?.some(tag => {
+    const lowerTag = tag.toLowerCase();
+    return lowerTag.includes('human-grade') || 
+           lowerTag.includes('human grade');
+  })) {
+    score += 3;
+  }
+  
+  // ============================================
+  // VALUE/AFFORDABILITY (10 points) - Lower Priority
+  // ============================================
+  // Reasonable price (5 points) - Accessibility
+  if (product.price <= 40) {
+    score += 5;
+  } else if (product.price <= 50) {
+    score += 3; // Partial credit for moderately priced
+  }
+  
+  // Good value per calorie (5 points)
+  if (product.pricePer1000kcal <= 3.5) {
+    score += 5;
+  } else if (product.pricePer1000kcal <= 4.5) {
+    score += 3; // Partial credit
+  }
   
   return Math.min(score, 100);
 }

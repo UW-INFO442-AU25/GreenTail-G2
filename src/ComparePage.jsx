@@ -341,31 +341,93 @@ const ComparePage = () => {
     const tags = product.tags || [];
     const tagStrings = tags.map(t => t.toLowerCase());
     
-    // Core quality factors
-    if (product.isOrganic) breakdown.push({ factor: 'Organic Certified', points: 20, earned: true });
-    if (product.isGrainFree) breakdown.push({ factor: 'Grain-Free Formula', points: 15, earned: true });
-    if (product.ecoFeatures?.certified) breakdown.push({ factor: 'Eco Certification', points: 10, earned: true });
-    if (tagStrings.some(t => t.includes('certified organic'))) breakdown.push({ factor: 'Certified Organic Tag', points: 5, earned: true });
+    // ============================================
+    // SUSTAINABILITY FEATURES (40 points) - GreenTail's #1 Priority
+    // ============================================
+    // Low-footprint proteins (15 points)
+    if (product.ecoFeatures?.lowFootprintProtein) {
+      breakdown.push({ factor: 'Low-Footprint Proteins', points: 15, earned: true, category: 'Sustainability' });
+    } else if (tagStrings.some(t => t.includes('low-footprint') || t.includes('sustainable protein') || t.includes('insect') || t.includes('plant-based'))) {
+      breakdown.push({ factor: 'Low-Footprint Proteins (mentioned)', points: 10, earned: true, category: 'Sustainability' });
+    }
     
-    // Eco-friendly features
-    if (product.ecoFeatures?.recyclablePackaging) breakdown.push({ factor: 'Recyclable Packaging', points: 10, earned: true });
-    if (product.ecoFeatures?.lowFootprintProtein) breakdown.push({ factor: 'Low-Carbon Protein', points: 12, earned: true });
-    if (product.ecoFeatures?.localProduction) breakdown.push({ factor: 'Local Production', points: 8, earned: true });
-    if (tagStrings.some(t => t.includes('sustainable'))) breakdown.push({ factor: 'Sustainable Practices', points: 8, earned: true });
+    // Recyclable/compostable packaging (12 points)
+    if (product.ecoFeatures?.recyclablePackaging) {
+      breakdown.push({ factor: 'Recyclable/Compostable Packaging', points: 12, earned: true, category: 'Sustainability' });
+    } else if (tagStrings.some(t => t.includes('recyclable') || t.includes('compostable') || t.includes('eco-friendly packaging'))) {
+      breakdown.push({ factor: 'Recyclable Packaging (mentioned)', points: 8, earned: true, category: 'Sustainability' });
+    }
     
-    // Value factors
-    if (product.price <= 35) breakdown.push({ factor: 'Reasonable Price (≤$35)', points: 8, earned: true });
-    if (product.pricePer1000kcal <= 3.5) breakdown.push({ factor: 'Good Value per Calorie (≤$3.5)', points: 8, earned: true });
-    if (product.pricePer1000kcal <= 2.5) breakdown.push({ factor: 'Excellent Value (≤$2.5)', points: 4, earned: true });
+    // Local production (8 points)
+    if (product.ecoFeatures?.localProduction) {
+      breakdown.push({ factor: 'Local Production', points: 8, earned: true, category: 'Sustainability' });
+    } else if (tagStrings.some(t => t.includes('locally sourced') || t.includes('made nearby') || t.includes('local production'))) {
+      breakdown.push({ factor: 'Local Production (mentioned)', points: 5, earned: true, category: 'Sustainability' });
+    }
     
-    // Premium and quality indicators
-    if (tagStrings.some(t => t.includes('premium'))) breakdown.push({ factor: 'Premium Quality', points: 8, earned: true });
-    if (tagStrings.some(t => t.includes('high protein'))) breakdown.push({ factor: 'High Protein', points: 6, earned: true });
-    if (tagStrings.some(t => t.includes('human-grade'))) breakdown.push({ factor: 'Human-Grade', points: 6, earned: true });
+    // General sustainability indicators (5 points)
+    if (tagStrings.some(t => t.includes('sustainable') || t.includes('eco-friendly') || t.includes('carbon neutral') || t.includes('environmentally friendly'))) {
+      breakdown.push({ factor: 'Sustainable Practices', points: 5, earned: true, category: 'Sustainability' });
+    }
     
-    // Additional quality bonuses
-    if (tagStrings.some(t => t.includes('hypoallergenic'))) breakdown.push({ factor: 'Hypoallergenic', points: 5, earned: true });
-    if (tagStrings.some(t => t.includes('limited ingredient'))) breakdown.push({ factor: 'Limited Ingredient', points: 5, earned: true });
+    // ============================================
+    // ORGANIC & CERTIFICATIONS (30 points) - Core Transparency Value
+    // ============================================
+    // Organic certification (18 points)
+    if (product.isOrganic) {
+      breakdown.push({ factor: 'Organic Certified', points: 18, earned: true, category: 'Organic & Certifications' });
+    } else if (tagStrings.some(t => t.includes('organic') || t.includes('certified organic'))) {
+      breakdown.push({ factor: 'Organic (mentioned)', points: 12, earned: true, category: 'Organic & Certifications' });
+    }
+    
+    // Credible certifications (12 points)
+    if (product.ecoFeatures?.certified) {
+      breakdown.push({ factor: 'Credible Certifications', points: 12, earned: true, category: 'Organic & Certifications' });
+    } else if (tagStrings.some(t => t.includes('certified') || t.includes('usda') || t.includes('usda organic') || t.includes('certification'))) {
+      breakdown.push({ factor: 'Certifications (mentioned)', points: 8, earned: true, category: 'Organic & Certifications' });
+    }
+    
+    // ============================================
+    // PET HEALTH FEATURES (20 points) - Important but Secondary
+    // ============================================
+    // Grain-free (8 points)
+    if (product.isGrainFree) {
+      breakdown.push({ factor: 'Grain-Free Formula', points: 8, earned: true, category: 'Pet Health' });
+    } else if (tagStrings.some(t => t.includes('grain-free'))) {
+      breakdown.push({ factor: 'Grain-Free (mentioned)', points: 5, earned: true, category: 'Pet Health' });
+    }
+    
+    // High protein (5 points)
+    if (tagStrings.some(t => t.includes('high protein'))) {
+      breakdown.push({ factor: 'High Protein', points: 5, earned: true, category: 'Pet Health' });
+    }
+    
+    // Hypoallergenic/Limited ingredient (4 points)
+    if (tagStrings.some(t => t.includes('hypoallergenic') || t.includes('limited ingredient') || t.includes('single protein'))) {
+      breakdown.push({ factor: 'Hypoallergenic/Limited Ingredient', points: 4, earned: true, category: 'Pet Health' });
+    }
+    
+    // Human-grade quality (3 points)
+    if (tagStrings.some(t => t.includes('human-grade') || t.includes('human grade'))) {
+      breakdown.push({ factor: 'Human-Grade Quality', points: 3, earned: true, category: 'Pet Health' });
+    }
+    
+    // ============================================
+    // VALUE/AFFORDABILITY (10 points) - Lower Priority
+    // ============================================
+    // Reasonable price (5 points)
+    if (product.price <= 40) {
+      breakdown.push({ factor: 'Reasonable Price (≤$40)', points: 5, earned: true, category: 'Value' });
+    } else if (product.price <= 50) {
+      breakdown.push({ factor: 'Moderate Price (≤$50)', points: 3, earned: true, category: 'Value' });
+    }
+    
+    // Good value per calorie (5 points)
+    if (product.pricePer1000kcal <= 3.5) {
+      breakdown.push({ factor: 'Good Value per Calorie (≤$3.5/1000kcal)', points: 5, earned: true, category: 'Value' });
+    } else if (product.pricePer1000kcal <= 4.5) {
+      breakdown.push({ factor: 'Moderate Value (≤$4.5/1000kcal)', points: 3, earned: true, category: 'Value' });
+    }
     
     return breakdown;
   };
@@ -395,7 +457,8 @@ const ComparePage = () => {
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="font-medium text-green-800 mb-2">Our Rating System (5.0 scale)</h4>
                 <p className="text-sm text-green-700">
-                  We evaluate products based on quality, sustainability, and value. Ratings are calculated from a 100-point scoring system and converted to a 5.0 scale for easy comparison.
+                  We evaluate products based on <strong>sustainability first</strong>, then organic certifications, pet health, and value. 
+                  Ratings are calculated from a 100-point scoring system aligned with GreenTail's core values and converted to a 5.0 scale for easy comparison.
                 </p>
               </div>
               

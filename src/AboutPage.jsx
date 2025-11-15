@@ -190,13 +190,7 @@ const AboutPage = () => {
 
       {/* Hero Section */}
       {/* Optimization: Initial load animations - hero image, title, description, buttons with staggered timing */}
-      <section className="pt-24 pb-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-20 w-64 h-64 bg-green-200 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-200 rounded-full blur-3xl"></div>
-        </div>
-        
+      <section className="about-hero-section pt-24">
         <div className="max-w-6xl mx-auto px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Main Visual/Image - Subtle Scale & Fade-in */}
@@ -213,26 +207,11 @@ const AboutPage = () => {
                 }`}
                 style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
               >
-                <div className="relative inline-block w-full max-w-md mx-auto">
-                  {/* Floating shadow effect - soft glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl transform translate-y-8 scale-125 -z-10"></div>
+                <div className="earth-illustration">
                   <img 
                     src={`${import.meta.env.BASE_URL}images/earth-pets.png`} 
                     alt="Earth with pets, symbolizing GreenTail's mission to help pet parents make sustainable choices" 
-                    className="w-full transition-all duration-500 ease-out relative z-10"
-                    style={{
-                      transform: 'translateY(-10px) scale(1)',
-                      filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))',
-                      transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-20px) scale(1.05)';
-                      e.currentTarget.style.filter = 'drop-shadow(0 30px 60px rgba(0, 0, 0, 0.2))';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
-                      e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
-                    }}
+                    className="w-full"
                     loading="eager"
                   />
                 </div>
@@ -253,7 +232,7 @@ const AboutPage = () => {
                 }`}
                 style={{ transitionTimingFunction: 'ease-out' }}
               >
-                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                <h1 className="about-section-title text-4xl lg:text-5xl">
                   Why GreenTail exists
                 </h1>
               </div>
@@ -269,7 +248,7 @@ const AboutPage = () => {
                 }`}
                 style={{ transitionDelay: '400ms' }}
               >
-                <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                <p className="about-section-subtitle text-lg">
                   We're building a clearer, faster way to choose organic pet foods that fit your pet and your budget. No more confusing labels or endless research.
                 </p>
               </div>
@@ -280,24 +259,14 @@ const AboutPage = () => {
                 <a 
                   href="#mission" 
                   ref={el => sectionsRef.current['hero-button-1'] = el}
-                  className={`bg-green-800 text-white px-6 py-3 rounded-lg font-medium transition-all duration-500 ease-out ${
+                  className={`about-btn-primary ${
                     isVisible['hero-button-1'] 
                       ? 'opacity-100 translate-y-0' 
                       : 'opacity-0 translate-y-5'
                   }`}
                   style={{ 
                     transitionDelay: '800ms',
-                    transform: 'translateY(0)',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    transition: 'transform 0.3s ease, opacity 0.5s ease-out, box-shadow 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
                   }}
                   aria-label="Scroll to our mission section"
                 >
@@ -306,24 +275,14 @@ const AboutPage = () => {
                 <a 
                   href="#team" 
                   ref={el => sectionsRef.current['hero-button-2'] = el}
-                  className={`border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all duration-500 ease-out hover:bg-gray-50 ${
+                  className={`about-btn-secondary ${
                     isVisible['hero-button-2'] 
                       ? 'opacity-100 translate-y-0' 
                       : 'opacity-0 translate-y-5'
                   }`}
                   style={{ 
                     transitionDelay: '650ms',
-                    transform: 'translateY(0)',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                    transition: 'transform 0.3s ease, opacity 0.5s ease-out, box-shadow 0.3s ease, background-color 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+                    transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
                   }}
                   aria-label="Scroll to meet the team section"
                 >
@@ -370,55 +329,31 @@ const AboutPage = () => {
           {/* Optimization: Cards appear sequentially when scrolling into view */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div 
-              className="group bg-white/80 backdrop-blur-sm p-10 rounded-2xl shadow-xl border border-green-100/50 hover:border-green-200 transition-all duration-300 ease"
+              className="about-quote-card"
               ref={el => sectionsRef.current['value-card-1'] = el}
               style={{
-                transform: isVisible['value-card-1'] ? 'translateY(0)' : 'translateY(20px)',
                 opacity: isVisible['value-card-1'] ? 1 : 0,
-                transition: 'transform 0.8s ease-out, opacity 0.8s ease-out, box-shadow 0.3s ease',
-                transitionDelay: isVisible['value-card-1'] ? '0ms' : '0ms',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '';
+                transform: isVisible['value-card-1'] ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-                <p className="text-2xl text-gray-800 font-semibold leading-relaxed relative z-10">
-                  "Pure ingredients, lighter footprint."
-                </p>
-              </div>
+              <p className="about-quote-text">
+                Pure ingredients, lighter footprint.
+              </p>
             </div>
             
             <div 
-              className="group bg-white/80 backdrop-blur-sm p-10 rounded-2xl shadow-xl border border-green-100/50 hover:border-green-200 transition-all duration-300 ease"
+              className="about-quote-card"
               ref={el => sectionsRef.current['value-card-2'] = el}
               style={{
-                transform: isVisible['value-card-2'] ? 'translateY(0)' : 'translateY(20px)',
                 opacity: isVisible['value-card-2'] ? 1 : 0,
-                transition: 'transform 0.8s ease-out, opacity 0.8s ease-out, box-shadow 0.3s ease',
-                transitionDelay: isVisible['value-card-2'] ? '150ms' : '0ms',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '';
+                transform: isVisible['value-card-2'] ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.8s ease-out 0.15s, transform 0.8s ease-out 0.15s',
               }}
             >
-              <div className="relative">
-                <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-                <p className="text-2xl text-gray-800 font-semibold leading-relaxed relative z-10">
-                  "Nourish naturally. Reduce the impact."
-                </p>
-              </div>
+              <p className="about-quote-text">
+                Nourish naturally. Reduce the impact.
+              </p>
             </div>
           </div>
         </div>
@@ -446,10 +381,9 @@ const AboutPage = () => {
               }`}
             >
               <div className="inline-block">
-                <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-8">
+                <h2 className="about-section-title text-4xl lg:text-6xl">
                   Our mission
                 </h2>
-                <div className="w-32 h-1.5 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 mx-auto rounded-full mb-8"></div>
               </div>
               <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
                 Help pet parents pick organic, lower-impact foods that fit real budgets—quickly and clearly.
@@ -468,30 +402,19 @@ const AboutPage = () => {
             ].map((card) => (
               <div
                 key={card.key}
-                className="group bg-white/70 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-green-100/50 hover:border-green-300/50 relative overflow-hidden transition-all duration-300 ease"
+                className="about-mission-card"
                 ref={el => sectionsRef.current[card.key] = el}
                 style={{
-                  transform: isVisible[card.key] ? 'translateY(0)' : 'translateY(20px)',
                   opacity: isVisible[card.key] ? 1 : 0,
-                  transition: `transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease`,
-                  transitionDelay: isVisible[card.key] ? `${card.delay}ms` : '0ms',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                  transform: isVisible[card.key] ? 'translateY(0)' : 'translateY(20px)',
+                  transition: `opacity 0.5s ease-out ${card.delay}ms, transform 0.5s ease-out ${card.delay}ms`,
                 }}
               >
-                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${card.bgGradient} rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-500`}></div>
-                <div className="relative z-10">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    {card.title}
-                  </h3>
-                  <p className="text-gray-600 text-lg leading-relaxed">{card.text}</p>
-                </div>
+                <div className="decoration-circle"></div>
+                <h3>
+                  {card.title}
+                </h3>
+                <p>{card.text}</p>
               </div>
             ))}
           </div>
@@ -531,32 +454,24 @@ const AboutPage = () => {
             ].map((member, index) => (
               <div
                 key={member.key}
-                className="bg-white p-6 rounded-xl shadow-lg text-center transition-all duration-300 ease"
+                className="about-team-card"
                 ref={el => sectionsRef.current[member.key] = el}
                 style={{
-                  transform: isVisible[member.key] ? 'translateY(0)' : 'translateY(20px)',
                   opacity: isVisible[member.key] ? 1 : 0,
-                  transition: `transform 0.8s ease-out, opacity 0.8s ease-out`,
+                  transform: isVisible[member.key] ? 'translateY(0)' : 'translateY(20px)',
+                  transition: `opacity 0.8s ease-out, transform 0.8s ease-out`,
                   transitionDelay: isVisible[member.key] ? `${index * 150}ms` : '0ms',
                 }}
               >
-                <img 
-                  src={`${import.meta.env.BASE_URL}images/${member.image}`} 
-                  alt={member.name} 
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover transition-transform duration-400 ease"
-                  style={{
-                    transform: 'scale(1)',
-                    transition: 'transform 0.4s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.03)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
-                <p className="text-gray-600">{member.role}</p>
+                <div className="about-avatar-wrapper">
+                  <img 
+                    src={`${import.meta.env.BASE_URL}images/${member.image}`} 
+                    alt={member.name} 
+                    className="about-avatar-img"
+                  />
+                </div>
+                <h3 className="about-team-name">{member.name}</h3>
+                <p className="about-team-role">{member.role}</p>
               </div>
             ))}
           </div>

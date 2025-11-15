@@ -33,9 +33,10 @@ function SearchPage() {
   const [sortBy, setSortBy] = useState('best');
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedProductForMap, setSelectedProductForMap] = useState(null);
+  const [showQuizContext, setShowQuizContext] = useState(true);
   const [filters, setFilters] = useState({
-    species: ['Dog'],
-    lifeStage: ['Adult'],
+    species: [],
+    lifeStage: [],
     dietStyle: [],
     proteinType: [],
     priceRange: '',
@@ -67,10 +68,30 @@ function SearchPage() {
   const filteredProducts = useMemo(() => {
     let products = [...petFoodDatabase];
     
-    // If quiz data exists, use smart matching algorithm to prioritize results
-    if (quizData && quizData.pet) {
-      products = findBestMatches(quizData);
-    }
+    // Only use smart matching algorithm if user has applied filters or search
+    // Otherwise, show all products
+    const hasActiveFilters = filters.species.length > 0 || 
+                            filters.lifeStage.length > 0 || 
+                            filters.dietStyle.length > 0 || 
+                            filters.proteinType.length > 0 || 
+                            filters.priceRange !== '' ||
+                            filters.packaging || 
+                            filters.certifications || 
+                            filters.grainFree || 
+                            filters.highProtein || 
+                            filters.organic || 
+                            filters.sustainable || 
+                            filters.hypoallergenic || 
+                            filters.subscription || 
+                            filters.premium || 
+                            filters.locallySourced || 
+                            filters.humanGrade ||
+                            searchTerm !== '';
+    
+    // Don't use findBestMatches when user has applied filters - it limits to 8 products
+    // When filters are applied, show all matching products from the full database
+    // Only use findBestMatches if no filters are applied and quizData exists (for initial recommendations)
+    // In that case, we'll still show all products, just sorted by match score
 
     // Apply text search filter across product name, brand, and tags
     if (searchTerm) {
@@ -83,30 +104,46 @@ function SearchPage() {
 
     // Filter by pet species (Dog, Cat)
     if (filters.species.length > 0) {
-      products = products.filter(product => 
-        filters.species.some(species => product.petType.includes(species))
-      );
+      products = products.filter(product => {
+        if (!product.petType || !Array.isArray(product.petType)) {
+          console.warn('Product missing petType:', product.id, product.name);
+          return false;
+        }
+        return filters.species.some(species => product.petType.includes(species));
+      });
     }
 
     // Filter by life stage (Puppy, Adult, Senior)
     if (filters.lifeStage.length > 0) {
-      products = products.filter(product => 
-        filters.lifeStage.some(stage => product.lifeStage.includes(stage))
-      );
+      products = products.filter(product => {
+        if (!product.lifeStage || !Array.isArray(product.lifeStage)) {
+          console.warn('Product missing lifeStage:', product.id, product.name);
+          return false;
+        }
+        return filters.lifeStage.some(stage => product.lifeStage.includes(stage));
+      });
     }
 
     // Filter by diet style (Kibble, Wet, Freeze-dried, etc.)
     if (filters.dietStyle.length > 0) {
-      products = products.filter(product => 
-        filters.dietStyle.some(style => product.feedingStyle.includes(style))
-      );
+      products = products.filter(product => {
+        if (!product.feedingStyle || !Array.isArray(product.feedingStyle)) {
+          console.warn('Product missing feedingStyle:', product.id, product.name);
+          return false;
+        }
+        return filters.dietStyle.some(style => product.feedingStyle.includes(style));
+      });
     }
 
     // Filter by protein type (Chicken, Salmon, etc.)
     if (filters.proteinType.length > 0) {
-      products = products.filter(product => 
-        filters.proteinType.some(protein => product.mainProteins.includes(protein))
-      );
+      products = products.filter(product => {
+        if (!product.mainProteins || !Array.isArray(product.mainProteins)) {
+          console.warn('Product missing mainProteins:', product.id, product.name);
+          return false;
+        }
+        return filters.proteinType.some(protein => product.mainProteins.includes(protein));
+      });
     }
 
     // Filter by price range
@@ -124,33 +161,41 @@ function SearchPage() {
     }
 
     if (filters.premium) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return product.price > 40;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('premium') || 
-          tag.toLowerCase().includes('high-end') ||
-          product.price > 40
-        )
-      );
+          tag.toLowerCase().includes('high-end')
+        ) || product.price > 40;
+      });
     }
 
     if (filters.packaging) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('recyclable') || 
           tag.toLowerCase().includes('compostable') ||
           tag.toLowerCase().includes('eco-friendly')
-        )
-      );
+        );
+      });
     }
 
     if (filters.certifications) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('certified') || 
           tag.toLowerCase().includes('organic') ||
           tag.toLowerCase().includes('usda')
-        )
-      );
+        );
+      });
     }
 
     if (filters.grainFree) {
@@ -158,9 +203,12 @@ function SearchPage() {
     }
 
     if (filters.highProtein) {
-      products = products.filter(product => 
-        product.tags.some(tag => tag.toLowerCase().includes('high protein'))
-      );
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => tag.toLowerCase().includes('high protein'));
+      });
     }
 
     if (filters.organic) {
@@ -168,51 +216,66 @@ function SearchPage() {
     }
 
     if (filters.sustainable) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('sustainable') || 
           tag.toLowerCase().includes('low-footprint') ||
           tag.toLowerCase().includes('eco-friendly')
-        )
-      );
+        );
+      });
     }
 
     if (filters.hypoallergenic) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('hypoallergenic') || 
           tag.toLowerCase().includes('limited ingredient') ||
           tag.toLowerCase().includes('single protein')
-        )
-      );
+        );
+      });
     }
 
     if (filters.locallySourced) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('locally sourced') || 
           tag.toLowerCase().includes('made nearby') ||
           tag.toLowerCase().includes('local production')
-        )
-      );
+        );
+      });
     }
 
     if (filters.humanGrade) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('human-grade') || 
           tag.toLowerCase().includes('human grade')
-        )
-      );
+        );
+      });
     }
 
     if (filters.subscription) {
-      products = products.filter(product => 
-        product.tags.some(tag => 
+      products = products.filter(product => {
+        if (!product.tags || !Array.isArray(product.tags)) {
+          return false;
+        }
+        return product.tags.some(tag => 
           tag.toLowerCase().includes('subscription') || 
           tag.toLowerCase().includes('fresh meals')
-        )
-      );
+        );
+      });
     }
 
     // Ensure all products have matchLevel based on quality score
@@ -261,12 +324,17 @@ function SearchPage() {
   }, [searchTerm, filters, sortBy, quizData]);
 
   const handleFilterChange = (category, value, checked) => {
-    setFilters(prev => ({
-      ...prev,
-      [category]: checked 
-        ? [...prev[category], value]
-        : prev[category].filter(item => item !== value)
-    }));
+    console.log('handleFilterChange called:', category, value, checked);
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [category]: checked 
+          ? [...prev[category], value]
+          : prev[category].filter(item => item !== value)
+      };
+      console.log('New filters state:', newFilters);
+      return newFilters;
+    });
   };
 
   const handlePriceRangeChange = (value) => {
@@ -277,6 +345,7 @@ function SearchPage() {
   };
 
   const clearFilters = () => {
+    console.log('clearFilters called');
     setFilters({
       species: [],
       lifeStage: [],
@@ -296,6 +365,8 @@ function SearchPage() {
       humanGrade: false
     });
     setSearchTerm('');
+    setShowQuizContext(false); // Hide quiz context when clearing filters
+    console.log('Filters cleared');
   };
 
   const handleTagFilter = (tagType) => {
@@ -492,7 +563,7 @@ function SearchPage() {
 
       {/* Search Context Summary */}
       {/* Optimization: Fade-in on page load */}
-      {quizData && quizData.pet && (
+      {quizData && quizData.pet && showQuizContext && (
         <section 
           className="bg-green-50 py-4 mt-16"
           ref={el => sectionsRef.current['search-context'] = el}
@@ -514,10 +585,27 @@ function SearchPage() {
               </strong> (from your answers)
             </p>
             <button 
-              onClick={clearFilters}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
-              className="text-green-800 hover:underline text-sm mt-1 transition-colors duration-300 min-h-[44px]"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clear filters button clicked');
+                clearFilters();
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                handleTouchStart(e);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Clear filters button touched');
+                handleTouchEnd(e, () => {
+                  clearFilters();
+                });
+              }}
+              className="text-green-800 hover:underline text-sm mt-1 transition-colors duration-300 min-h-[44px] cursor-pointer relative z-10"
+              style={{ pointerEvents: 'auto' }}
             >
               Clear filters
             </button>
@@ -732,24 +820,30 @@ function SearchPage() {
                 <h3 className="text-base font-semibold text-gray-900 mb-3">Filter by</h3>
                 
                 <div className="mb-4">
-                  <p className="text-xs font-medium text-gray-700 mb-2">SPECIES</p>
-                  <label className="flex items-center gap-2 mb-1.5">
+                  <p className="filter-category">SPECIES</p>
+                  <label className="checkbox-wrapper">
                     <input 
                       type="checkbox" 
                       checked={filters.species.includes('Dog')}
-                      onChange={(e) => handleFilterChange('species', 'Dog', e.target.checked)}
-                      className="w-4 h-4"
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleFilterChange('species', 'Dog', e.target.checked);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-xs">Dog</span>
+                    <span className="checkbox-label">Dog</span>
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="checkbox-wrapper">
                     <input 
                       type="checkbox" 
                       checked={filters.species.includes('Cat')}
-                      onChange={(e) => handleFilterChange('species', 'Cat', e.target.checked)}
-                      className="w-4 h-4"
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleFilterChange('species', 'Cat', e.target.checked);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-xs">Cat</span>
+                    <span className="checkbox-label">Cat</span>
                   </label>
                 </div>
 
@@ -934,11 +1028,28 @@ function SearchPage() {
                     Apply filters
                   </button>
                   <button 
-                    onClick={clearFilters}
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-1.5 px-3 rounded-lg text-xs font-medium transition-all duration-300 ease min-h-[32px]"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Clear button clicked in sidebar');
+                      clearFilters();
+                    }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      handleTouchStart(e);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Clear button touched in sidebar');
+                      handleTouchEnd(e, () => {
+                        clearFilters();
+                      });
+                    }}
+                    className="flex-1 bg-gray-200 text-gray-700 py-1.5 px-3 rounded-lg text-xs font-medium transition-all duration-300 ease min-h-[32px] cursor-pointer relative z-10"
                     style={{
+                      pointerEvents: 'auto',
                       transform: 'translateY(0)',
                       transition: 'transform 0.3s ease, background-color 0.3s ease',
                     }}
@@ -1144,8 +1255,8 @@ function SearchPage() {
                   const rating5 = convertTo5PointRating(productScore);
                   // Determine color based on rating
                   const ratingColor = productScore >= 80 ? 'bg-green-800 text-white' : 
-                                     productScore >= 60 ? 'bg-blue-600 text-white' : 
-                                     productScore >= 55 ? 'bg-yellow-600 text-white' : 
+                                     productScore >= 60 ? 'bg-yellow-600 text-white' : 
+                                     productScore >= 50 ? 'bg-red-600 text-white' : 
                                      'bg-gray-600 text-white';
                   
                   return (
@@ -1331,10 +1442,18 @@ function SearchPage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">No matching products found</h3>
                   <p className="text-gray-600 mb-6">Please try adjusting your filter criteria or search keywords.</p>
                   <button 
-                    onClick={clearFilters}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      clearFilters();
+                    }}
                     onTouchStart={handleTouchStart}
-                    onTouchEnd={(e) => handleTouchEnd(e, clearFilters)}
-                    className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px]"
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleTouchEnd(e, clearFilters);
+                    }}
+                    className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] cursor-pointer"
                   >
                     Clear all filters
                   </button>

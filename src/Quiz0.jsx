@@ -90,11 +90,31 @@ function Quiz0() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-green-50">
-      {/* Decorative BG */}
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #E0F2FE 0%, #D1FAE5 100%)' }}>
+      {/* Decorative BG Circles */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-24 -top-24 w-72 h-72 bg-green-100 rounded-full blur-3xl opacity-40"></div>
-        <div className="absolute -left-20 top-48 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-40"></div>
+        <div 
+          className="absolute rounded-full"
+          style={{
+            top: '-100px',
+            right: '-100px',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)',
+            zIndex: 0,
+          }}
+        ></div>
+        <div 
+          className="absolute rounded-full"
+          style={{
+            bottom: '-150px',
+            left: '-150px',
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%)',
+            zIndex: 0,
+          }}
+        ></div>
       </div>
 
       {/* Header */}
@@ -121,11 +141,11 @@ function Quiz0() {
       <ProgressBar currentStep={0} totalSteps={5} />
 
       {/* Main Content */}
-      <div className="pt-8 pb-20">
-        <div className="max-w-6xl mx-auto px-8">
+      <div className="pt-8 pb-20 relative z-10">
+        <div className="max-w-6xl mx-auto px-8 relative z-10">
           {/* Enhanced Hero Section */}
           {/* Phase 1: Enhanced Hero with improved messaging and animations */}
-          <section className="text-center mb-20">
+          <section className="text-center mb-20 relative z-10">
             {/* Main Headline - Fade-in & Slide-up */}
             <div 
               ref={el => sectionsRef.current['hero-title'] = el}
@@ -137,7 +157,11 @@ function Quiz0() {
               style={{ transitionTimingFunction: 'ease-out' }}
             >
               <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-                Let's find the perfect organic match for your pet 🐾
+                Let's find the perfect organic match for your pet{' '}
+                <span className="paw-icon inline-block ml-2" style={{
+                  animation: 'pawBounce 2s ease-in-out infinite',
+                  display: 'inline-block',
+                }}>🐾</span>
           </h1>
             </div>
             

@@ -10,7 +10,7 @@ function ContextualHelpBanner({ isVisible, onDismiss, onShowTransitionPlan }) {
   if (!isVisible) return null;
 
   return (
-    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg relative" role="banner" aria-label="Helpful resources">
+    <div className="helpful-resources mb-6 rounded-r-lg relative" role="banner" aria-label="Helpful resources">
       <button
         onClick={onDismiss}
         className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
@@ -22,26 +22,26 @@ function ContextualHelpBanner({ isVisible, onDismiss, onShowTransitionPlan }) {
       </button>
       
       <div className="flex flex-wrap gap-4 items-center text-sm">
-        <span className="font-semibold text-blue-900">Helpful resources:</span>
+        <span className="font-semibold text-gray-800">Helpful resources:</span>
         <Link 
           to="/pet-food-labels-guide" 
-          className="text-blue-700 hover:text-blue-900 hover:underline transition-colors duration-200"
+          className="resource-link"
           aria-label="Learn to decode pet food labels"
         >
           Learn to decode pet food labels →
         </Link>
-        <span className="text-blue-300">|</span>
+        <span className="text-gray-300">|</span>
         <button
           onClick={onShowTransitionPlan}
-          className="text-blue-700 hover:text-blue-900 hover:underline transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
+          className="resource-link cursor-pointer bg-transparent border-none p-0"
           aria-label="Get 7-14 day transition plan"
         >
           7-14 day transition plan →
         </button>
-        <span className="text-blue-300">|</span>
+        <span className="text-gray-300">|</span>
         <Link 
           to="/organic-pet-food-guide" 
-          className="text-blue-700 hover:text-blue-900 hover:underline transition-colors duration-200"
+          className="resource-link"
           aria-label="Learn what organic covers"
         >
           What "organic" covers →

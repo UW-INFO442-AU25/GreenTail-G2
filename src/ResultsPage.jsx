@@ -36,6 +36,7 @@ function ResultsPage() {
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedProductForMap, setSelectedProductForMap] = useState(null);
   const [showTransitionPlan, setShowTransitionPlan] = useState(false);
+  const [showCompareReminder, setShowCompareReminder] = useState(false);
   
   // Saved products state for compare suggestion
   const [savedForCompare, setSavedForCompare] = useState(() => {
@@ -476,7 +477,7 @@ function ResultsPage() {
               ref={el => sectionsRef.current['filter-sidebar'] = el}
             >
               <div 
-                className={`bg-white rounded-xl p-4 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
+                className={`filter-sidebar lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
                   isVisible['filter-sidebar'] 
                     ? 'opacity-100 translate-x-0' 
                     : 'opacity-0 -translate-x-5'
@@ -486,37 +487,35 @@ function ResultsPage() {
                 <h3 className="text-base font-semibold text-gray-900 mb-3">Filter by</h3>
                 
                 <div className="mb-4">
-                  <p className="text-xs font-medium text-gray-700 mb-2">LIFE STAGE</p>
+                  <p className="filter-category">LIFE STAGE</p>
                   {availableLifeStages.map((stage) => (
-                    <label key={stage} className="flex items-center gap-2 mb-1.5">
+                    <label key={stage} className="checkbox-wrapper">
                       <input 
                         type="checkbox" 
                         checked={filters.lifeStage.includes(stage)}
                         onChange={(e) => handleFilterChange('lifeStage', stage, e.target.checked)}
-                        className="w-4 h-4"
                       />
-                      <span className="text-xs">{stage}</span>
+                      <span className="checkbox-label">{stage}</span>
                     </label>
                   ))}
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-xs font-medium text-gray-700 mb-2">PROTEIN TYPE</p>
+                  <p className="filter-category">PROTEIN TYPE</p>
                   {availableProteins.slice(0, 4).map((protein) => (
-                    <label key={protein} className="flex items-center gap-2 mb-1.5">
+                    <label key={protein} className="checkbox-wrapper">
                       <input 
                         type="checkbox" 
                         checked={filters.proteinType.includes(protein)}
                         onChange={(e) => handleFilterChange('proteinType', protein, e.target.checked)}
-                        className="w-4 h-4"
                       />
-                      <span className="text-xs">{protein}</span>
+                      <span className="checkbox-label">{protein}</span>
                     </label>
                   ))}
                 </div>
 
                 <div className="mb-4">
-                  <p className="text-xs font-medium text-gray-700 mb-2">PRICE RANGE</p>
+                  <p className="filter-category">PRICE RANGE</p>
                   <label className="flex items-center gap-2 mb-1.5">
                     <input 
                       type="radio" 
@@ -627,9 +626,14 @@ function ResultsPage() {
                     : 'opacity-0 translate-y-5'
                 }`}
               >
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Best matches for your pet</h1>
-                <p className="text-gray-600 mb-4">{personalizedDescription}</p>
-                <div className="text-green-800 text-sm mb-4">✔ Your answers saved</div>
+              <h1 className="results-title">Best matches for your pet</h1>
+                <p className="pet-info">{personalizedDescription}</p>
+                <div className="saved-indicator">
+                  <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                  </svg>
+                  Your answers saved
+                </div>
                 
                 {/* Action Buttons */}
                 <div className="flex gap-3 mb-6">
@@ -643,32 +647,37 @@ function ResultsPage() {
                       setSelectedProductForMap(null);
                       setShowMapModal(true);
                     })}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg text-sm font-medium transition-all duration-300 ease min-h-[44px]"
-                    style={{
-                      transform: 'translateY(0)',
-                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                      transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-3px)';
-                      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.15)';
-                      e.currentTarget.style.backgroundColor = '#065f46'; // green-700
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                      e.currentTarget.style.backgroundColor = '#166534'; // green-800
-                    }}
+                    className="btn-find-stores"
                     aria-label="Find stores near you"
                   >
                     🗺️ Find Stores Near You
                   </button>
-                  <Link
-                    to="/compare"
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-300"
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+                      if (savedProducts.length === 0) {
+                        setShowCompareReminder(true);
+                      } else {
+                        navigate('/compare');
+                      }
+                    }}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleTouchEnd(e, () => {
+                        const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+                        if (savedProducts.length === 0) {
+                          setShowCompareReminder(true);
+                        } else {
+                          navigate('/compare');
+                        }
+                      });
+                    }}
+                    className="btn-compare"
                   >
                     Compare Products
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -680,7 +689,7 @@ function ResultsPage() {
                   id="sort" 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="sort-dropdown"
                 >
                   <option value="best">Best match</option>
                   <option value="lowest">Price: Low to High</option>
@@ -765,7 +774,7 @@ function ResultsPage() {
                 )}
                 
                 {/* Results Count */}
-                <div className="ml-auto text-sm text-gray-600">
+                <div className="ml-auto product-count">
                   Showing {filteredAndSortedProducts.length} product{filteredAndSortedProducts.length !== 1 ? 's' : ''}
                 </div>
               </div>
@@ -781,29 +790,20 @@ function ResultsPage() {
                   const rating5 = convertTo5PointRating(productScore);
                   // Determine color based on rating
                   const ratingColor = productScore >= 80 ? 'bg-green-800 text-white' : 
-                                     productScore >= 60 ? 'bg-blue-600 text-white' : 
-                                     productScore >= 55 ? 'bg-yellow-600 text-white' : 
+                                     productScore >= 60 ? 'bg-yellow-600 text-white' : 
+                                     productScore >= 50 ? 'bg-red-600 text-white' : 
                                      'bg-gray-600 text-white';
                   
                   return (
                     <div 
                       key={product.id} 
-                      className="bg-white rounded-xl p-6 shadow-lg flex flex-col h-full transition-all duration-300 ease"
+                      className="product-card flex flex-col h-full"
                       ref={el => sectionsRef.current[productKey] = el}
                       style={{
                         transform: isVisible[productKey] ? 'translateY(0)' : 'translateY(20px)',
                         opacity: isVisible[productKey] ? 1 : 0,
                         transition: `transform 0.8s ease-out, opacity 0.8s ease-out, box-shadow 0.3s ease`,
                         transitionDelay: isVisible[productKey] ? `${Math.min(index * 80, 800)}ms` : '0ms',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
                       }}
                     >
                       <div className="flex justify-between items-start mb-4">
@@ -818,15 +818,15 @@ function ResultsPage() {
                             e.preventDefault();
                             handleTouchEnd(e, () => handleSaveProduct(product));
                           }}
-                          className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center`}
+                          className={`min-h-[44px] min-w-[44px] flex items-center justify-center`}
                           title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
                         >
                           {isProductSaved(product.id) ? (
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="favorite-icon active" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                             </svg>
                           ) : (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="favorite-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                           )}
@@ -1020,6 +1020,51 @@ function ResultsPage() {
         currentFood="Regular"
         newFood="Organic"
       />
+
+      {/* Compare Reminder Modal */}
+      {showCompareReminder && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+          onClick={() => setShowCompareReminder(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowCompareReminder(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              aria-label="Close"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Save products first</h3>
+              <p className="text-gray-600 leading-relaxed">
+                To compare products, please click the <span className="text-green-600 font-semibold">❤️ heart icon</span> on the products you're interested in. 
+                You need to save at least 2 products to start comparing.
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCompareReminder(false)}
+                className="flex-1 bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px]"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
