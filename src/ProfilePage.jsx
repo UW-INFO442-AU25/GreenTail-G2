@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useToast } from './contexts/ToastContext';
-import { useScrollAnimation } from './hooks/useScrollAnimation';
-
 const ProfilePage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
-  const { sectionsRef, getAnimationClass, getParallaxStyle } = useScrollAnimation();
   
   // Debug logging
   console.log('ProfilePage rendered, user:', user);
@@ -382,7 +379,7 @@ const ProfilePage = () => {
   // Error boundary for debugging
   try {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="profile-page">
       {/* Header */}
       <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -462,36 +459,32 @@ const ProfilePage = () => {
 
       {/* Profile Hero */}
       <section 
-        className="pt-24 pb-12 bg-white"
-        ref={el => sectionsRef.current['profile-hero'] = el}
-        style={getParallaxStyle(0.5)}
+        className="pt-24 pb-12"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={getAnimationClass('profile-hero', 0)}>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Your saved products</h1>
-            <p className="text-lg text-gray-600 mb-8">Organic dog & cat foods you've liked across GreenTail.</p>
+        <div className="profile-container px-4 sm:px-6 lg:px-8">
+          <div>
+            <h1 className="page-title">Your saved products</h1>
+            <p className="page-subtitle">Organic dog & cat foods you've liked across GreenTail.</p>
 
-            <div className="flex flex-wrap gap-4 mb-8">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  placeholder="98105"
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-                <button 
-                  onClick={handleUpdateZipCode}
-                  className="bg-green-800 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
-                >
-                  Update
-                </button>
-              </div>
+            <div className="control-bar">
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="98105"
+                className="zip-input"
+              />
+              <button 
+                onClick={handleUpdateZipCode}
+                className="btn-update"
+              >
+                Update
+              </button>
 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="sort-select"
               >
                 <option value="recently-saved">Recently saved</option>
                 <option value="a-z">A-Z</option>
@@ -500,50 +493,62 @@ const ProfilePage = () => {
 
               <Link
                 to="/search"
-                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300 mr-2"
+                className="btn-back"
               >
                 Back to Search
               </Link>
               <Link
                 to="/compare"
-                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors duration-300"
+                className="btn-compare"
               >
                 Compare
               </Link>
             </div>
 
             {/* User Info Card */}
-            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-lg font-semibold">
+            <div className="user-card">
+              <div className="user-info">
+                <div className="user-avatar">
+                  <span>
                     {userPersona?.name ? userPersona.name.charAt(0) : user?.name ? user.name.charAt(0) : "U"}
                   </span>
                 </div>
-                <div>
-                  <div className="font-semibold text-gray-900">{userPersona?.name || user?.name || "Sammi Huang"}</div>
-                  <div className="text-sm text-gray-600">{userPersona?.bio || "Pet Parent"}</div>
-                  <div className="text-sm text-gray-500">Member since {userPersona?.memberSince || "2025"}</div>
+                <div className="user-details">
+                  <h2>{userPersona?.name || user?.name || "Sammi Huang"}</h2>
+                  <div className="user-role">{userPersona?.bio || "Pet Parent"}</div>
+                  <div className="user-meta">Member since {userPersona?.memberSince || "2025"}</div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-6">
-                <label className="flex items-center space-x-2">
+              <div className="user-preferences">
+                <label className="preference-item">
                   <input
                     type="checkbox"
                     checked={useZipInResults}
                     onChange={(e) => setUseZipInResults(e.target.checked)}
-                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                   />
-                  <span className="text-sm text-gray-700">Use this ZIP in results</span>
+                  <div className={`custom-checkbox ${useZipInResults ? 'checked' : ''}`}>
+                    {useZipInResults && (
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <span className="preference-label">Use this ZIP in results</span>
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="preference-item">
                   <input
                     type="checkbox"
                     checked={showNearbyShops}
                     onChange={(e) => setShowNearbyShops(e.target.checked)}
-                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                   />
-                  <span className="text-sm text-gray-700">Show nearby shops widget</span>
+                  <div className={`custom-checkbox ${showNearbyShops ? 'checked' : ''}`}>
+                    {showNearbyShops && (
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <span className="preference-label">Show nearby shops widget</span>
                 </label>
               </div>
             </div>
@@ -554,90 +559,82 @@ const ProfilePage = () => {
       {/* Saved Products Grid */}
       <section 
         className="py-12"
-        ref={el => sectionsRef.current['saved-products'] = el}
-        style={getParallaxStyle(0.3)}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={getAnimationClass('saved-products', 200)}>
+        <div className="profile-container px-4 sm:px-6 lg:px-8">
+          <div>
             {savedProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="mb-4 flex justify-center">
-                  <svg className="w-16 h-16 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No saved products yet</h3>
-                <p className="text-gray-600 mb-6">Start exploring and save products you love!</p>
+                <h3 className="empty-title">No saved products yet</h3>
+                <p className="empty-description">Start exploring and save products you love!</p>
                 <Link
                   to="/search"
-                  className="bg-green-800 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-300"
+                  className="empty-cta"
                 >
                   Browse Products
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="products-grid">
                 {sortedProducts.map((product, index) => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                    className="product-card"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="relative">
-                      <div className="relative inline-block w-full">
-                        {/* Floating shadow effect - soft glow */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-2xl transform translate-y-4 scale-110 -z-10"></div>
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-48 object-cover transition-all duration-500 ease-out relative z-10"
-                          style={{
-                            transform: 'translateY(-5px) scale(1)',
-                            filter: 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))',
-                            transition: 'transform 0.5s ease-out, filter 0.5s ease-out',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-10px) scale(1.03)';
-                            e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.18))';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
-                            e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
-                          }}
-                        />
-                      </div>
-                      <div className="absolute top-3 right-3 flex space-x-2 z-20">
-                        <button
-                          onClick={() => handleRemoveProduct(product.id)}
-                          className="bg-white/80 hover:bg-white rounded-full p-2 transition-colors duration-300"
-                          title="Remove from saved"
-                        >
-                          <span className="text-red-500">🗑</span>
-                        </button>
-                      </div>
+                    <div className="product-image-wrapper">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="product-image"
+                      />
+                      <button
+                        onClick={() => handleRemoveProduct(product.id)}
+                        className="favorite-btn"
+                        title="Remove from saved"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
                     </div>
-                    <div className="p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <div className="product-info">
+                      <div className="product-brand">
+                        {product.name.split('·')[0]?.trim() || 'Product'}
+                      </div>
+                      <h4 className="product-name">
                         {product.name}
                       </h4>
-                      <p className="text-xl font-bold text-green-800 mb-3">${product.price}</p>
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="product-meta">
+                        <div className="product-price">${product.price}</div>
+                        <div className="product-rating">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                          <span>4.5</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mb-3">
                         {product.tags?.slice(0, 3).map((tag, tagIndex) => (
                           <span
                             key={tagIndex}
-                            className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                            className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
                       <div className="flex space-x-2">
-                        <button className="flex-1 bg-green-800 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300">
+                        <button className="flex-1 bg-green-800 text-white py-1.5 px-3 rounded-md hover:bg-green-700 transition-colors duration-300 text-sm">
                           Buy
                         </button>
                         <button
                           onClick={() => handleAddToCompare(product)}
-                          className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors duration-300"
+                          className="flex-1 border border-gray-300 text-gray-700 py-1.5 px-3 rounded-md hover:bg-gray-50 transition-colors duration-300 text-sm"
                         >
                           Add to Compare
                         </button>
