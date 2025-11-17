@@ -29,27 +29,46 @@ GreenTail is a web application that helps pet parents find sustainable, organic 
 - **Responsive Design**: Mobile-first approach for busy pet parents
 
 ### Key Pages
-- **Homepage**: Introduction and feature overview
-- **Quiz**: Interactive questionnaire for personalized recommendations
-- **Search**: Browse and filter products with advanced options
-- **Compare**: Compare products side-by-side with detailed insights
-- **Profile**: Manage saved products and user preferences
-- **About**: Team information and project details
+- **Homepage** (`/`): Introduction and feature overview
+- **Quiz** (`/quiz`): Interactive questionnaire for personalized recommendations
+  - **Quiz Steps** (`/quiz/0` to `/quiz/5`): Individual quiz question pages with YouTube video integration
+- **Search** (`/search`): Browse and filter products with advanced options, includes store locator map
+- **Results** (`/results`): Personalized product recommendations after quiz completion, includes store locator map
+- **Compare** (`/compare`): Compare products side-by-side with detailed insights
+- **Profile** (`/profile`): Manage saved products and user preferences
+- **About** (`/about`): Team information and project details
+- **First Time Pet Owner** (`/first-time`): Educational guide for new pet parents
+- **Shops Near You** (`/shops-near-you`): Interactive store locator with map integration
+- **Login** (`/login`): User authentication page
+- **Educational Guides**:
+  - **Pet Food Labels Guide** (`/pet-food-labels-guide`): Learn to decode pet food labels
+  - **Organic Pet Food Guide** (`/organic-pet-food-guide`): Understanding what "organic" covers
+- **Legal Pages**:
+  - **Cookie Policy** (`/cookie-policy`): Cookie usage and consent information
+  - **Privacy Policy** (`/privacy-policy`): Privacy policy and data handling
+  - **Terms of Service** (`/terms-of-service`): Terms and conditions
+- **Test Page** (`/test`): Development testing and navigation hub
 
 ## Technology Stack
 
-- **Frontend**: React 18 with Vite
-- **Styling**: Tailwind CSS
-- **Routing**: React Router DOM
+- **Frontend Framework**: React 18 with Vite
+- **Styling**: Tailwind CSS with PostCSS
+- **Routing**: React Router DOM v7
 - **State Management**: React Context API
+  - `QuizContext`: Manages quiz state and user responses
+  - `AuthContext`: Handles user authentication and profiles
+  - `ToastContext`: Manages toast notifications
+- **Maps**: Leaflet with react-leaflet for interactive store location maps
 - **Icons**: Custom SVG icons
-- **Responsive Design**: Mobile-first approach
+- **Build Tool**: Vite with React plugin
+- **Code Quality**: ESLint with React plugins
+- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn
+- Node.js (version 16 or higher, recommended: 18+)
+- npm (comes with Node.js) or yarn
 
 ### Installation
 
@@ -69,7 +88,14 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+4. The development server will automatically open your browser at `http://localhost:3000`
+
+### Available Scripts
+
+- `npm run dev` - Start the development server with hot module replacement
+- `npm run build` - Build the application for production
+- `npm run preview` - Preview the production build locally
+- `npm run lint` - Run ESLint to check code quality
 
 ### Building for Production
 
@@ -78,6 +104,11 @@ npm run build
 ```
 
 The built files will be in the `dist` directory.
+
+To preview the production build locally:
+```bash
+npm run preview
+```
 
 ## Project Structure
 
@@ -89,13 +120,61 @@ GreenTail-G2/
 │   ├── icons/          # SVG icons
 │   └── logos/          # Brand logos
 ├── src/
-│   ├── components/     # React components
+│   ├── components/     # Reusable React components
+│   │   ├── Collapsible.jsx          # Collapsible content sections
+│   │   ├── ContextualHelpBanner.jsx # Educational help banner
+│   │   ├── CookieConsent.jsx        # Cookie consent banner
+│   │   ├── ReadingTime.jsx          # Reading time calculator
+│   │   ├── RouteTransition.jsx      # Page transition animations
+│   │   ├── StoreMapModal.jsx       # Interactive store location map
+│   │   ├── Toast.jsx               # Toast notification component
+│   │   ├── TransitionPlanModal.jsx # Pet food transition plan modal
+│   │   └── YouTubeVideo.jsx         # YouTube video embed component
+│   ├── contexts/       # React Context providers
+│   │   └── ToastContext.jsx        # Toast notification context
 │   ├── data/          # Product database and matching algorithm
+│   │   └── petFoodDatabase.js      # Product data and matching logic
 │   ├── hooks/         # Custom React hooks
+│   │   ├── useInteractionMode.js   # User interaction mode detection
+│   │   └── useScrollAnimation.js   # Scroll-based animations
 │   ├── utils/         # Utility functions
-│   └── main.jsx       # Application entry point
+│   │   ├── matchingAlgorithm.js    # Product matching algorithm
+│   │   ├── storeLocator.js         # Store location utilities
+│   │   └── testMatching.js         # Matching algorithm tests
+│   ├── AboutPage.jsx
+│   ├── App.jsx                    # Main app component with routing
+│   ├── AuthContext.jsx            # Authentication context
+│   ├── ComparePage.jsx
+│   ├── CookiePolicyPage.jsx
+│   ├── FirstTimePage.jsx
+│   ├── HomePage.jsx
+│   ├── LoginPage.jsx
+│   ├── OrganicPetFoodGuide.jsx
+│   ├── PetFoodLabelsGuide.jsx
+│   ├── PrivacyPolicyPage.jsx
+│   ├── ProfilePage.jsx
+│   ├── ProgressBar.jsx
+│   ├── Quiz0.jsx through Quiz5.jsx # Individual quiz steps
+│   ├── QuizContext.jsx            # Quiz state management
+│   ├── QuizPage.jsx
+│   ├── ResultsPage.jsx
+│   ├── SearchPage.jsx
+│   ├── ShopsNearYouPage.jsx
+│   ├── TermsOfServicePage.jsx
+│   ├── TestPage.jsx
+│   ├── index.css                  # Global styles
+│   └── main.jsx                   # Application entry point
+├── docs/              # Documentation
+│   ├── COMPARE_PAGE_ARCHITECTURE.md
+│   ├── QUIZ_PAGE_ARCHITECTURE.md
+│   ├── RESULTS_PAGE_ARCHITECTURE.md
+│   ├── TESTING_CHECKLIST.md
+│   └── TESTING_PROTOCOL.md
 ├── index.html         # Main HTML file
-└── package.json       # Dependencies and scripts
+├── package.json       # Dependencies and scripts
+├── vite.config.js    # Vite configuration
+├── tailwind.config.js # Tailwind CSS configuration
+└── postcss.config.cjs # PostCSS configuration
 ```
 
 ## Key Features Implementation
@@ -104,16 +183,51 @@ GreenTail-G2/
 - Considers user preferences from quiz responses
 - Weights factors like sustainability, price, and pet needs
 - Provides match scores and recommendations
+- Located in `src/utils/matchingAlgorithm.js`
 
 ### User Authentication
 - Mock authentication system for demonstration
 - User profiles with personalized preferences
 - Saved products functionality
+- localStorage-based persistence
+- Multiple persona support (Emma Chen, Sarah Williams, etc.)
+
+### Store Locator & Maps
+- Interactive map using Leaflet and react-leaflet
+- ZIP code-based store search
+- Store information display (address, hours, phone, products)
+- Integration on Search, Results, and Shops Near You pages
+- Google Maps integration for directions
+
+### Toast Notification System
+- Context-based toast notifications
+- Multiple notification types (success, error, info)
+- Auto-dismiss functionality
+- Smooth animations
+
+### Cookie Consent
+- GDPR-compliant cookie consent banner
+- 30-day expiration tracking
+- localStorage-based consent storage
+- Links to cookie policy page
+
+### Educational Features
+- YouTube video integration in quiz pages
+- Contextual help banners with educational links
+- Pet food transition plan modal (7-14 day guide)
+- Reading time calculator for educational content
+- Guides for pet food labels and organic certification
+
+### Route Transitions
+- Smooth page transitions similar to Nuxt.js
+- Fade animations between routes
+- Optimized for client-side routing
 
 ### Responsive Design
 - Mobile-first approach using Tailwind CSS
 - Breakpoints for different screen sizes
 - Touch-friendly interface elements
+- Adaptive layouts for desktop, tablet, and mobile
 
 ## Team Members
 
@@ -252,7 +366,60 @@ See `USER_PERSONAS.md` for detailed information about our target users and their
 
 ## Deployment
 
-The application is designed to be deployed on modern web hosting platforms such as Vercel, Netlify, or similar services.
+The application is designed to be deployed on modern web hosting platforms such as Vercel, Netlify, or GitHub Pages.
+
+### GitHub Pages Deployment
+
+The project is configured for GitHub Pages deployment with the base path `/GreenTail-G2/`. The Vite configuration automatically adjusts the base path for production builds:
+
+- **Development**: Base path is `/` (localhost:3000)
+- **Production**: Base path is `/GreenTail-G2/` (for GitHub Pages)
+
+To deploy:
+
+1. Build the project:
+```bash
+npm run build
+```
+
+2. The built files will be in the `dist` directory
+
+3. Deploy the `dist` directory to your hosting platform
+
+### Environment Variables
+
+The application uses `import.meta.env.BASE_URL` for asset paths, which is automatically configured by Vite based on the build mode.
+
+### Continuous Deployment
+
+The project includes GitHub Actions workflow for automatic deployment to GitHub Pages:
+
+- **Workflow File**: `.github/workflows/deploy.yml`
+- **Trigger**: Automatically deploys on push to `main` branch
+- **Process**: 
+  1. Builds the application
+  2. Creates SPA fallback (404.html)
+  3. Deploys to GitHub Pages
+- **Manual Trigger**: Can also be triggered manually via GitHub Actions UI
+
+The deployment is configured to use the base path `/GreenTail-G2/` for GitHub Pages compatibility.
+
+## Development
+
+### Code Quality
+
+The project uses ESLint for code quality checks. Run the linter before committing:
+
+```bash
+npm run lint
+```
+
+### Project Configuration
+
+- **Development Server**: Runs on port 3000 (configurable in `vite.config.js`)
+- **Build Output**: `dist/` directory
+- **Hot Module Replacement**: Enabled in development mode
+- **Auto-open Browser**: Enabled in development mode
 
 ## Contributing
 
@@ -264,6 +431,5 @@ This project is created for educational purposes as part of the INFO 442 course 
 
 ## Contact
 
-- **Email**: contact@greentail.com
 - **GitHub**: https://github.com/kaibo-wang/GreenTail-G2
 - **Course**: INFO 442: Cooperative Software Development Autumn 2025

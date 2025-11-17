@@ -53,6 +53,9 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 4. Check that "Next" buttons work
 5. Test "Back" navigation
 6. Complete quiz and reach results page
+7. Test YouTube video integration in quiz pages
+8. Verify video loads and plays correctly
+9. Test video controls (play, pause, fullscreen)
 
 **Expected Results:**
 - Quiz progresses through all steps
@@ -60,12 +63,15 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - Navigation works in both directions
 - Results page shows personalized recommendations
 - No data loss during navigation
+- YouTube videos load and display correctly
+- Video controls function properly
 
 **Known Issues:**
 - None identified
 
 **Workarounds:**
 - If quiz gets stuck, refresh page and restart
+- If video doesn't load, check internet connection
 
 ---
 
@@ -83,6 +89,9 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 4. Test tag filters (Budget, Packaging, Certifications, etc.)
 5. Test sorting options (Best match, Price low-high, A-Z)
 6. Clear filters and verify reset
+7. Test "Find Stores Near You" button
+8. Test "Find Nearby" button on individual products
+9. Verify map modal opens correctly
 
 **Expected Results:**
 - Search returns relevant results
@@ -91,12 +100,15 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - Sorting options work as expected
 - Clear filters resets all selections
 - Results update in real-time
+- Map modal opens and displays store locations
+- Store information is accurate
 
 **Known Issues:**
 - None identified
 
 **Workarounds:**
 - If filters don't update, refresh page
+- If map doesn't load, check Leaflet dependencies
 
 ---
 
@@ -269,6 +281,167 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 **Workarounds:**
 - Refresh page if performance degrades
 
+---
+
+### 11. Store Locator & Maps
+
+**Test Steps:**
+1. Navigate to Search page and click "Find Stores Near You"
+2. Navigate to Results page and click "Find Stores Near You"
+3. Navigate to Shops Near You page (`/shops-near-you`)
+4. Test ZIP code input and update functionality
+5. Click "Open Interactive Map" button
+6. Verify map displays with store markers
+7. Click on store markers to see popup information
+8. Test store filtering by product
+9. Test "Get Directions" functionality (opens Google Maps)
+10. Test "Call Store" functionality
+11. Test store hours display
+
+**Expected Results:**
+- Map modal opens correctly on all pages
+- Store markers display on map
+- Store information popups show correct data
+- ZIP code updates work correctly
+- Directions link opens Google Maps in new tab
+- Call functionality works on mobile devices
+- Store hours display correctly
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- If map doesn't load, check Leaflet CSS and JS imports
+- If markers don't appear, verify icon paths
+
+---
+
+### 12. Cookie Consent
+
+**Test Steps:**
+1. Clear browser localStorage
+2. Navigate to any page
+3. Verify cookie consent banner appears
+4. Click "Accept" button
+5. Refresh page and verify banner doesn't reappear
+6. Clear localStorage and wait 30+ days (or manually adjust timestamp)
+7. Verify banner reappears after expiration
+8. Test links to cookie policy page
+
+**Expected Results:**
+- Cookie consent banner appears on first visit
+- Banner dismisses when accepted
+- Consent persists across sessions
+- Banner reappears after 30-day expiration
+- Links to cookie policy work correctly
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- Clear localStorage to reset consent for testing
+
+---
+
+### 13. Toast Notifications
+
+**Test Steps:**
+1. Perform actions that trigger toasts (save product, update profile, etc.)
+2. Verify toast appears with correct message
+3. Test auto-dismiss functionality
+4. Test multiple toasts stacking
+5. Test different toast types (success, error, info)
+
+**Expected Results:**
+- Toasts appear at correct position
+- Messages are clear and accurate
+- Auto-dismiss works after timeout
+- Multiple toasts stack correctly
+- Different types have appropriate styling
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- None needed
+
+---
+
+### 14. Educational Features
+
+**Test Steps:**
+1. Navigate to Search or Results page
+2. Verify contextual help banner appears
+3. Test "Learn to decode pet food labels" link
+4. Test "7-14 day transition plan" button
+5. Test "What 'organic' covers" link
+6. Test banner dismiss functionality
+7. Navigate to `/pet-food-labels-guide` page
+8. Navigate to `/organic-pet-food-guide` page
+9. Test reading time calculator
+10. Verify educational content displays correctly
+
+**Expected Results:**
+- Help banner appears on relevant pages
+- All links navigate correctly
+- Transition plan modal opens
+- Educational pages load correctly
+- Reading time is calculated accurately
+- Content is readable and well-formatted
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- None needed
+
+---
+
+### 15. Route Transitions
+
+**Test Steps:**
+1. Navigate between different pages
+2. Observe page transition animations
+3. Test rapid navigation (clicking links quickly)
+4. Verify no layout shifts during transitions
+5. Test browser back/forward buttons
+
+**Expected Results:**
+- Smooth fade transitions between pages
+- No flickering or layout shifts
+- Transitions work with browser navigation
+- Performance remains smooth
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- None needed
+
+---
+
+### 16. Legal Pages
+
+**Test Steps:**
+1. Navigate to `/cookie-policy`
+2. Navigate to `/privacy-policy`
+3. Navigate to `/terms-of-service`
+4. Verify all pages load correctly
+5. Test links within legal pages
+6. Verify content is readable and complete
+
+**Expected Results:**
+- All legal pages load without errors
+- Content is complete and formatted correctly
+- Links work properly
+- Pages are accessible
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- None needed
+
 ## Cross-Browser Testing
 
 ### Chrome (Primary)
@@ -335,18 +508,42 @@ When reporting bugs, include:
 
 ## Test Completion Checklist
 
+### Core Features
 - [ ] All navigation links work
-- [ ] Quiz functionality complete
+- [ ] Quiz functionality complete (Quiz 0-5)
+- [ ] YouTube video integration works in quiz pages
 - [ ] Search and filtering work
 - [ ] Product saving works
 - [ ] Comparison feature works
 - [ ] Authentication works
 - [ ] Profile page displays correctly
-- [ ] Responsive design works
+
+### Map & Store Locator
+- [ ] Map modal opens on Search page
+- [ ] Map modal opens on Results page
+- [ ] Map modal opens on Shops Near You page
+- [ ] Store markers display correctly
+- [ ] Store information popups work
+- [ ] ZIP code update functionality works
+- [ ] Get Directions opens Google Maps
+- [ ] Call Store works on mobile
+
+### Additional Features
+- [ ] Cookie consent banner works
+- [ ] Toast notifications appear correctly
+- [ ] Contextual help banner works
+- [ ] Transition plan modal opens
+- [ ] Educational guide pages load
+- [ ] Route transitions are smooth
+- [ ] Legal pages (Cookie Policy, Privacy Policy, Terms) load
+
+### Technical Requirements
+- [ ] Responsive design works on all devices
 - [ ] Accessibility features work
 - [ ] Performance meets benchmarks
 - [ ] Cross-browser compatibility verified
 - [ ] Mobile functionality confirmed
+- [ ] No console errors
 
 ## Known Limitations
 
