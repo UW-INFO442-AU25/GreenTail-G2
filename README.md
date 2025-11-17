@@ -1,8 +1,8 @@
 # GreenTail - Sustainable Pet Food Verification Platform
 
-## 🚀 实时演示
+##  Live Demo
 
-**[👉 访问实时演示](https://uw-info442-au25.github.io/GreenTail-G2/)**
+**(https://uw-info442-au25.github.io/GreenTail-G2/)**
 
 ## Overview
 
