@@ -1,5 +1,9 @@
 # GreenTail - Sustainable Pet Food Verification Platform
 
+## 🚀 实时演示
+
+**[👉 访问实时演示](https://uw-info442-au25.github.io/GreenTail-G2/)**
+
 ## Overview
 
 GreenTail is a web application that helps pet parents find sustainable, organic pet food that fits their budget and values. Our smart matching algorithm considers user preferences, pet needs, and environmental impact to recommend the best products.
@@ -191,6 +195,8 @@ GreenTail-G2/
 - Saved products functionality
 - localStorage-based persistence
 - Multiple persona support (Emma Chen, Sarah Williams, etc.)
+- **Privacy-First Design**: All core features (quiz, search, compare) work without login
+- **Optional Authentication**: Login is a convenience feature for cross-device sync, not a barrier
 
 ### Store Locator & Maps
 - Interactive map using Leaflet and react-leaflet
@@ -336,6 +342,20 @@ GreenTail MVP primarily serves two key user personas that represent our core tar
 - **Behavior**: Thoroughly researches products, values transparency and visual interfaces, prioritizes environmental impact
 - **Why Primary**: Represents environmentally conscious pet parents who are the core audience for sustainable pet food verification
 - **Design Impact**: Features like environmental impact indicators, sustainability certifications, and detailed ingredient sourcing were specifically designed for Emma's research-driven approach
+
+#### Solving the "Privacy Paradox": Architecture for Emma
+
+One of our core challenges was serving Emma's dual needs: she requires complete **product transparency** (data, algorithms) while being highly sensitive to **data privacy** (resistant to forced login).
+
+We solved this paradox through **architectural design**:
+
+* **No-Login Core Features**: The entire quiz (`Quiz0.jsx` through `Quiz5.jsx`), search (`SearchPage.jsx`), and comparison (`ComparePage.jsx`) features work **completely without login**.
+
+* **Client-Side State Management**: User quiz answers are stored in client-side `QuizContext`, not immediately sent to a server.
+
+* **Local Storage First**: The "saved products" feature uses `localStorage` (`ProfilePage.jsx`, `SearchPage.jsx`), allowing users to save anonymously.
+
+* **Optional Value-Add Login**: `AuthContext` treats login as a **convenience feature** (for cross-device sync), not a barrier.
 
 ### 2. **The New Pet Parent (Sarah Williams)**
 - **Profile**: 24-year-old User Researcher with a Golden Retriever puppy
