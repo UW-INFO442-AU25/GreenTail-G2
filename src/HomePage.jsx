@@ -334,6 +334,9 @@ function HomePage() {
               console.error('Video load error:', e);
               const videoSrc = `${import.meta.env.BASE_URL || '/'}images/homepage.mp4`;
               console.error('Video src:', videoSrc);
+              console.error('BASE_URL:', import.meta.env.BASE_URL);
+              // If video fails to load, skip it and show content
+              handleSkipVideo();
               console.error('Full video element:', fullscreenVideoRef.current);
               if (fullscreenVideoRef.current) {
                 console.error('Video error code:', fullscreenVideoRef.current.error?.code);
