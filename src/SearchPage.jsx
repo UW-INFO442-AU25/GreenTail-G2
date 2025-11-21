@@ -6,6 +6,7 @@ import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { getMatchLevelStyle, findBestMatches, getProductMatchLevel, calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
 import StoreMapModal from './components/StoreMapModal';
+import FeatureTooltip from './components/FeatureTooltip';
 import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
@@ -29,6 +30,9 @@ function SearchPage() {
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+  // Refs for feature tooltips
+  const filterSidebarRef = useRef(null);
+  const findStoresButtonRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('best');
   const [showMapModal, setShowMapModal] = useState(false);
@@ -644,6 +648,7 @@ function SearchPage() {
             </div>
             
             <button
+              ref={findStoresButtonRef}
               onClick={() => {
                 setSelectedProductForMap(null);
                 setShowMapModal(true);
@@ -807,7 +812,10 @@ function SearchPage() {
             {/* Optimization: Fade-in on page load */}
             <aside 
               className="w-full lg:w-48 flex-shrink-0"
-              ref={el => sectionsRef.current['filter-sidebar'] = el}
+              ref={el => {
+                sectionsRef.current['filter-sidebar'] = el;
+                filterSidebarRef.current = el;
+              }}
             >
               <div 
                 className={`bg-white rounded-xl p-4 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
@@ -1548,6 +1556,15 @@ function SearchPage() {
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}
         selectedProduct={selectedProductForMap}
+      />
+
+      {/* Feature Tooltips - Lightweight contextual hints */}
+      <FeatureTooltip
+        pageId="search"
+        featureId="filter-sidebar"
+        message="Use filters to find products matching your pet's needs"
+        position="right"
+        targetRef={filterSidebarRef}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { petFoodDatabase } from './data/petFoodDatabase';
 import { useAuth } from './AuthContext';
 import { useTouchHandlers } from './hooks/useInteractionMode';
 import { calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
+import FeatureTooltip from './components/FeatureTooltip';
 
 /**
  * ComparePage - Redesigned per comparison_page_critique.md
@@ -56,6 +57,9 @@ const ComparePage = () => {
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+  // Refs for feature tooltips
+  const productSelectRef = useRef(null);
+  const analystVerdictRef = useRef(null);
 
   // Generate Google search URL for product
   const getGoogleSearchUrl = (product) => {
@@ -1081,7 +1085,7 @@ const ComparePage = () => {
           }`}
           style={{ transitionDelay: '400ms' }}
         >
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+          <h3 ref={analystVerdictRef} className="text-xl font-bold text-gray-900 mb-4 flex items-center">
           <svg className="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
             <path d="M5 5a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2a1 1 0 10-2 0v2H5V7h2a1 1 0 000-2H5z" />
@@ -1647,6 +1651,7 @@ const ComparePage = () => {
               </div>
             )}
             <div 
+              ref={productSelectRef}
               className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 transition-all duration-1000 ease-out ${
                 isVisible['compare-selector'] 
                   ? 'opacity-100 translate-y-0' 
@@ -1838,6 +1843,28 @@ const ComparePage = () => {
       
       {/* Score Info Modal */}
       {renderScoreInfoModal()}
+
+      {/* Feature Tooltips - Lightweight contextual hints */}
+      <FeatureTooltip
+        pageId="compare"
+        featureId="product-select"
+        message="Select products to compare side-by-side"
+        position="top"
+        targetRef={productSelectRef}
+        delay={2500}
+        offset={-10}
+        maxWidth={220}
+      />
+      <FeatureTooltip
+        pageId="compare"
+        featureId="analyst-verdict"
+        message="Read quick summary instead of tables"
+        position="bottom"
+        targetRef={analystVerdictRef}
+        delay={2500}
+        offset={-10}
+        maxWidth={220}
+      />
     </div>
   );
 };

@@ -47,17 +47,21 @@ function HomePage() {
   // Debug: Log video state on mount
   useEffect(() => {
     const localStorageValue = localStorage.getItem('hasSeenIntroVideo');
-    console.log('HomePage mounted - Video state:', {
+    const savedProducts = localStorage.getItem('savedProducts');
+    
+    console.log('[HomePage] First visit check:', {
       hasSeenVideo,
       isFullscreenVideo,
       showContent,
       localStorageValue,
-      shouldShowVideo: !hasSeenVideo
+      shouldShowVideo: !hasSeenVideo,
+      savedProductsCount: savedProducts ? JSON.parse(savedProducts).length : 0,
+      isFirstVisit: !localStorageValue && (!savedProducts || savedProducts === '[]')
     });
     
     // Force check: if localStorage is cleared, video should show
     if (!localStorageValue && !isFullscreenVideo) {
-      console.warn('WARNING: localStorage is empty but video is not showing! Forcing video to show...');
+      console.warn('[HomePage] WARNING: localStorage is empty but video is not showing! Forcing video to show...');
       setIsFullscreenVideo(true);
       setShowContent(false);
     }
