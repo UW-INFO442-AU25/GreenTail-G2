@@ -68,6 +68,33 @@ const ComparePage = () => {
     const encodedQuery = encodeURIComponent(searchQuery);
     return `https://www.google.com/search?q=${encodedQuery}`;
   };
+  
+  // Handle saving product to favorites
+  const handleSaveProduct = (product) => {
+    // Allow saving to localStorage for both logged-in and non-logged-in users
+    const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    const isAlreadySaved = savedProducts.find(p => p.id === product.id);
+
+    let updated;
+    if (!isAlreadySaved) {
+      const productToSave = { ...product, savedAt: new Date().toISOString() };
+      updated = [...savedProducts, productToSave];
+      localStorage.setItem('savedProducts', JSON.stringify(updated));
+      console.log('Product saved:', product.id);
+    } else {
+      updated = savedProducts.filter(p => p.id !== product.id);
+      localStorage.setItem('savedProducts', JSON.stringify(updated));
+      console.log('Product removed from saved:', product.id);
+    }
+    // Force re-render to update heart icons
+    setSavedItems(updated);
+  };
+
+  // Check if a product is saved
+  const isProductSaved = (productId) => {
+    const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    return savedProducts.find(p => p.id === productId);
+  };
 
   const handleLogout = () => {
     logout();
@@ -1050,11 +1077,18 @@ const ComparePage = () => {
               Buy Now
             </a>
             <button 
+              onClick={() => handleSaveProduct(product)}
               onTouchStart={handleTouchStart}
-              onTouchEnd={(e) => handleTouchEnd(e)}
+              onTouchEnd={(e) => handleTouchEnd(e, () => handleSaveProduct(product))}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label={isProductSaved(product.id) ? "Remove from favorites" : "Add to favorites"}
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className={`w-5 h-5 ${isProductSaved(product.id) ? "text-red-500 fill-current" : "text-gray-600"}`} 
+                fill={isProductSaved(product.id) ? "currentColor" : "none"} 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
