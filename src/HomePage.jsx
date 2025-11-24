@@ -570,6 +570,9 @@ function HomePage() {
                       e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
                       e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
                     }}
+                    width="550"
+                    height="415"
+                    fetchPriority="high"
                   />
                 </div>
               </div>

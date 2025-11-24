@@ -1335,6 +1335,9 @@ function SearchPage() {
                             e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
                             e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
                           }}
+                          loading="lazy"
+                          width="300"
+                          height="192"
                         />
                       </div>
                       <h4 className="font-semibold text-gray-900 mb-3 text-lg">

@@ -466,8 +466,11 @@ const AboutPage = () => {
                 <div className="about-avatar-wrapper">
                   <img 
                     src={`${import.meta.env.BASE_URL}images/${member.image}`} 
-                    alt={member.name} 
+                    alt={member.name}
                     className="about-avatar-img"
+                    loading="lazy"
+                    width="140"
+                    height="140"
                   />
                 </div>
                 <h3 className="about-team-name">{member.name}</h3>
