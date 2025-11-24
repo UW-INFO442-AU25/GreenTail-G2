@@ -8,7 +8,7 @@ const PetFoodLabelsGuide = () => {
   const sections = {
     ingredients: {
       title: "Ingredients List",
-      icon: "📋",
+      icon: "",
       content: {
         main: "Ingredients are listed in order of weight, from highest to lowest.",
         details: [
@@ -32,7 +32,7 @@ const PetFoodLabelsGuide = () => {
     },
     guaranteed: {
       title: "Guaranteed Analysis",
-      icon: "📊",
+      icon: "",
       content: {
         main: "This shows the minimum/maximum percentages of key nutrients.",
         details: [
@@ -56,7 +56,7 @@ const PetFoodLabelsGuide = () => {
     },
     certifications: {
       title: "Certifications & Claims",
-      icon: "🏆",
+      icon: "",
       content: {
         main: "Look for third-party certifications that verify quality claims.",
         details: [
@@ -82,7 +82,7 @@ const PetFoodLabelsGuide = () => {
     },
     redflags: {
       title: "Red Flags to Avoid",
-      icon: "🚩",
+      icon: "",
       content: {
         main: "Watch out for these warning signs on pet food labels.",
         details: [
@@ -114,7 +114,7 @@ const PetFoodLabelsGuide = () => {
       <NavigationBar />
 
       {/* Main Content */}
-      <main className="pt-8 pb-20">
+      <main className="pt-24 pb-20">
         <div className="max-w-6xl mx-auto px-8">
           {/* Hero Section */}
           <div className="text-center mb-12">
@@ -164,7 +164,7 @@ const PetFoodLabelsGuide = () => {
                 <ul className="space-y-3">
                   {sections[activeSection].content.details.map((detail, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <span className="text-green-600 mt-1">✓</span>
+                      <span className="text-green-600 mt-1">•</span>
                       <span className="text-gray-700">{detail}</span>
                     </li>
                   ))}
@@ -217,17 +217,17 @@ const PetFoodLabelsGuide = () => {
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Quick Reference Card</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">🥩</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Protein First</h4>
                 <p className="text-sm text-gray-600">Look for whole meat as the first ingredient</p>
               </div>
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">📊</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Check Analysis</h4>
                 <p className="text-sm text-gray-600">Verify protein and fat percentages</p>
               </div>
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">🏆</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Look for Certifications</h4>
                 <p className="text-sm text-gray-600">USDA Organic, AAFCO, Non-GMO</p>
               </div>

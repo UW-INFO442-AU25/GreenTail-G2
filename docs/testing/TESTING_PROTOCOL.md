@@ -32,12 +32,23 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 2. Click on each navigation link (Home, Quiz, Search, Compare, About, Profile)
 3. Verify page loads correctly
 4. Test responsive design on different screen sizes
+5. Test NavigationBar component:
+   - Verify unified design across all pages
+   - Test active link highlighting (current page link should be highlighted)
+   - Test logout button visibility when logged in
+   - Test login button visibility when logged out
+   - Test mobile responsive wrapping (menu items should wrap on narrow screens)
+   - Verify navigation bar is fixed at top on all pages
 
 **Expected Results:**
 - All navigation links work correctly
 - Pages load without errors
 - Responsive design adapts to screen size
 - No broken links or 404 errors
+- NavigationBar displays consistently across all pages
+- Active link highlighting works correctly
+- Logout/login button toggles based on authentication state
+- Navigation bar wraps correctly on mobile without breaking layout
 
 **Known Issues:**
 - None identified
@@ -52,26 +63,23 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 3. Verify answers are saved correctly
 4. Check that "Next" buttons work
 5. Test "Back" navigation
-6. Complete quiz and reach results page
-7. Test YouTube video integration in quiz pages
-8. Verify video loads and plays correctly
-9. Test video controls (play, pause, fullscreen)
+6. Verify progress bar updates correctly (shows current step/total steps, e.g., "1/5", "2/5", etc.)
+7. Complete quiz and reach results page
 
 **Expected Results:**
 - Quiz progresses through all steps
 - Answers are saved and displayed correctly
 - Navigation works in both directions
+- Progress bar displays correctly and updates with each step
+- Progress bar shows accurate step count (e.g., "3/5" on Quiz 3)
 - Results page shows personalized recommendations
 - No data loss during navigation
-- YouTube videos load and display correctly
-- Video controls function properly
 
 **Known Issues:**
 - None identified
 
 **Workarounds:**
 - If quiz gets stuck, refresh page and restart
-- If video doesn't load, check internet connection
 
 ---
 
@@ -116,8 +124,8 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 
 **Test Steps:**
 1. Navigate to Search page
-2. Click heart button (♡) on various products
-3. Verify heart changes to filled (❤️)
+2. Click heart button on various products
+3. Verify heart changes to filled state
 4. Navigate to Profile page
 5. Verify saved products appear in profile
 6. Test removing products from profile
@@ -219,13 +227,19 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 4. Verify all interactive elements work
 5. Check text readability
 6. Test navigation on mobile
+7. Test map modal on mobile (verify close button is easily accessible)
+8. Test navigation bar on narrow screens (verify menu items wrap correctly)
+9. Verify all touch targets meet minimum 44px size requirement
 
 **Expected Results:**
 - Layout adapts to screen size
 - All elements remain functional
 - Text is readable at all sizes
 - Navigation works on mobile
+- Navigation bar wraps correctly on narrow screens without breaking layout
+- Map modal close button is easily accessible on mobile (minimum 48px touch target)
 - No horizontal scrolling on mobile
+- All interactive elements meet minimum touch target size (44px)
 
 **Known Issues:**
 - None identified
@@ -253,10 +267,10 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - Proper heading hierarchy
 
 **Known Issues:**
-- Limited ARIA labels implemented
+- None identified (ARIA labels and accessibility features have been implemented)
 
 **Workarounds:**
-- Use mouse/touch for full functionality
+- None needed
 
 ---
 
@@ -297,6 +311,9 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 9. Test "Get Directions" functionality (opens Google Maps)
 10. Test "Call Store" functionality
 11. Test store hours display
+12. **Mobile Testing**: Test map modal close button on mobile devices (verify it's easily accessible and meets minimum 48px touch target)
+13. **Mobile Testing**: Test clicking outside modal to close (if implemented)
+14. **Mobile Testing**: Verify map modal is responsive and doesn't overflow on small screens
 
 **Expected Results:**
 - Map modal opens correctly on all pages
@@ -306,11 +323,14 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - Directions link opens Google Maps in new tab
 - Call functionality works on mobile devices
 - Store hours display correctly
+- Map modal close button is easily accessible on mobile (minimum 48px touch target)
+- Map modal is fully responsive and doesn't overflow on small screens
 
 **Known Issues:**
-- None identified
+- Store data is simulated/mocked for demonstration. Store locations, hours, and inventory are simulated for demonstration purposes and may not reflect real-world availability.
 
 **Workarounds:**
+- This is expected behavior for the MVP
 - If map doesn't load, check Leaflet CSS and JS imports
 - If markers don't appear, verify icon paths
 
@@ -378,14 +398,20 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 6. Test banner dismiss functionality
 7. Navigate to `/pet-food-labels-guide` page
 8. Navigate to `/organic-pet-food-guide` page
-9. Test reading time calculator
-10. Verify educational content displays correctly
+9. Navigate to `/first-time` page (First Time Pet Owner guide)
+10. Test YouTube video integration on First Time Pet Owner page
+11. Verify video loads and plays correctly
+12. Test video controls (play, pause, fullscreen)
+13. Test reading time calculator
+14. Verify educational content displays correctly
 
 **Expected Results:**
 - Help banner appears on relevant pages
 - All links navigate correctly
 - Transition plan modal opens
 - Educational pages load correctly
+- YouTube video on First Time Pet Owner page loads and displays correctly
+- Video controls function properly
 - Reading time is calculated accurately
 - Content is readable and well-formatted
 
@@ -393,7 +419,7 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - None identified
 
 **Workarounds:**
-- None needed
+- If video doesn't load, check internet connection (YouTube embed requires internet access)
 
 ---
 
@@ -466,13 +492,43 @@ This document outlines the comprehensive testing protocol for GreenTail, includi
 - Touch interactions work correctly
 - Responsive design adapts properly
 - Video playback may have limitations
+- Map modal close button is easily accessible (minimum 48px touch target)
+- Navigation bar wraps correctly on narrow screens
+- All interactive elements meet minimum 44px touch target size
 
 ### Android Chrome
 - All features should work
 - Touch interactions responsive
+- Map modal close button is easily accessible (minimum 48px touch target)
+- Navigation bar wraps correctly on narrow screens
+- All interactive elements meet minimum 44px touch target size
 - No known issues
 
 ## Error Handling
+
+### React Error Boundary
+
+**Test Steps:**
+1. Simulate a component error (if possible in development mode)
+2. Verify error boundary fallback UI displays
+3. Test "Try Again" button (should reset error state)
+4. Test "Go to Home" button (should navigate to homepage)
+5. Verify error details are shown in development mode only
+6. Verify error logging to console
+
+**Expected Results:**
+- Error boundary catches component errors gracefully
+- Fallback UI displays with clear error message
+- "Try Again" button resets error state and attempts to re-render
+- "Go to Home" button navigates to homepage successfully
+- Error details (stack trace) only visible in development mode
+- Errors are logged to console for debugging
+
+**Known Issues:**
+- None identified
+
+**Workarounds:**
+- If error boundary doesn't catch an error, check if it's an event handler or async error (these require try-catch)
 
 ### Network Errors
 - Graceful degradation when offline
@@ -511,7 +567,6 @@ When reporting bugs, include:
 ### Core Features
 - [ ] All navigation links work
 - [ ] Quiz functionality complete (Quiz 0-5)
-- [ ] YouTube video integration works in quiz pages
 - [ ] Search and filtering work
 - [ ] Product saving works
 - [ ] Comparison feature works
@@ -534,6 +589,7 @@ When reporting bugs, include:
 - [ ] Contextual help banner works
 - [ ] Transition plan modal opens
 - [ ] Educational guide pages load
+- [ ] YouTube video integration works on First Time Pet Owner page
 - [ ] Route transitions are smooth
 - [ ] Legal pages (Cookie Policy, Privacy Policy, Terms) load
 
@@ -548,8 +604,8 @@ When reporting bugs, include:
 ## Known Limitations
 
 1. **Social Login**: Mock implementation only
-2. **Video Content**: Requires actual video files
-3. **ARIA Labels**: Limited implementation
+2. **Video Content**: Requires internet connection to load YouTube embed (videos are embedded via iframe, not stored locally)
+3. **Store Data**: Store locations, hours, and inventory are simulated for demonstration purposes
 4. **Offline Support**: Basic only
 5. **Data Persistence**: localStorage only (not server-side)
 

@@ -120,7 +120,7 @@ src/
 ## Content Specifications
 
 ### Hero Section Text
-- **Headline**: "Let's find the perfect organic match for your pet 🐾"
+- **Headline**: "Let's find the perfect organic match for your pet"
 - **Sub-headline**: "In just 90 seconds, get personalized organic food recommendations tailored to your pet's needs — and your budget."
 - **CTA Button**: "Start The 90-Second Quiz"
 - **Microcopy**: "5 simple steps. Personalized results."

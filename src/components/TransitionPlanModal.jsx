@@ -181,7 +181,7 @@ const TransitionPlanModal = ({ isOpen, onClose, petType = 'Dog', currentFood = '
             <ul className="text-yellow-700 text-sm space-y-1">
               {plan.warnings.map((warning, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="text-yellow-600 mt-0.5">⚠️</span>
+                  <span className="text-yellow-600 mt-0.5">!</span>
                   <span>{warning}</span>
                 </li>
               ))}
@@ -205,7 +205,7 @@ const TransitionPlanModal = ({ isOpen, onClose, petType = 'Dog', currentFood = '
         <div className="p-6 border-t bg-gray-50">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              💡 Save this plan for future reference
+              Save this plan for future reference
             </p>
             <button
               onClick={onClose}

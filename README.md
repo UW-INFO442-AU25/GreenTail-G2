@@ -35,13 +35,13 @@ GreenTail is a web application that helps pet parents find sustainable, organic 
 ### Key Pages
 - **Homepage** (`/`): Introduction and feature overview
 - **Quiz** (`/quiz`): Interactive questionnaire for personalized recommendations
-  - **Quiz Steps** (`/quiz/0` to `/quiz/5`): Individual quiz question pages with YouTube video integration
+  - **Quiz Steps** (`/quiz/0` to `/quiz/5`): Individual quiz question pages
 - **Search** (`/search`): Browse and filter products with advanced options, includes store locator map
 - **Results** (`/results`): Personalized product recommendations after quiz completion, includes store locator map
 - **Compare** (`/compare`): Compare products side-by-side with detailed insights
 - **Profile** (`/profile`): Manage saved products and user preferences
 - **About** (`/about`): Team information and project details
-- **First Time Pet Owner** (`/first-time`): Educational guide for new pet parents
+- **First Time Pet Owner** (`/first-time`): Educational guide for new pet parents with YouTube video integration
 - **Shops Near You** (`/shops-near-you`): Interactive store locator with map integration
 - **Login** (`/login`): User authentication page
 - **Educational Guides**:
@@ -128,6 +128,8 @@ GreenTail-G2/
 │   │   ├── Collapsible.jsx          # Collapsible content sections
 │   │   ├── ContextualHelpBanner.jsx # Educational help banner
 │   │   ├── CookieConsent.jsx        # Cookie consent banner
+│   │   ├── ErrorBoundary.jsx        # Error boundary for graceful error handling
+│   │   ├── NavigationBar.jsx        # Unified navigation bar component
 │   │   ├── ReadingTime.jsx          # Reading time calculator
 │   │   ├── RouteTransition.jsx      # Page transition animations
 │   │   ├── StoreMapModal.jsx       # Interactive store location map
@@ -139,8 +141,8 @@ GreenTail-G2/
 │   ├── data/          # Product database and matching algorithm
 │   │   └── petFoodDatabase.js      # Product data and matching logic
 │   ├── hooks/         # Custom React hooks
-│   │   ├── useInteractionMode.js   # User interaction mode detection
-│   │   └── useScrollAnimation.js   # Scroll-based animations
+│   │   ├── useInteractionMode.js   # Detects mouse vs touch interaction mode
+│   │   └── useScrollAnimation.js   # Scroll-triggered animations and parallax effects
 │   ├── utils/         # Utility functions
 │   │   ├── matchingAlgorithm.js    # Product matching algorithm
 │   │   ├── storeLocator.js         # Store location utilities
@@ -157,7 +159,7 @@ GreenTail-G2/
 │   ├── PetFoodLabelsGuide.jsx
 │   ├── PrivacyPolicyPage.jsx
 │   ├── ProfilePage.jsx
-│   ├── ProgressBar.jsx
+│   ├── ProgressBar.jsx            # Quiz progress indicator
 │   ├── Quiz0.jsx through Quiz5.jsx # Individual quiz steps
 │   ├── QuizContext.jsx            # Quiz state management
 │   ├── QuizPage.jsx
@@ -169,11 +171,14 @@ GreenTail-G2/
 │   ├── index.css                  # Global styles
 │   └── main.jsx                   # Application entry point
 ├── docs/              # Documentation
-│   ├── COMPARE_PAGE_ARCHITECTURE.md
-│   ├── QUIZ_PAGE_ARCHITECTURE.md
-│   ├── RESULTS_PAGE_ARCHITECTURE.md
-│   ├── TESTING_CHECKLIST.md
-│   └── TESTING_PROTOCOL.md
+│   ├── architecture/  # Page architecture and design documents
+│   │   ├── COMPARE_PAGE_ARCHITECTURE.md
+│   │   ├── QUIZ_PAGE_ARCHITECTURE.md
+│   │   └── RESULTS_PAGE_ARCHITECTURE.md
+│   ├── testing/       # Testing protocols and checklists
+│   │   ├── TESTING_CHECKLIST.md
+│   │   └── TESTING_PROTOCOL.md
+│   └── USER_PERSONAS.md
 ├── index.html         # Main HTML file
 ├── package.json       # Dependencies and scripts
 ├── vite.config.js    # Vite configuration
@@ -204,6 +209,8 @@ GreenTail-G2/
 - Store information display (address, hours, phone, products)
 - Integration on Search, Results, and Shops Near You pages
 - Google Maps integration for directions
+- Mobile-optimized map modal with touch-friendly controls
+- **Note**: Store data is simulated/mocked for demonstration purposes
 
 ### Toast Notification System
 - Context-based toast notifications
@@ -218,7 +225,7 @@ GreenTail-G2/
 - Links to cookie policy page
 
 ### Educational Features
-- YouTube video integration in quiz pages
+- YouTube video integration on First Time Pet Owner page
 - Contextual help banners with educational links
 - Pet food transition plan modal (7-14 day guide)
 - Reading time calculator for educational content
@@ -229,11 +236,21 @@ GreenTail-G2/
 - Fade animations between routes
 - Optimized for client-side routing
 
+### Error Handling
+- React Error Boundary implementation
+- Graceful error fallback UI
+- Error logging and recovery
+- Wraps all routes for comprehensive error catching
+- "Try Again" and "Go to Home" recovery options
+- Development mode error details display
+
 ### Responsive Design
 - Mobile-first approach using Tailwind CSS
 - Breakpoints for different screen sizes
-- Touch-friendly interface elements
+- Touch-friendly interface elements (minimum 44px touch targets)
 - Adaptive layouts for desktop, tablet, and mobile
+- Mobile-optimized navigation bar with flexible wrapping
+- Responsive map modals with mobile-friendly close buttons
 
 ## Team Members
 
@@ -317,9 +334,10 @@ Our testing approach is designed around our two primary personas to ensure the a
 
 ### Known Limitations
 1. **Social Login**: Mock implementation only
-2. **Data Persistence**: localStorage only (not server-side)
-3. **ARIA Labels**: Limited accessibility implementation
-4. **Offline Support**: Basic only
+2. **Video Content**: Requires internet connection to load YouTube embed (videos are embedded via iframe, not stored locally)
+3. **Store Data**: Store data is simulated/mocked for demonstration. Store locations, hours, and inventory are simulated for demonstration purposes and may not reflect real-world availability.
+4. **Data Persistence**: localStorage only (not server-side)
+5. **Offline Support**: Basic only
 
 ### Success Criteria
 The application passes testing if:
@@ -329,7 +347,7 @@ The application passes testing if:
 - Performance meets benchmarks across all devices
 - No critical bugs prevent core functionality
 
-See `TESTING_PROTOCOL.md` for detailed testing procedures and expected results.
+See `docs/testing/TESTING_PROTOCOL.md` for detailed testing procedures and expected results.
 
 ## Primary User Personas
 
@@ -382,7 +400,7 @@ We solved this paradox through **architectural design**:
 ### Common Characteristics
 Both personas share values of environmental consciousness, pet health and wellbeing, quality and transparency, and informed decision-making. They expect mobile-responsive design, fast loading times, and intuitive navigation.
 
-See `USER_PERSONAS.md` for detailed information about our target users and their characteristics.
+See `docs/USER_PERSONAS.md` for detailed information about our target users and their characteristics.
 
 ## Deployment
 

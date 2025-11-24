@@ -46,3 +46,13 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Backup files and folders
+backup/
+*.bak
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride

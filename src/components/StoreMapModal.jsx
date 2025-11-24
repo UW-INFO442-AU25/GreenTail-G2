@@ -104,14 +104,22 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
-        <div className="flex justify-between items-center p-6 border-b">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 md:p-4"
+      onClick={(e) => {
+        // Close modal when clicking on backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="bg-white rounded-lg max-w-6xl w-full max-h-[95vh] md:max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="flex justify-between items-start p-4 md:p-6 border-b relative">
+          <div className="flex-1 pr-2 md:pr-4">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900">
               {selectedProduct ? `Stores with ${selectedProduct}` : 'Stores Near You'}
             </h2>
-            <p className="text-gray-600 mt-1">
+            <p className="text-sm md:text-base text-gray-600 mt-1">
               {getZipCodeDisplayName(zipCode)} • {filteredStores.length} stores found
             </p>
           </div>
@@ -119,7 +127,8 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
             onClick={onClose}
             onTouchStart={handleTouchStart}
             onTouchEnd={(e) => handleTouchEnd(e, onClose)}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="text-gray-400 hover:text-gray-600 active:text-gray-800 text-3xl font-bold min-w-[48px] min-h-[48px] flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors flex-shrink-0 -mt-1 -mr-1 md:mt-0 md:mr-0"
+            aria-label="Close map modal"
           >
             ×
           </button>
@@ -184,7 +193,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                   onTouchEnd={(e) => handleTouchEnd(e, handleUpdateLocation)}
                   className="w-full mt-2 bg-green-800 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors min-h-[44px]"
                 >
-                  🔍 Update Location
+                  Update Location
                 </button>
               </div>
 
@@ -246,7 +255,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                         }}
                         className="flex-1 bg-green-800 text-white py-1 px-2 rounded text-xs hover:bg-green-700 transition-colors min-h-[44px]"
                       >
-                        📍 Directions
+                        Directions
                       </button>
                       <button
                         onClick={(e) => {
@@ -260,7 +269,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                         }}
                         className="flex-1 bg-gray-100 text-gray-700 py-1 px-2 rounded text-xs hover:bg-gray-200 transition-colors min-h-[44px]"
                       >
-                        📞 Call
+                        Call
                       </button>
                     </div>
                   </div>
@@ -328,7 +337,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
 
         <div className="p-4 border-t bg-gray-50">
           <p className="text-sm text-gray-600 text-center">
-            💡 Tip: Click on store markers or store cards to see more details
+            Tip: Click on store markers or store cards to see more details
           </p>
         </div>
       </div>
@@ -351,7 +360,7 @@ const StoreMapModal = ({ isOpen, onClose, selectedProduct = null }) => {
                   onClick={() => handleDialPhone(selectedPhone)}
                   className="bg-green-800 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
-                  📞 Call Now
+                  Call Now
                 </button>
                 <button
                   onClick={() => setShowPhoneModal(false)}

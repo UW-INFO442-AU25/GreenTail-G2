@@ -140,7 +140,7 @@ const ShopsNearYouPage = () => {
 
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
                   <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl text-gray-500">
-                    🗺️
+                    Map
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">Interactive Map</h3>
                   <p className="text-sm text-gray-600 mb-4">Click to open full map view</p>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import NavigationBar from './components/NavigationBar';
 import Collapsible from './components/Collapsible';
 import ReadingTime from './components/ReadingTime';
-import NavigationBar from './components/NavigationBar';
 
 /**
  * HomePage - Enhanced with smooth animations per smooth_transition_recommendations.md
@@ -48,21 +48,10 @@ function HomePage() {
   // Debug: Log video state on mount
   useEffect(() => {
     const localStorageValue = localStorage.getItem('hasSeenIntroVideo');
-    const savedProducts = localStorage.getItem('savedProducts');
-    
-    console.log('[HomePage] First visit check:', {
-      hasSeenVideo,
-      isFullscreenVideo,
-      showContent,
-      localStorageValue,
-      shouldShowVideo: !hasSeenVideo,
-      savedProductsCount: savedProducts ? JSON.parse(savedProducts).length : 0,
-      isFirstVisit: !localStorageValue && (!savedProducts || savedProducts === '[]')
-    });
-    
+
     // Force check: if localStorage is cleared, video should show
     if (!localStorageValue && !isFullscreenVideo) {
-      console.warn('[HomePage] WARNING: localStorage is empty but video is not showing! Forcing video to show...');
+
       setIsFullscreenVideo(true);
       setShowContent(false);
     }
@@ -215,12 +204,6 @@ function HomePage() {
     if (fullscreenVideoRef.current && isFullscreenVideo) {
       const video = fullscreenVideoRef.current;
       
-      console.log('Video element found, attempting to play:', {
-        src: video.src,
-        isFullscreenVideo,
-        hasSeenVideo: localStorage.getItem('hasSeenIntroVideo')
-      });
-      
       // Ensure video is muted and set to autoplay (required for autoplay policy)
       video.muted = true;
       video.playsInline = true;
@@ -239,11 +222,11 @@ function HomePage() {
         playPromise
           .then(() => {
             // Video is playing
-            console.log('Video is playing successfully');
+
           })
           .catch((error) => {
             // Autoplay was prevented
-            console.warn('Autoplay prevented:', error);
+
             // Try to play again after user interaction is detected
             const handleInteraction = () => {
               video.play().catch((err) => {
@@ -258,24 +241,17 @@ function HomePage() {
       }
     } else {
       const localStorageValue = localStorage.getItem('hasSeenIntroVideo');
-      console.log('Video not showing because:', {
-        hasRef: !!fullscreenVideoRef.current,
-        isFullscreenVideo,
-        hasSeenVideo: localStorageValue,
-        localStorageValue,
-        shouldShowVideo: !localStorageValue
-      });
-      
+
       // If video should show but ref is not ready, try again after a short delay
       if (isFullscreenVideo && !fullscreenVideoRef.current) {
-        console.log('Video ref not ready, will retry in 100ms...');
+
         setTimeout(() => {
           if (fullscreenVideoRef.current && isFullscreenVideo) {
-            console.log('Retrying video play...');
+
             const video = fullscreenVideoRef.current;
             video.muted = true;
             video.playsInline = true;
-            video.play().catch(err => console.warn('Retry play failed:', err));
+            video.play().catch(() => {}); // Silently handle play errors
           }
         }, 100);
       }
@@ -349,16 +325,16 @@ function HomePage() {
               }
             }}
             onLoadedData={() => {
-              console.log('Video loaded successfully');
+
               // Ensure video plays when loaded
               if (fullscreenVideoRef.current) {
                 fullscreenVideoRef.current.play().catch((err) => {
-                  console.warn('Autoplay prevented on loadedData:', err);
+
                 });
               }
             }}
             onCanPlay={() => {
-              console.log('Video can play');
+
             }}
             aria-label="GreenTail introduction video"
           />
@@ -375,7 +351,6 @@ function HomePage() {
           showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {/* Header */}
         <NavigationBar />
 
       {/* Hero Section */}
@@ -513,9 +488,6 @@ function HomePage() {
                       e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
                       e.currentTarget.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15))';
                     }}
-                    width="550"
-                    height="415"
-                    fetchPriority="high"
                   />
                 </div>
               </div>

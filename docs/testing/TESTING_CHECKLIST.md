@@ -19,8 +19,8 @@
 
 #### **User Flow Pages**
 - **Quiz Page**: `http://localhost:3000/quiz`
-- **Quiz Steps**: `http://localhost:3000/quiz/0` to `/quiz/5` (with YouTube video integration)
-- **First Time Page**: `http://localhost:3000/first-time`
+- **Quiz Steps**: `http://localhost:3000/quiz/0` to `/quiz/5`
+- **First Time Page**: `http://localhost:3000/first-time` (with YouTube video integration)
 - **About Page**: `http://localhost:3000/about`
 - **Profile**: `http://localhost:3000/profile`
 - **Login Page**: `http://localhost:3000/login`
@@ -39,6 +39,8 @@
 
 ### **Map Functionality Test Points**
 
+**Note**: Store data is simulated/mocked for demonstration purposes and may not reflect real-world availability.
+
 #### **SearchPage Testing**
 1. Visit `http://localhost:3000/search`
 2. Click the "Find Stores Near You" button
@@ -48,6 +50,7 @@
 6. Test store marker clicks and popups
 7. Test "Get Directions" functionality
 8. Test "Call Store" functionality
+9. **Mobile Testing**: Verify map modal close button is easily accessible (minimum 48px touch target)
 
 #### **ResultsPage Testing**
 1. Visit the results page after completing the quiz
@@ -83,6 +86,11 @@
 - **Desktop**: 1920x1080, 1366x768
 - **Tablet**: iPad (768x1024)
 - **Mobile**: iPhone (375x667), Android (360x640)
+- **Mobile-Specific Tests**:
+  - Verify navigation bar wraps correctly on narrow screens
+  - Test map modal close button accessibility (minimum 48px touch target)
+  - Verify all interactive elements meet minimum 44px touch target size
+  - Test navigation on very narrow screens (< 375px width)
 
 ### **User Role Testing**
 
@@ -97,7 +105,7 @@
 - Test educational content
 - Test new user-friendly interface
 - Test guidance functionality
-- Test YouTube video integration in quiz
+- Test YouTube video integration on First Time Pet Owner page (`/first-time`)
 - Test contextual help banners
 - Test transition plan modal
 - Test educational guide pages
@@ -138,10 +146,11 @@
 - [ ] Browser back/forward buttons work with transitions
 
 ### **YouTube Video Integration**
-- [ ] Videos load in quiz pages
+- [ ] Videos load on First Time Pet Owner page (`/first-time`)
 - [ ] Video controls work correctly
 - [ ] Videos don't autoplay
 - [ ] Video loading states display correctly
+- [ ] Video requires internet connection (embedded via iframe)
 
 ## **Test Execution Recommendations**
 
@@ -161,6 +170,7 @@
 ### **Core Functionality**
 - [ ] Homepage navigation works
 - [ ] Quiz flow completes successfully (Quiz 0-5)
+- [ ] Quiz progress bar displays correctly (shows step X/5)
 - [ ] Results page displays personalized recommendations
 - [ ] Search page filters and sorting work
 - [ ] Product comparison (2-3 products) works
@@ -177,14 +187,22 @@
 - [ ] ZIP code update works
 - [ ] Get Directions opens Google Maps
 - [ ] Call Store works on mobile
+- [ ] Map modal close button is easily accessible on mobile (minimum 48px touch target)
+- [ ] **Note**: Store data is simulated/mocked for demonstration purposes
 
 ### **Educational Features**
-- [ ] YouTube videos load in quiz pages
+- [ ] YouTube videos load on First Time Pet Owner page (`/first-time`)
 - [ ] Contextual help banner appears
 - [ ] Help banner links work
 - [ ] Transition plan modal opens
 - [ ] Educational guide pages load
 - [ ] Reading time calculator works
+
+### **Error Handling**
+- [ ] Error boundary displays fallback UI on component errors
+- [ ] "Try Again" button resets error state
+- [ ] "Go to Home" button navigates correctly
+- [ ] Error details shown in development mode only
 
 ### **UI/UX Features**
 - [ ] Cookie consent banner works
@@ -192,6 +210,9 @@
 - [ ] Route transitions are smooth
 - [ ] Responsive design works on all devices
 - [ ] All links navigate correctly
+- [ ] NavigationBar displays consistently across all pages
+- [ ] Active link highlighting works correctly
+- [ ] Navigation bar wraps correctly on mobile
 
 ### **Legal & Policy Pages**
 - [ ] Cookie policy page loads

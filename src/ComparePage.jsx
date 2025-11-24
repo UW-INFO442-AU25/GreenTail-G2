@@ -2,18 +2,17 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { useAuth } from './AuthContext';
+import NavigationBar from './components/NavigationBar';
 import { useTouchHandlers } from './hooks/useInteractionMode';
 import { calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
-import FeatureTooltip from './components/FeatureTooltip';
-import NavigationBar from './components/NavigationBar';
 
 /**
  * ComparePage - Redesigned per comparison_page_critique.md
  * 
  * Architecture:
- * 1. Analyst's Verdict Section - Enhanced insights with qualitative summary and Pros & Cons
+ * 1. Analyst&apos;s Verdict Section - Enhanced insights with qualitative summary and Pros & Cons
  * 2. Comprehensive Comparison Table - Detailed side-by-side comparison of all attributes
- * 3. Clear CTAs - Primary "Add to Cart" and secondary "View Details" actions per product
+ * 3. Clear CTAs - Primary &quot;Add to Cart&quot; and secondary &quot;View Details&quot; actions per product
  * 
  * Animation Strategy:
  * - Initial load: Verdict section fades in
@@ -58,42 +57,12 @@ const ComparePage = () => {
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
-  // Refs for feature tooltips
-  const productSelectRef = useRef(null);
-  const analystVerdictRef = useRef(null);
 
   // Generate Google search URL for product
   const getGoogleSearchUrl = (product) => {
     const searchQuery = `${product.brand} ${product.name} ${product.preferredChannel}`;
     const encodedQuery = encodeURIComponent(searchQuery);
     return `https://www.google.com/search?q=${encodedQuery}`;
-  };
-  
-  // Handle saving product to favorites
-  const handleSaveProduct = (product) => {
-    // Allow saving to localStorage for both logged-in and non-logged-in users
-    const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-    const isAlreadySaved = savedProducts.find(p => p.id === product.id);
-
-    let updated;
-    if (!isAlreadySaved) {
-      const productToSave = { ...product, savedAt: new Date().toISOString() };
-      updated = [...savedProducts, productToSave];
-      localStorage.setItem('savedProducts', JSON.stringify(updated));
-      console.log('Product saved:', product.id);
-    } else {
-      updated = savedProducts.filter(p => p.id !== product.id);
-      localStorage.setItem('savedProducts', JSON.stringify(updated));
-      console.log('Product removed from saved:', product.id);
-    }
-    // Force re-render to update heart icons
-    setSavedItems(updated);
-  };
-
-  // Check if a product is saved
-  const isProductSaved = (productId) => {
-    const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-    return savedProducts.find(p => p.id === productId);
   };
 
   const handleLogout = () => {
@@ -104,17 +73,15 @@ const ComparePage = () => {
   // Load saved items from localStorage on component mount
   useEffect(() => {
     const saved = localStorage.getItem('savedProducts');
-    console.log('ComparePage: Loading saved products from localStorage:', saved);
+
     if (saved) {
       try {
         const parsedSaved = JSON.parse(saved);
-        console.log('ComparePage: Parsed saved products:', parsedSaved);
+
         setSavedItems(parsedSaved);
       } catch (error) {
         console.error('Error parsing saved products:', error);
       }
-    } else {
-      console.log('ComparePage: No saved products found in localStorage');
     }
   }, []);
 
@@ -177,10 +144,7 @@ const ComparePage = () => {
               const fifth = maxProducts >= 5 && parsedSaved[4] ? getProductFromDatabase(parsedSaved[4]) : null;
               
               if (first && second) {
-                console.log('ComparePage: Auto-loading saved items:', { first, second, third, fourth, fifth });
                 setSelectedProducts({ first, second, third, fourth, fifth });
-              } else {
-                console.log('ComparePage: Could not load saved items - first:', first, 'second:', second);
               }
             }
           } catch (error) {
@@ -219,7 +183,7 @@ const ComparePage = () => {
   };
 
   const handleUseSavedItems = () => {
-    console.log('ComparePage: handleUseSavedItems called, savedItems:', savedItems);
+
     if (savedItems.length >= 2) {
       const newSelection = {
         first: savedItems[0] || null,
@@ -228,15 +192,13 @@ const ComparePage = () => {
         fourth: maxProducts >= 4 ? (savedItems[3] || null) : null,
         fifth: maxProducts >= 5 ? (savedItems[4] || null) : null
       };
-      console.log('ComparePage: Setting selected products:', newSelection);
+
       setSelectedProducts(newSelection);
-    } else {
-      console.log('ComparePage: Not enough saved items to compare (need at least 2)');
     }
   };
 
   const handleRemoveAll = () => {
-    console.log('ComparePage: handleRemoveAll called, current selectedProducts:', selectedProducts);
+
     setSelectedProducts({
       first: null,
       second: null,
@@ -244,11 +206,10 @@ const ComparePage = () => {
       fourth: null,
       fifth: null
     });
-    console.log('ComparePage: All products removed');
-    
+
     // Force a small delay to ensure state update
     setTimeout(() => {
-      console.log('ComparePage: State should be updated now');
+
     }, 100);
   };
 
@@ -477,6 +438,7 @@ const ComparePage = () => {
                 onClick={() => setShowScoreInfo(false)}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, () => setShowScoreInfo(false))}
+                aria-label="Close rating information modal"
                 className="text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -490,7 +452,7 @@ const ComparePage = () => {
                 <h4 className="font-medium text-green-800 mb-2">Our Rating System (5.0 scale)</h4>
                 <p className="text-sm text-green-700">
                   We evaluate products based on <strong>sustainability first</strong>, then organic certifications, pet health, and value. 
-                  Ratings are calculated from a 100-point scoring system aligned with GreenTail's core values and converted to a 5.0 scale for easy comparison.
+                  Ratings are calculated from a 100-point scoring system aligned with GreenTail&apos;s core values and converted to a 5.0 scale for easy comparison.
                 </p>
               </div>
               
@@ -642,15 +604,17 @@ const ComparePage = () => {
 
   // Initialize animations on mount
   useEffect(() => {
-    // Trigger initial animations for title and selector sections (header removed from animations)
+    // Trigger initial animations for header and title sections
     setTimeout(() => {
       setIsVisible((prev) => ({
         ...prev,
+        'compare-header': true,
         'compare-title': true,
         'compare-selector': true,
       }));
       setHasAnimated((prev) => ({
         ...prev,
+        'compare-header': true,
         'compare-title': true,
         'compare-selector': true,
       }));
@@ -678,7 +642,7 @@ const ComparePage = () => {
     }
   }, [selectedProducts]);
 
-  // Generate Analyst's Verdict - Phase 1: Enhanced insights
+  // Generate Analyst&apos;s Verdict - Phase 1: Enhanced insights
   const generateAnalystsVerdict = (products) => {
     if (products.length < 2) return null;
 
@@ -1077,18 +1041,12 @@ const ComparePage = () => {
               Buy Now
             </a>
             <button 
-              onClick={() => handleSaveProduct(product)}
               onTouchStart={handleTouchStart}
-              onTouchEnd={(e) => handleTouchEnd(e, () => handleSaveProduct(product))}
+              onTouchEnd={(e) => handleTouchEnd(e)}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label={isProductSaved(product.id) ? "Remove from favorites" : "Add to favorites"}
+              aria-label="Save product to favorites"
             >
-              <svg 
-                className={`w-5 h-5 ${isProductSaved(product.id) ? "text-red-500 fill-current" : "text-gray-600"}`} 
-                fill={isProductSaved(product.id) ? "currentColor" : "none"} 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
@@ -1098,7 +1056,7 @@ const ComparePage = () => {
     );
   };
 
-  // Render Analyst's Verdict - Phase 1: Enhanced insights
+  // Render Analyst&apos;s Verdict - Phase 1: Enhanced insights
   const renderAnalystsVerdict = (products) => {
     if (products.length < 2) return null;
     
@@ -1118,12 +1076,12 @@ const ComparePage = () => {
           }`}
           style={{ transitionDelay: '400ms' }}
         >
-          <h3 ref={analystVerdictRef} className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
           <svg className="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
             <path d="M5 5a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2v-2a1 1 0 10-2 0v2H5V7h2a1 1 0 000-2H5z" />
           </svg>
-            Analyst's Verdict
+            Analyst&apos;s Verdict
         </h3>
           
           {/* Qualitative Summary */}
@@ -1309,7 +1267,7 @@ const ComparePage = () => {
           </div>
         )}
 
-        {/* Analyst's Verdict - Phase 1: Enhanced insights */}
+        {/* Analyst&apos;s Verdict - Phase 1: Enhanced insights */}
         {renderAnalystsVerdict(products)}
 
         {/* Comprehensive Comparison Table - Phase 2: Detailed side-by-side (Collapsible) */}
@@ -1415,7 +1373,7 @@ const ComparePage = () => {
                                   style={{ width: `${75 / products.length}%`, wordBreak: 'break-word' }}
                                 >
                                   {isHighlighted && (
-                                    <span className="absolute top-1 right-1 text-green-600 text-xs">✓</span>
+                                    <span className="absolute top-1 right-1 text-green-600 text-xs">•</span>
                                   )}
                                   <div className="break-words">{value}</div>
                                 </td>
@@ -1512,7 +1470,6 @@ const ComparePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <NavigationBar />
 
       {/* Compare Section */}
@@ -1574,7 +1531,7 @@ const ComparePage = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Remove all button clicked');
+
                   handleRemoveAll();
                 }}
                 onTouchStart={handleTouchStart}
@@ -1609,7 +1566,6 @@ const ComparePage = () => {
               </div>
             )}
             <div 
-              ref={productSelectRef}
               className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 transition-all duration-1000 ease-out ${
                 isVisible['compare-selector'] 
                   ? 'opacity-100 translate-y-0' 
@@ -1757,7 +1713,7 @@ const ComparePage = () => {
                 </select>
                 {selectedProducts.first && selectedProducts.second && getRecommendedThirdProducts.length > 0 && (
                   <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-xs font-medium text-green-800 mb-2">💡 Top Recommendation:</p>
+                    <p className="text-xs font-medium text-green-800 mb-2">Top Recommendation:</p>
                     <div className="flex items-center gap-3">
                       <img 
                         src={getRecommendedThirdProducts[0].product.image} 
@@ -1801,28 +1757,6 @@ const ComparePage = () => {
       
       {/* Score Info Modal */}
       {renderScoreInfoModal()}
-
-      {/* Feature Tooltips - Lightweight contextual hints */}
-      <FeatureTooltip
-        pageId="compare"
-        featureId="product-select"
-        message="Select products to compare side-by-side"
-        position="top"
-        targetRef={productSelectRef}
-        delay={2500}
-        offset={-10}
-        maxWidth={220}
-      />
-      <FeatureTooltip
-        pageId="compare"
-        featureId="analyst-verdict"
-        message="Read quick summary instead of tables"
-        position="bottom"
-        targetRef={analystVerdictRef}
-        delay={2500}
-        offset={-10}
-        maxWidth={220}
-      />
     </div>
   );
 };

@@ -241,8 +241,8 @@ src/
 - **Rating**: Mock data if not available (e.g., "4.5 ⭐ (12 reviews)")
 
 ### Active Filters Display
-- Format: "Filter Name: Value ✕"
-- Example: "Price: $20-30 ✕", "Brand: Orijen ✕"
+- Format: "Filter Name: Value ×"
+- Example: "Price: $20-30 ×", "Brand: Orijen ×"
 
 ## Success Metrics
 

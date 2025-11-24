@@ -440,6 +440,9 @@ function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-green-50">
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {filteredAndSortedProducts.length} {filteredAndSortedProducts.length === 1 ? 'product' : 'products'} found
+      </div>
       <NavigationBar />
 
       {/* Main Content */}
@@ -588,12 +591,21 @@ function ResultsPage() {
                   </button>
                 </div>
 
-                <Link 
-                  to="/search" 
-                  className="block w-full text-center bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors duration-300"
+                <button
+                  onClick={() => {
+                    setSelectedProductForMap(null);
+                    setShowMapModal(true);
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => {
+                    setSelectedProductForMap(null);
+                    setShowMapModal(true);
+                  })}
+                  className="block w-full text-center bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors duration-300 min-h-[44px]"
+                  aria-label="Find stores near you"
                 >
-                  Find stores nearby ➤
-                </Link>
+                  Find stores nearby →
+                </button>
               </div>
             </aside>
 
@@ -633,7 +645,7 @@ function ResultsPage() {
                     className="btn-find-stores"
                     aria-label="Find stores near you"
                   >
-                    🗺️ Find Stores Near You
+                    Find Stores Near You
                   </button>
                   <button
                     onClick={(e) => {
@@ -691,7 +703,7 @@ function ResultsPage() {
                         Price: {filters.priceRange === 'under20' ? '< $20' : 
                                 filters.priceRange === '20-30' ? '$20–30' :
                                 filters.priceRange === '30-40' ? '$30–40' : '> $40'}
-                        <span className="ml-1 hover:text-red-600">✕</span>
+                        <span className="ml-1 hover:text-red-600">×</span>
                       </span>
                     )}
                     {filters.brands.map((brand) => (
@@ -701,7 +713,7 @@ function ResultsPage() {
                         onClick={() => handleFilterChange('brands', brand, false)}
                       >
                         {brand}
-                        <span className="ml-1 hover:text-red-600">✕</span>
+                        <span className="ml-1 hover:text-red-600">×</span>
                       </span>
                     ))}
                     {filters.lifeStage.map((stage) => (
@@ -711,7 +723,7 @@ function ResultsPage() {
                         onClick={() => handleFilterChange('lifeStage', stage, false)}
                       >
                         {stage}
-                        <span className="ml-1 hover:text-red-600">✕</span>
+                        <span className="ml-1 hover:text-red-600">×</span>
                       </span>
                     ))}
                     {filters.specialDiet.map((diet) => (
@@ -721,7 +733,7 @@ function ResultsPage() {
                         onClick={() => handleSpecialDietChange(diet, false)}
                       >
                         {diet.replace('-', ' ')}
-                        <span className="ml-1 hover:text-red-600">✕</span>
+                        <span className="ml-1 hover:text-red-600">×</span>
                       </span>
                     ))}
                     {filters.proteinType.map((protein) => (
@@ -731,7 +743,7 @@ function ResultsPage() {
                         onClick={() => handleFilterChange('proteinType', protein, false)}
                   >
                         {protein}
-                    <span className="ml-1 hover:text-red-600">✕</span>
+                    <span className="ml-1 hover:text-red-600">×</span>
                   </span>
                 ))}
                     {Object.entries(filters.sustainability)
@@ -749,7 +761,7 @@ function ResultsPage() {
                             onClick={() => handleSustainabilityChange(key)}
                   >
                             {labels[key]}
-                            <span className="ml-1 hover:text-red-600">✕</span>
+                            <span className="ml-1 hover:text-red-600">×</span>
                   </span>
                         );
                       })}
@@ -933,7 +945,7 @@ function ResultsPage() {
                           className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-300 min-h-[44px] flex items-center justify-center gap-1"
                           title="Find stores with this product"
                         >
-                          📍 Find store nearby
+                          Find store nearby
                         </button>
                       </div>
                     </div>
@@ -1037,7 +1049,7 @@ function ResultsPage() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Save products first</h3>
               <p className="text-gray-600 leading-relaxed">
-                To compare products, please click the <span className="text-green-600 font-semibold">❤️ heart icon</span> on the products you're interested in. 
+                To compare products, please click the <span className="text-green-600 font-semibold">heart icon</span> on the products you're interested in. 
                 You need to save at least 2 products to start comparing.
               </p>
             </div>

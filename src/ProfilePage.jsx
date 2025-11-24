@@ -9,7 +9,7 @@ const ProfilePage = () => {
   const { showSuccess, showError } = useToast();
   
   // Debug logging
-  console.log('ProfilePage rendered, user:', user);
+
   const [savedProducts, setSavedProducts] = useState([]);
   const [zipCode, setZipCode] = useState('98105');
   const [sortBy, setSortBy] = useState('recently-saved');
@@ -245,14 +245,13 @@ const ProfilePage = () => {
   };
 
   const handleAddToCompare = (product) => {
-    console.log('ProfilePage: Adding product to compare:', product);
+
     const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
-    console.log('ProfilePage: Current compare list:', compareList);
-    
+
     if (compareList.length < 3 && !compareList.find(p => p.id === product.id)) {
       compareList.push(product);
       localStorage.setItem('compareList', JSON.stringify(compareList));
-      console.log('ProfilePage: Updated compare list:', compareList);
+
       showSuccess('Product added to compare list!');
     } else if (compareList.length >= 3) {
       showError('You can only compare up to 3 products at a time.');
@@ -290,30 +289,47 @@ const ProfilePage = () => {
   // If user is not logged in, show login prompt
   if (!user) {
     return (
-      <div className="profile-page">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-green-400 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          <div className="absolute top-40 right-10 w-72 h-72 bg-emerald-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-teal-400 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
+        
         <NavigationBar />
 
         {/* Login Prompt */}
-        <section className="pt-24 pb-16 bg-white">
+        <section className="pt-24 pb-16 relative z-10">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+            {/* User Icon with animation */}
+            <div className="flex justify-center mb-6 animate-fade-in">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full blur-lg opacity-50 animate-pulse"></div>
+                <div className="relative bg-gradient-to-br from-green-500 to-emerald-700 p-6 md:p-8 rounded-full shadow-xl animate-breathe">
+                  <svg className="w-12 h-12 md:w-16 md:h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Sign in to view your profile</h1>
-            <p className="text-lg text-gray-600 mb-8">
+            
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 animate-slide-down">Sign in to view your profile</h1>
+            <p className="text-base md:text-lg text-gray-700 mb-8 animate-slide-down animation-delay-100">
               Log in to see your saved products, preferences, and personalized recommendations.
             </p>
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in">
               <Link
                 to="/login"
-                className="inline-block bg-green-800 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 font-medium"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-900 to-emerald-900 text-white px-8 py-3 rounded-lg hover:from-green-800 hover:to-emerald-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                Sign In
+                <span>Sign In</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </Link>
-              <div className="text-sm text-gray-500">
-                Don't have an account? <Link to="/login" className="text-green-800 hover:text-green-600">Create one here</Link>
+              <div className="text-sm text-gray-700">
+                Don't have an account? <Link to="/login" className="text-green-700 hover:text-green-900 font-semibold underline decoration-2 underline-offset-2 transition-colors">Create one here</Link>
               </div>
             </div>
           </div>

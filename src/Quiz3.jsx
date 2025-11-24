@@ -69,16 +69,16 @@ function Quiz3() {
             </p>
 
             {/* Question 1 */}
-            <div className="mb-6">
+            <fieldset className="mb-6">
               <div className="flex justify-between items-center mb-3">
-                <label className="block text-lg font-semibold text-gray-900">
+                <legend className="block text-lg font-semibold text-gray-900">
                   Choose your top two for "eco-friendly"
-                </label>
-                <span className="text-sm text-gray-500">
+                </legend>
+                <span className="text-sm text-gray-500" aria-live="polite" aria-atomic="true">
                   {selectedPriorities.length}/2 selected
                 </span>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Eco-friendly priorities selection">
                 {priorities.map((priority) => (
                   <button
                     key={priority}
@@ -86,6 +86,9 @@ function Quiz3() {
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => handlePriorityToggle(priority))}
                     disabled={!selectedPriorities.includes(priority) && selectedPriorities.length >= 2}
+                    aria-pressed={selectedPriorities.includes(priority)}
+                    aria-label={`${selectedPriorities.includes(priority) ? 'Remove' : 'Select'} ${priority} as eco-friendly priority`}
+                    aria-disabled={!selectedPriorities.includes(priority) && selectedPriorities.length >= 2}
                     className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       selectedPriorities.includes(priority)
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -96,23 +99,25 @@ function Quiz3() {
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 mt-2" id="priorities-hint">
                 Pick two (you can change this later).
               </p>
-            </div>
+            </fieldset>
 
             {/* Question 2 */}
-            <div className="mb-8">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-8">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 What's your main goal today?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Main goal selection">
                 {goals.map((goal) => (
                   <button
                     key={goal}
                     onClick={() => setMainGoal(goal)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => setMainGoal(goal))}
+                    aria-pressed={mainGoal === goal}
+                    aria-label={`Select ${goal} as main goal`}
                     className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       mainGoal === goal
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -123,17 +128,18 @@ function Quiz3() {
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 mt-2" id="goal-hint">
                 This helps us tune recommendations and tips.
               </p>
-            </div>
+            </fieldset>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
+            <nav className="flex justify-between items-center" aria-label="Quiz navigation">
               <button
                 onClick={handleBack}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                aria-label="Go back to previous step"
                 className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Back
@@ -142,11 +148,12 @@ function Quiz3() {
                 onClick={handleNext}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, handleNext)}
+                aria-label="Continue to next step"
                 className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Next
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </div>

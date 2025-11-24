@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import NavigationBar from './components/NavigationBar';
 import YouTubeVideo from './components/YouTubeVideo';
 
 const FirstTimePage = () => {
@@ -73,25 +74,7 @@ const FirstTimePage = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-green-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center px-8 py-4">
-          <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
-            <span className="text-2xl font-bold text-green-800">GreenTail</span>
-          </div>
-          <nav>
-            <ul className="flex gap-8">
-              <li><Link to="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</Link></li>
-              <li><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Quiz</Link></li>
-              <li><Link to="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</Link></li>
-              <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</Link></li>
-              <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</Link></li>
-              <li><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</Link></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <NavigationBar />
 
       {/* Hero Section */}
       <section className="pt-24 pb-20 bg-gradient-to-br from-green-50 to-blue-50 relative overflow-hidden">

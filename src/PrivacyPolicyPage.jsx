@@ -1,21 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import NavigationBar from './components/NavigationBar';
 
 const PrivacyPolicyPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-8 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-8 h-8" />
-            <span className="text-2xl font-bold text-green-800">GreenTail</span>
-          </Link>
-        </div>
-      </header>
+      <NavigationBar />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-8 py-12">
+      <main className="max-w-4xl mx-auto px-8 pt-24 pb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
         <p className="text-sm text-gray-500 mb-8">Last updated: January 2025</p>
 

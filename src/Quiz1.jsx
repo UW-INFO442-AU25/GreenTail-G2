@@ -50,23 +50,30 @@ function Quiz1() {
             <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
               About your pet
             </h1>
-            <p className="text-center text-gray-600 mb-8">
+            <p className="text-center text-gray-600 mb-8" id="quiz1-description">
               Answer a few basics so we can tailor your results.
             </p>
+            <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+              {selectedPet && selectedLifeStage && selectedWeight 
+                ? "All questions answered. You can proceed to the next step."
+                : "Please answer all questions to continue."}
+            </div>
 
             {/* Question 1 */}
-            <div className="mb-6">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-6">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 What pet are we shopping for?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Pet type selection">
                 {['Dog', 'Cat'].map((pet) => (
                   <button
                     key={pet}
                     onClick={() => setSelectedPet(pet)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedPet(pet))}
-                    className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
+                    aria-pressed={selectedPet === pet}
+                    aria-label={`Select ${pet} as pet type`}
+                    className={`px-4 py-2 rounded-lg border transition-all duration-200 min-h-[44px] ${
                       selectedPet === pet
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -76,21 +83,23 @@ function Quiz1() {
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Question 2 */}
-            <div className="mb-6">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-6">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 Life stage?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Life stage selection">
                 {['Puppy/Kitten', 'Adult', 'Senior'].map((stage) => (
                   <button
                     key={stage}
                     onClick={() => setSelectedLifeStage(stage)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedLifeStage(stage))}
-                    className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
+                    aria-pressed={selectedLifeStage === stage}
+                    aria-label={`Select ${stage} as life stage`}
+                    className={`px-4 py-2 rounded-lg border transition-all duration-200 min-h-[44px] ${
                       selectedLifeStage === stage
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -100,21 +109,23 @@ function Quiz1() {
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Question 3 */}
-            <div className="mb-8">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-8">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 Approx. weight range?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Weight range selection">
                 {['<10 lb', '10-25 lb', '26-50 lb', '51-90 lb', '90+ lb', 'Not sure'].map((weight) => (
                   <button
                     key={weight}
                     onClick={() => setSelectedWeight(weight)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => setSelectedWeight(weight))}
-                    className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
+                    aria-pressed={selectedWeight === weight}
+                    aria-label={`Select ${weight} as weight range`}
+                    className={`px-4 py-2 rounded-lg border transition-all duration-200 min-h-[44px] ${
                       selectedWeight === weight
                         ? 'border-green-600 bg-green-50 text-green-800'
                         : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
@@ -124,14 +135,15 @@ function Quiz1() {
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
+            <nav className="flex justify-between items-center" aria-label="Quiz navigation">
               <button
                 onClick={handleBack}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                aria-label="Go back to previous step"
                 className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-w-[44px] min-h-[44px]"
               >
                 Back
@@ -141,11 +153,13 @@ function Quiz1() {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => !(!selectedPet || !selectedLifeStage || !selectedWeight) && handleTouchEnd(e, handleNext)}
                 disabled={!selectedPet || !selectedLifeStage || !selectedWeight}
+                aria-label={!selectedPet || !selectedLifeStage || !selectedWeight ? "Please complete all questions to continue" : "Continue to next step"}
+                aria-disabled={!selectedPet || !selectedLifeStage || !selectedWeight}
                 className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-700 transition-colors duration-300 min-w-[44px] min-h-[44px]"
               >
                 Next
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </div>

@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import NavigationBar from './components/NavigationBar';
 
@@ -14,16 +13,11 @@ import NavigationBar from './components/NavigationBar';
  * 5. Accessibility: Respects prefers-reduced-motion
  */
 const AboutPage = () => {
-  const { user, logout } = useAuth();
   const [isVisible, setIsVisible] = useState({});
   const [hasAnimated, setHasAnimated] = useState({});
   const [showContactModal, setShowContactModal] = useState(false);
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
-
-  const handleLogout = () => {
-    logout();
-  };
 
   // Intersection Observer for scroll-triggered animations
   // Optimization: Uses Intersection Observer API for efficient scroll detection
@@ -63,39 +57,6 @@ const AboutPage = () => {
     };
   }, [hasAnimated]);
 
-  // Animation utility functions
-  // Optimization: Only uses transform and opacity for hardware acceleration
-  const getAnimationClass = (sectionKey, animationType = 'fade-up', delay = 0) => {
-    const isVisibleNow = isVisible[sectionKey] || sectionKey.startsWith('hero-'); // Hero animates on load
-    
-    if (!isVisibleNow) {
-      switch (animationType) {
-        case 'fade-up':
-          return 'opacity-0 translate-y-5';
-        case 'fade':
-          return 'opacity-0';
-        case 'scale-fade':
-          return 'opacity-0 scale-105';
-        default:
-          return 'opacity-0';
-      }
-    }
-
-    // Animation states when visible
-    const baseClasses = 'transition-all duration-800 ease-out';
-    const delayStyle = delay > 0 ? { transitionDelay: `${delay}ms` } : {};
-    
-    switch (animationType) {
-      case 'fade-up':
-        return `${baseClasses} opacity-100 translate-y-0`;
-      case 'fade':
-        return `${baseClasses} opacity-100`;
-      case 'scale-fade':
-        return `${baseClasses} opacity-100 scale-100`;
-      default:
-        return `${baseClasses} opacity-100`;
-    }
-  };
 
   // Initialize hero animations on mount
   useEffect(() => {
@@ -185,7 +146,7 @@ const AboutPage = () => {
                 style={{ transitionDelay: '400ms' }}
               >
                 <p className="about-section-subtitle text-lg">
-                  We're building a clearer, faster way to choose organic pet foods that fit your pet and your budget. No more confusing labels or endless research.
+                  We&apos;re building a clearer, faster way to choose organic pet foods that fit your pet and your budget. No more confusing labels or endless research.
                 </p>
               </div>
               
@@ -463,7 +424,7 @@ const AboutPage = () => {
                     transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s',
                   }}
                 >
-                  Store locations, availability, hours, and contact information in the "Find store nearby" feature are mock data generated for demonstration purposes. These stores and their product inventories are simulated and do not represent actual retail locations.
+                  Store locations, availability, hours, and contact information in the &quot;Find store nearby&quot; feature are mock data generated for demonstration purposes. These stores and their product inventories are simulated and do not represent actual retail locations.
                 </p>
                 <small 
                   className="text-gray-500"
@@ -521,12 +482,17 @@ const AboutPage = () => {
           <h3 className="text-2xl font-bold text-gray-900 mb-8">Learn more</h3>
           <ul className="flex flex-wrap gap-4 md:gap-6 mb-8 items-center">
             <li className="flex items-center">
-              <a href="#" className="text-green-600 hover:text-green-800 font-medium">
+              <a 
+                href="https://docs.google.com/presentation/d/1CGDfJP_38tJmNWYQfVimajFI3okfaEKoQ5zCbNe3idw/edit?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-green-600 hover:text-green-800 font-medium"
+              >
                 Project deck ↗
               </a>
             </li>
             <li className="flex items-center">
-              <a href="https://github.com/kaibo-wang/GreenTail-G2" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 font-medium">
+              <a href="https://github.com/UW-INFO442-AU25/GreenTail-G2" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 font-medium">
                 GitHub repo ↗
               </a>
             </li>

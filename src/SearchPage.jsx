@@ -6,9 +6,8 @@ import { useToast } from './contexts/ToastContext';
 import { petFoodDatabase } from './data/petFoodDatabase';
 import { getMatchLevelStyle, findBestMatches, getProductMatchLevel, calculateProductQualityScore, convertTo5PointRating } from './utils/matchingAlgorithm';
 import StoreMapModal from './components/StoreMapModal';
-import FeatureTooltip from './components/FeatureTooltip';
-import { useTouchHandlers } from './hooks/useInteractionMode';
 import NavigationBar from './components/NavigationBar';
+import { useTouchHandlers } from './hooks/useInteractionMode';
 
 /**
  * SearchPage - Enhanced with smooth animations per smooth_transition_recommendations.md
@@ -31,9 +30,6 @@ function SearchPage() {
   const [hasAnimated, setHasAnimated] = useState({});
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
-  // Refs for feature tooltips
-  const filterSidebarRef = useRef(null);
-  const findStoresButtonRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('best');
   const [showMapModal, setShowMapModal] = useState(false);
@@ -111,7 +107,7 @@ function SearchPage() {
     if (filters.species.length > 0) {
       products = products.filter(product => {
         if (!product.petType || !Array.isArray(product.petType)) {
-          console.warn('Product missing petType:', product.id, product.name);
+
           return false;
         }
         return filters.species.some(species => product.petType.includes(species));
@@ -122,7 +118,7 @@ function SearchPage() {
     if (filters.lifeStage.length > 0) {
       products = products.filter(product => {
         if (!product.lifeStage || !Array.isArray(product.lifeStage)) {
-          console.warn('Product missing lifeStage:', product.id, product.name);
+
           return false;
         }
         return filters.lifeStage.some(stage => product.lifeStage.includes(stage));
@@ -133,7 +129,7 @@ function SearchPage() {
     if (filters.dietStyle.length > 0) {
       products = products.filter(product => {
         if (!product.feedingStyle || !Array.isArray(product.feedingStyle)) {
-          console.warn('Product missing feedingStyle:', product.id, product.name);
+
           return false;
         }
         return filters.dietStyle.some(style => product.feedingStyle.includes(style));
@@ -144,7 +140,7 @@ function SearchPage() {
     if (filters.proteinType.length > 0) {
       products = products.filter(product => {
         if (!product.mainProteins || !Array.isArray(product.mainProteins)) {
-          console.warn('Product missing mainProteins:', product.id, product.name);
+
           return false;
         }
         return filters.proteinType.some(protein => product.mainProteins.includes(protein));
@@ -329,7 +325,7 @@ function SearchPage() {
   }, [searchTerm, filters, sortBy, quizData]);
 
   const handleFilterChange = (category, value, checked) => {
-    console.log('handleFilterChange called:', category, value, checked);
+
     setFilters(prev => {
       const newFilters = {
         ...prev,
@@ -337,7 +333,7 @@ function SearchPage() {
           ? [...prev[category], value]
           : prev[category].filter(item => item !== value)
       };
-      console.log('New filters state:', newFilters);
+
       return newFilters;
     });
   };
@@ -350,7 +346,7 @@ function SearchPage() {
   };
 
   const clearFilters = () => {
-    console.log('clearFilters called');
+
     setFilters({
       species: [],
       lifeStage: [],
@@ -371,7 +367,7 @@ function SearchPage() {
     });
     setSearchTerm('');
     setShowQuizContext(false); // Hide quiz context when clearing filters
-    console.log('Filters cleared');
+
   };
 
   const handleTagFilter = (tagType) => {
@@ -428,10 +424,9 @@ function SearchPage() {
     
     try {
       const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-      console.log('handleCompareNow: saved products:', saved);
-      
+
       if (!saved || saved.length < 2) {
-        console.log('handleCompareNow: Not enough saved items', saved?.length);
+
         alert('Please save at least 2 products to compare');
         return false;
       }
@@ -440,9 +435,7 @@ function SearchPage() {
         // Handle both object format and ID format
         return typeof p === 'object' && p.id ? p.id : p;
       });
-      
-      console.log('handleCompareNow: last two IDs:', lastTwo);
-      
+
       if (lastTwo.length < 2) {
         console.error('handleCompareNow: Failed to extract 2 product IDs');
         alert('Error: Could not extract product IDs');
@@ -450,14 +443,12 @@ function SearchPage() {
       }
       
       localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
-      console.log('handleCompareNow: Saved to localStorage:', lastTwo);
-      
+
       // Force navigation using window.location as primary method
       const baseUrl = window.location.origin;
       const basePath = import.meta.env.BASE_URL || '/';
       const compareUrl = `${baseUrl}${basePath}compare`.replace(/\/+/g, '/');
-      console.log('handleCompareNow: Navigating to:', compareUrl);
-      
+
       // Use window.location for reliable navigation
       window.location.href = compareUrl;
       
@@ -552,7 +543,7 @@ function SearchPage() {
       {/* Optimization: Fade-in on page load */}
       {quizData && quizData.pet && showQuizContext && (
         <section 
-          className="bg-green-50 py-4 mt-16"
+          className="bg-green-50 py-4 mt-24"
           ref={el => sectionsRef.current['search-context'] = el}
         >
           <div 
@@ -576,7 +567,7 @@ function SearchPage() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Clear filters button clicked');
+
                 clearFilters();
               }}
               onTouchStart={(e) => {
@@ -586,7 +577,7 @@ function SearchPage() {
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Clear filters button touched');
+
                 handleTouchEnd(e, () => {
                   clearFilters();
                 });
@@ -631,7 +622,6 @@ function SearchPage() {
             </div>
             
             <button
-              ref={findStoresButtonRef}
               onClick={() => {
                 setSelectedProductForMap(null);
                 setShowMapModal(true);
@@ -658,7 +648,7 @@ function SearchPage() {
                 e.currentTarget.style.backgroundColor = '#166534'; // green-800
               }}
             >
-              🗺️ Find Stores Near You
+              Find Stores Near You
             </button>
             
             {/* Active Filter Tags */}
@@ -669,7 +659,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleFilterChange('species', species, false)}
                 >
-                  {species} <span className="hover:text-red-600">✕</span>
+                  {species} <span className="hover:text-red-600">×</span>
                 </span>
               ))}
               {filters.lifeStage.map((stage, index) => (
@@ -678,7 +668,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleFilterChange('lifeStage', stage, false)}
                 >
-                  {stage} <span className="hover:text-red-600">✕</span>
+                  {stage} <span className="hover:text-red-600">×</span>
                 </span>
               ))}
               {filters.dietStyle.map((style, index) => (
@@ -687,7 +677,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleFilterChange('dietStyle', style, false)}
                 >
-                  {style} <span className="hover:text-red-600">✕</span>
+                  {style} <span className="hover:text-red-600">×</span>
                 </span>
               ))}
               {filters.proteinType.map((protein, index) => (
@@ -696,7 +686,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleFilterChange('proteinType', protein, false)}
                 >
-                  {protein} <span className="hover:text-red-600">✕</span>
+                  {protein} <span className="hover:text-red-600">×</span>
                 </span>
               ))}
               {filters.premium && (
@@ -704,7 +694,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('premium')}
                 >
-                  Premium <span className="hover:text-red-600">✕</span>
+                  Premium <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.packaging && (
@@ -712,7 +702,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('packaging')}
                 >
-                  Packaging <span className="hover:text-red-600">✕</span>
+                  Packaging <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.certifications && (
@@ -720,7 +710,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('certifications')}
                 >
-                  Certifications <span className="hover:text-red-600">✕</span>
+                  Certifications <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.grainFree && (
@@ -728,7 +718,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('grainFree')}
                 >
-                  Grain Free <span className="hover:text-red-600">✕</span>
+                  Grain Free <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.highProtein && (
@@ -736,7 +726,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('highProtein')}
                 >
-                  High Protein <span className="hover:text-red-600">✕</span>
+                  High Protein <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.organic && (
@@ -744,7 +734,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('organic')}
                 >
-                  Organic <span className="hover:text-red-600">✕</span>
+                  Organic <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.sustainable && (
@@ -752,7 +742,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('sustainable')}
                 >
-                  Sustainable <span className="hover:text-red-600">✕</span>
+                  Sustainable <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.hypoallergenic && (
@@ -760,7 +750,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('hypoallergenic')}
                 >
-                  Hypoallergenic <span className="hover:text-red-600">✕</span>
+                  Hypoallergenic <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.locallySourced && (
@@ -768,7 +758,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('locallySourced')}
                 >
-                  Locally Sourced <span className="hover:text-red-600">✕</span>
+                  Locally Sourced <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.humanGrade && (
@@ -776,7 +766,7 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('humanGrade')}
                 >
-                  Human Grade <span className="hover:text-red-600">✕</span>
+                  Human Grade <span className="hover:text-red-600">×</span>
                 </span>
               )}
               {filters.subscription && (
@@ -784,24 +774,21 @@ function SearchPage() {
                   className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-green-200 transition-colors duration-200 flex items-center gap-1"
                   onClick={() => handleTagFilter('subscription')}
                 >
-                  Subscription <span className="hover:text-red-600">✕</span>
+                  Subscription <span className="hover:text-red-600">×</span>
                 </span>
               )}
             </div>
                 </div>
 
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Sidebar Filters */}
             {/* Optimization: Fade-in on page load */}
             <aside 
-              className="w-full md:w-48 flex-shrink-0"
-              ref={el => {
-                sectionsRef.current['filter-sidebar'] = el;
-                filterSidebarRef.current = el;
-              }}
+              className="w-full lg:w-48 flex-shrink-0"
+              ref={el => sectionsRef.current['filter-sidebar'] = el}
             >
               <div 
-                className={`bg-white rounded-xl p-4 shadow-lg md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto transition-all duration-1000 ease-out ${
+                className={`bg-white rounded-xl p-4 shadow-lg lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
                   isVisible['filter-sidebar'] 
                     ? 'opacity-100 translate-x-0' 
                     : 'opacity-0 -translate-x-5'
@@ -1023,7 +1010,7 @@ function SearchPage() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Clear button clicked in sidebar');
+
                       clearFilters();
                     }}
                     onTouchStart={(e) => {
@@ -1033,7 +1020,7 @@ function SearchPage() {
                     onTouchEnd={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Clear button touched in sidebar');
+
                       handleTouchEnd(e, () => {
                         clearFilters();
                       });
@@ -1057,12 +1044,21 @@ function SearchPage() {
                   </button>
                 </div>
 
-                <Link 
-                  to="/search" 
-                  className="block w-full text-center bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors duration-300"
+                <button
+                  onClick={() => {
+                    setSelectedProductForMap(null);
+                    setShowMapModal(true);
+                  }}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={(e) => handleTouchEnd(e, () => {
+                    setSelectedProductForMap(null);
+                    setShowMapModal(true);
+                  })}
+                  className="block w-full text-center bg-gray-100 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors duration-300 min-h-[44px]"
+                  aria-label="Find stores near you"
                 >
-                  Find stores nearby ➤
-                </Link>
+                  Find stores nearby →
+                </button>
               </div>
             </aside>
 
@@ -1073,11 +1069,17 @@ function SearchPage() {
                 className="mb-6"
                 ref={el => sectionsRef.current['search-input'] = el}
               >
+                <label htmlFor="product-search-input" className="sr-only">
+                  Search products by brand, protein, or keyword
+                </label>
                 <input 
+                  id="product-search-input"
                   type="text" 
                   placeholder="Search by brand, protein, keyword..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Search products by brand, protein, or keyword"
+                  aria-describedby="search-results-count"
                   className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-800 transition-all duration-1000 ease-out ${
                     isVisible['search-input'] 
                       ? 'opacity-100 translate-y-0' 
@@ -1085,6 +1087,9 @@ function SearchPage() {
                   }`}
                   style={{ transitionDelay: '400ms' }}
                 />
+                <div id="search-results-count" className="sr-only" aria-live="polite" aria-atomic="true">
+                  {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found{searchTerm ? ` for "${searchTerm}"` : ''}
+                </div>
               </div>
               
               {/* Keyword filter buttons - horizontal scrollable (only this section scrolls) */}
@@ -1238,8 +1243,7 @@ function SearchPage() {
               {/* Product Grid */}
               {/* Optimization: Staggered fade-in on scroll for product cards */}
               {/* Responsive grid: adaptive columns based on available space, 1-3 columns depending on screen size */}
-              <div className="product-grid-container">
-                <div className="product-grid-adaptive gap-4">
+              <div className="product-grid-adaptive gap-4" role="region" aria-label="Product search results">
                 {filteredProducts.map((product, index) => {
                   const matchStyle = getMatchLevelStyle(product.matchLevel);
                   const productKey = `product-${product.id}`;
@@ -1252,10 +1256,11 @@ function SearchPage() {
                                      'bg-gray-600 text-white';
                   
                   return (
-                    <div 
+                    <article 
                       key={product.id} 
                       className="bg-white rounded-xl p-6 shadow-lg flex flex-col h-full transition-all duration-300 ease"
                       ref={el => sectionsRef.current[productKey] = el}
+                      aria-label={`Product: ${product.name} by ${product.brand}, ${rating5} out of 5 stars, $${product.price}`}
                       style={{
                         transform: isVisible[productKey] ? 'translateY(0)' : 'translateY(20px)',
                         opacity: isVisible[productKey] ? 1 : 0,
@@ -1284,6 +1289,8 @@ function SearchPage() {
                             e.preventDefault();
                             handleTouchEnd(e, () => handleSaveProduct(product));
                           }}
+                          aria-label={isProductSaved(product.id) ? `Remove ${product.name} from saved products` : `Save ${product.name} to profile`}
+                          aria-pressed={isProductSaved(product.id)}
                           className={`${isProductSaved(product.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center`}
                           title={isProductSaved(product.id) ? 'Remove from saved' : 'Save to profile'}
                         >
@@ -1304,7 +1311,7 @@ function SearchPage() {
                         <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-2xl transform translate-y-4 scale-110 -z-10 rounded-lg"></div>
                         <img 
                           src={product.image} 
-                          alt={product.name} 
+                          alt={`${product.brand} ${product.name} product image`}
                           className="w-full h-48 object-cover rounded-lg transition-all duration-500 ease-out relative z-10"
                           style={{
                             transform: 'translateY(-5px) scale(1)',
@@ -1319,9 +1326,6 @@ function SearchPage() {
                             e.currentTarget.style.transform = 'translateY(-5px) scale(1)';
                             e.currentTarget.style.filter = 'drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12))';
                           }}
-                          loading="lazy"
-                          width="300"
-                          height="192"
                         />
                       </div>
                       <h4 className="font-semibold text-gray-900 mb-3 text-lg">
@@ -1372,13 +1376,12 @@ function SearchPage() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log('Compare button clicked, product:', product.id);
+
                               // Save product ID to localStorage for ComparePage
                               try {
                                 const selection = [product.id];
                                 localStorage.setItem('compareSelection', JSON.stringify(selection));
-                                console.log('Saved to localStorage:', selection);
-                                console.log('Navigating to /compare');
+
                                 navigate('/compare', { replace: false });
                               } catch (error) {
                                 console.error('Error navigating to compare page:', error);
@@ -1391,12 +1394,11 @@ function SearchPage() {
                               e.preventDefault();
                               e.stopPropagation();
                               handleTouchEnd(e, () => {
-                                console.log('Compare button touched, product:', product.id);
+
                                 try {
                                   const selection = [product.id];
                                   localStorage.setItem('compareSelection', JSON.stringify(selection));
-                                  console.log('Saved to localStorage:', selection);
-                                  console.log('Navigating to /compare');
+
                                   navigate('/compare', { replace: false });
                                 } catch (error) {
                                   console.error('Error navigating to compare page:', error);
@@ -1424,13 +1426,12 @@ function SearchPage() {
                           className="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-300 min-h-[44px] flex items-center justify-center gap-1"
                           title="Find stores with this product"
                         >
-                          📍 Find store nearby
+                          Find store nearby
                         </button>
                       </div>
-                    </div>
+                    </article>
                   );
                 })}
-                </div>
               </div>
 
               {filteredProducts.length === 0 && (
@@ -1469,25 +1470,22 @@ function SearchPage() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Compare latest 2 button clicked');
-              
+
               // Save products to localStorage first
               try {
                 const saved = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-                console.log('Saved products:', saved);
-                
+
                 if (saved.length >= 2) {
                   const lastTwo = saved.slice(-2).map(p => {
                     return typeof p === 'object' && p.id ? p.id : p;
                   });
-                  console.log('Last two IDs:', lastTwo);
+
                   localStorage.setItem('compareSelection', JSON.stringify(lastTwo));
-                  console.log('Saved to localStorage, now navigating...');
-                  
+
                   // Use window.location for guaranteed navigation
                   const basePath = import.meta.env.BASE_URL || '/';
                   const comparePath = `${basePath}compare`.replace(/\/+/g, '/');
-                  console.log('Navigating to:', comparePath);
+
                   window.location.href = comparePath;
                 } else {
                   console.error('Not enough saved items');
@@ -1544,15 +1542,6 @@ function SearchPage() {
         isOpen={showMapModal}
         onClose={() => setShowMapModal(false)}
         selectedProduct={selectedProductForMap}
-      />
-
-      {/* Feature Tooltips - Lightweight contextual hints */}
-      <FeatureTooltip
-        pageId="search"
-        featureId="filter-sidebar"
-        message="Use filters to find products matching your pet's needs"
-        position="right"
-        targetRef={filterSidebarRef}
       />
     </div>
   );

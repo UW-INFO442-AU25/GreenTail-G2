@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import NavigationBar from './components/NavigationBar';
 
 const CookiePolicyPage = () => {
   const [showContactModal, setShowContactModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-6xl mx-auto px-8 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="w-8 h-8" />
-            <span className="text-2xl font-bold text-green-800">GreenTail</span>
-          </Link>
-        </div>
-      </header>
+      <NavigationBar />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-8 pt-24 pb-12">

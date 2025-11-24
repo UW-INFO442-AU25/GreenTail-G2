@@ -8,7 +8,7 @@ const OrganicPetFoodGuide = () => {
   const sections = {
     definition: {
       title: "What Does 'Organic' Mean?",
-      icon: "🌱",
+      icon: "",
       content: {
         main: "Organic pet food follows strict standards for ingredient sourcing, processing, and certification.",
         details: [
@@ -29,7 +29,7 @@ const OrganicPetFoodGuide = () => {
     },
     standards: {
       title: "Certification Standards",
-      icon: "🏆",
+      icon: "",
       content: {
         main: "Different certification levels indicate varying degrees of organic compliance.",
         details: [
@@ -60,7 +60,7 @@ const OrganicPetFoodGuide = () => {
     },
     ingredients: {
       title: "Organic vs Conventional",
-      icon: "🥗",
+      icon: "",
       content: {
         main: "Understanding the differences between organic and conventional pet food ingredients.",
         details: [
@@ -92,7 +92,7 @@ const OrganicPetFoodGuide = () => {
     },
     benefits: {
       title: "Benefits for Your Pet",
-      icon: "❤️",
+      icon: "",
       content: {
         main: "Organic pet food can provide several health and environmental benefits.",
         details: [
@@ -118,7 +118,7 @@ const OrganicPetFoodGuide = () => {
     },
     cost: {
       title: "Cost Considerations",
-      icon: "💰",
+      icon: "",
       content: {
         main: "Understanding the cost differences and value of organic pet food.",
         details: [
@@ -145,7 +145,7 @@ const OrganicPetFoodGuide = () => {
     },
     choosing: {
       title: "How to Choose",
-      icon: "🎯",
+      icon: "",
       content: {
         main: "Tips for selecting the right organic pet food for your pet.",
         details: [
@@ -156,12 +156,12 @@ const OrganicPetFoodGuide = () => {
           "Consult your veterinarian for recommendations"
         ],
         checklist: [
-          "✓ USDA Organic seal present",
-          "✓ Whole protein as first ingredient",
-          "✓ No artificial preservatives",
-          "✓ Appropriate for pet's life stage",
-          "✓ Within your budget range",
-          "✓ Available at local stores"
+          "USDA Organic seal present",
+          "Whole protein as first ingredient",
+          "No artificial preservatives",
+          "Appropriate for pet's life stage",
+          "Within your budget range",
+          "Available at local stores"
         ],
         redflags: [
           "Generic 'natural' claims without certification",
@@ -178,7 +178,7 @@ const OrganicPetFoodGuide = () => {
       <NavigationBar />
 
       {/* Main Content */}
-      <main className="pt-8 pb-20">
+      <main className="pt-24 pb-20">
         <div className="max-w-6xl mx-auto px-8">
           {/* Hero Section */}
           <div className="text-center mb-12">
@@ -228,7 +228,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-3">
                     {sections[activeSection].content.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">✓</span>
+                        <span className="text-green-600 mt-1">•</span>
                         <span className="text-gray-700">{detail}</span>
                       </li>
                     ))}
@@ -239,7 +239,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-3">
                     {sections[activeSection].content.benefits.map((benefit, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-blue-600 mt-1">★</span>
+                        <span className="text-blue-600 mt-1">•</span>
                         <span className="text-gray-700">{benefit}</span>
                       </li>
                     ))}
@@ -275,7 +275,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-2">
                     {sections[activeSection].content.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">🏆</span>
+                        <span className="text-green-600 mt-1">•</span>
                         <span className="text-gray-700">{detail}</span>
                       </li>
                     ))}
@@ -314,7 +314,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-2">
                     {sections[activeSection].content.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">✓</span>
+                        <span className="text-green-600 mt-1">•</span>
                         <span className="text-gray-700">{detail}</span>
                       </li>
                     ))}
@@ -368,7 +368,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-2">
                     {sections[activeSection].content.tips.map((tip, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-green-600 mt-1">💰</span>
+                        <span className="text-green-600 mt-1">•</span>
                         <span className="text-gray-700">{tip}</span>
                       </li>
                     ))}
@@ -392,7 +392,7 @@ const OrganicPetFoodGuide = () => {
                       <ul className="space-y-2">
                         {sections[activeSection].content.checklist.map((item, index) => (
                           <li key={index} className="flex items-start gap-2">
-                            <span className="text-green-600 mt-1">✓</span>
+                            <span className="text-green-600 mt-1">•</span>
                             <span className="text-sm text-gray-700">{item}</span>
                           </li>
                         ))}
@@ -408,7 +408,7 @@ const OrganicPetFoodGuide = () => {
                       <ul className="space-y-2">
                         {sections[activeSection].content.redflags.map((flag, index) => (
                           <li key={index} className="flex items-start gap-2">
-                            <span className="text-red-600 mt-1">⚠️</span>
+                            <span className="text-red-600 mt-1">!</span>
                             <span className="text-sm text-gray-700">{flag}</span>
                           </li>
                         ))}
@@ -421,7 +421,7 @@ const OrganicPetFoodGuide = () => {
                   <ul className="space-y-2">
                     {sections[activeSection].content.details.map((detail, index) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="text-blue-600 mt-1">💡</span>
+                        <span className="text-blue-600 mt-1">•</span>
                         <span className="text-gray-700">{detail}</span>
                       </li>
                     ))}
@@ -436,22 +436,22 @@ const OrganicPetFoodGuide = () => {
             <h3 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Quick Reference</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">🏆</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Look for Seals</h4>
                 <p className="text-sm text-gray-600">USDA Organic certification</p>
               </div>
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">📋</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Read Labels</h4>
                 <p className="text-sm text-gray-600">Check ingredient lists</p>
               </div>
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">💰</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Budget Wisely</h4>
                 <p className="text-sm text-gray-600">Consider cost per meal</p>
               </div>
               <div className="bg-white rounded-lg p-6 text-center">
-                <div className="text-3xl mb-3">👨‍⚕️</div>
+                <div className="text-3xl mb-3"></div>
                 <h4 className="font-semibold text-gray-900 mb-2">Ask Your Vet</h4>
                 <p className="text-sm text-gray-600">Get professional advice</p>
               </div>

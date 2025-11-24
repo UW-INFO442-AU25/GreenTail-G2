@@ -61,17 +61,19 @@ function Quiz2() {
             </p>
 
             {/* Question 1 */}
-            <div className="mb-6">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-6">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 Any ingredients to avoid?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Ingredients to avoid selection">
                 {ingredients.map((ingredient) => (
                   <button
                     key={ingredient}
                     onClick={() => handleIngredientToggle(ingredient)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => handleIngredientToggle(ingredient))}
+                    aria-pressed={avoidIngredients.includes(ingredient)}
+                    aria-label={`${avoidIngredients.includes(ingredient) ? 'Remove' : 'Add'} ${ingredient} to ingredients to avoid`}
                     className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       avoidIngredients.includes(ingredient)
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -82,23 +84,25 @@ function Quiz2() {
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-gray-600 mt-2" id="ingredients-hint">
                 Unsure? Leave it blank—we'll show gentle options.
               </p>
-            </div>
+            </fieldset>
 
             {/* Question 2 */}
-            <div className="mb-8">
-              <label className="block text-lg font-semibold text-gray-900 mb-3">
+            <fieldset className="mb-8">
+              <legend className="block text-lg font-semibold text-gray-900 mb-3">
                 Current feeding style?
-              </label>
-              <div className="flex flex-wrap gap-3">
+              </legend>
+              <div className="flex flex-wrap gap-3" role="group" aria-label="Current feeding style selection">
                 {feedingStyles.map((style) => (
                   <button
                     key={style}
                     onClick={() => setFeedingStyle(style)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={(e) => handleTouchEnd(e, () => setFeedingStyle(style))}
+                    aria-pressed={feedingStyle === style}
+                    aria-label={`Select ${style} as current feeding style`}
                     className={`px-4 py-2 rounded-full border transition-all duration-200 min-h-[44px] ${
                       feedingStyle === style
                         ? 'border-green-600 bg-green-50 text-green-800'
@@ -111,20 +115,21 @@ function Quiz2() {
               </div>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
                 <div className="flex items-start gap-2">
-                  <span className="text-green-600 text-lg">💡</span>
+                  <span className="text-green-600 text-sm font-medium">Tip:</span>
                   <p className="text-green-800 text-sm">
                     New to organic? We'll include a 7-14 day transition plan in your results.
                   </p>
                 </div>
               </div>
-            </div>
+            </fieldset>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center">
+            <nav className="flex justify-between items-center" aria-label="Quiz navigation">
               <button
                 onClick={handleBack}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, handleBack)}
+                aria-label="Go back to previous step"
                 className="text-gray-600 hover:text-green-800 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Back
@@ -133,11 +138,12 @@ function Quiz2() {
                 onClick={handleNext}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={(e) => handleTouchEnd(e, handleNext)}
+                aria-label="Continue to next step"
                 className="bg-green-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 min-h-[44px] min-w-[44px]"
               >
                 Next
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </div>

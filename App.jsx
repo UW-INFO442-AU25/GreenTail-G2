@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QuizProvider } from './src/QuizContext';
 import { AuthProvider } from './src/AuthContext';
