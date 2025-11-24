@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import NavigationBar from './components/NavigationBar';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -145,39 +146,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-green-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
-                <span className="text-xl font-bold text-green-800">GreenTail</span>
-              </Link>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                Home
-              </Link>
-              <Link to="/quiz" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                Quiz
-              </Link>
-              <Link to="/search" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                Search
-              </Link>
-              <Link to="/compare" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                Compare
-              </Link>
-              <Link to="/about" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                About
-              </Link>
-              <Link to="/profile" className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium">
-                Profile
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <NavigationBar />
 
       {/* Login Section */}
       <main className="flex justify-center items-center pt-24 pb-16 px-4">

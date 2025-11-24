@@ -9,6 +9,7 @@ import StoreMapModal from './components/StoreMapModal';
 import TransitionPlanModal from './components/TransitionPlanModal';
 import ContextualHelpBanner from './components/ContextualHelpBanner';
 import { useTouchHandlers } from './hooks/useInteractionMode';
+import NavigationBar from './components/NavigationBar';
 
 /**
  * ResultsPage - Redesigned per results_page_redesign_plan.md
@@ -439,25 +440,7 @@ function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-green-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-8 py-4">
-          <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logos/logo.png`} alt="GreenTail Logo" className="h-8 w-8" />
-            <span className="text-2xl font-bold text-green-800">GreenTail</span>
-          </div>
-          <nav>
-            <ul className="flex gap-8">
-              <li><Link to="/" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Home</Link></li>
-              <li><Link to="/quiz" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Quiz</Link></li>
-              <li><Link to="/search" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Search</Link></li>
-              <li><Link to="/compare" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Compare</Link></li>
-              <li><Link to="/about" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">About</Link></li>
-              <li><Link to="/profile" className="text-gray-600 hover:text-green-800 transition-colors duration-300 font-medium">Profile</Link></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <NavigationBar />
 
       {/* Main Content */}
       <div className="pt-24 pb-20">

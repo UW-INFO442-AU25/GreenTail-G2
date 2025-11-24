@@ -2,22 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar */
+/* Custom scrollbar that's always visible but more prominent on hover */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #33664C;
-  border-radius: 4px;
+  background: rgba(51, 102, 76, 0.3); /* Very subtle green by default */
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s ease;
 }
 
+/* More visible on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a5a3f;
+  background: rgba(51, 102, 76, 0.8); /* More opaque on hover */
 }
 
 /* Smooth scrolling */
@@ -27,10 +32,17 @@ html {
 }
 
 /* Smooth scrolling for main content */
+html {
+  scrollbar-width: thin; /* Firefox - thin scrollbar */
+  scrollbar-color: rgba(51, 102, 76, 0.6) transparent; /* Firefox - thumb and track colors */
+}
+
 body {
   -webkit-overflow-scrolling: touch;
   overflow-scrolling: touch;
   scroll-behavior: smooth;
+  overflow-y: overlay; /* Use overlay to prevent scrollbar from taking space */
+  max-width: 100vw; /* Prevent horizontal overflow */
 }
 
 /* Optimize scrolling performance */
