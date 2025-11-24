@@ -452,15 +452,15 @@ function ResultsPage() {
             onShowTransitionPlan={() => setShowTransitionPlan(true)}
           />
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col md:flex-row gap-8">
             {/* Sidebar Filters */}
             {/* Optimization: Fade-in on page load */}
             <aside 
-              className="w-full lg:w-48 flex-shrink-0"
+              className="w-full md:w-48 flex-shrink-0"
               ref={el => sectionsRef.current['filter-sidebar'] = el}
             >
               <div 
-                className={`filter-sidebar lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto transition-all duration-1000 ease-out ${
+                className={`filter-sidebar md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto transition-all duration-1000 ease-out ${
                   isVisible['filter-sidebar'] 
                     ? 'opacity-100 translate-x-0' 
                     : 'opacity-0 -translate-x-5'
@@ -765,7 +765,8 @@ function ResultsPage() {
               {/* Product Grid */}
               {/* Optimization: Staggered fade-in on scroll for product cards */}
               {/* Responsive grid: adaptive columns based on available space, 1-3 columns depending on screen size */}
-              <div className="product-grid-adaptive gap-4">
+              <div className="product-grid-container">
+                <div className="product-grid-adaptive gap-4">
                 {processedProducts.map((product, index) => {
                   const matchStyle = getMatchLevelStyle(product.matchLevel);
                   const productKey = `product-${product.id}`;
@@ -938,6 +939,7 @@ function ResultsPage() {
                     </div>
                   );
                 })}
+                </div>
               </div>
 
               {processedProducts.length === 0 && (

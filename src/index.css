@@ -289,6 +289,8 @@ textarea {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
+  width: 100%;
+  overflow-y: auto;
 }
 
 /* Hide scrollbar for horizontal scrollable elements */
@@ -307,6 +309,24 @@ textarea {
   touch-action: pan-x;
   overscroll-behavior-x: contain;
   overscroll-behavior-y: none;
+}
+
+/* Mobile layout only (phones) */
+@media (max-width: 767px) {
+  .filter-sidebar {
+    position: sticky;
+    top: 70px;
+    z-index: 10;
+    margin-bottom: 1rem;
+    max-height: none;
+    overflow: visible !important;
+  }
+  
+  .product-grid-container {
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
 }
 
 /* Ensure minimum 1 column on mobile, 2 on tablet, up to 3 on desktop */
