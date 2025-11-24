@@ -237,8 +237,8 @@ GreenTail-G2/
 
 ## Team Members
 
-- **Sammi Huang** - UX & PM
-- **Lele Zhang** - Data & Research  
+- **Sammi Huang** - Product Manager
+- **Lele Zhang** - UX & Research  
 - **Kaibo Wang** - Product Design
 - **Lanqi Zhang** - User Research
 - **Amber Lu** - Development

@@ -328,54 +328,12 @@ const ProfilePage = () => {
       <div className="profile-page">
       <NavigationBar />
 
-      {/* Profile Hero */}
+      {/* User Profile Section */}
       <section 
-        className="pt-24 pb-12"
+        className="pt-20 pb-4"
       >
         <div className="profile-container px-4 sm:px-6 lg:px-8">
           <div>
-            <h1 className="page-title">Your saved products</h1>
-            <p className="page-subtitle">Organic dog & cat foods you've liked across GreenTail.</p>
-
-            <div className="control-bar">
-              <input
-                type="text"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-                placeholder="98105"
-                className="zip-input"
-              />
-              <button 
-                onClick={handleUpdateZipCode}
-                className="btn-update"
-              >
-                Update
-              </button>
-
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="sort-select"
-              >
-                <option value="recently-saved">Recently saved</option>
-                <option value="a-z">A-Z</option>
-                <option value="price-low-high">Price low to high</option>
-              </select>
-
-              <Link
-                to="/search"
-                className="btn-back"
-              >
-                Back to Search
-              </Link>
-              <Link
-                to="/compare"
-                className="btn-compare"
-              >
-                Compare
-              </Link>
-            </div>
-
             {/* User Info Card */}
             <div className="user-card">
               <div className="user-info">
@@ -423,16 +381,57 @@ const ProfilePage = () => {
                 </label>
               </div>
             </div>
+            
+            <div className="control-bar">
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                placeholder="98105"
+                className="zip-input"
+              />
+              <button 
+                onClick={handleUpdateZipCode}
+                className="btn-update"
+              >
+                Update
+              </button>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-select"
+              >
+                <option value="recently-saved">Recently saved</option>
+                <option value="a-z">A-Z</option>
+                <option value="price-low-high">Price low to high</option>
+              </select>
+
+              <Link
+                to="/search"
+                className="btn-back"
+              >
+                Back to Search
+              </Link>
+              <Link
+                to="/compare"
+                className="btn-compare"
+              >
+                Compare
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Saved Products Grid */}
       <section 
-        className="py-12"
+        className="py-2"
       >
         <div className="profile-container px-4 sm:px-6 lg:px-8">
           <div>
+            <h1 className="page-title">Your saved products</h1>
+            <p className="page-subtitle mb-4">Organic dog & cat foods you've liked across GreenTail.</p>
             {savedProducts.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">

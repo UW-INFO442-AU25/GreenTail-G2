@@ -382,8 +382,8 @@ const AboutPage = () => {
           {/* Optimization: Cards appear sequentially with hover effects on images */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { key: 'team-1', name: 'Sammi Huang', role: 'UX & PM', image: 'Sammi.png' },
-              { key: 'team-2', name: 'Lele Zhang', role: 'Data & Research', image: 'Lele.jpg' },
+              { key: 'team-1', name: 'Sammi Huang', role: 'Product Manager', image: 'Sammi.png' },
+              { key: 'team-2', name: 'Lele Zhang', role: 'UX & Research', image: 'Lele.jpg' },
               { key: 'team-3', name: 'Kaibo Wang', role: 'Product Design', image: 'kaiboWang.jpg' },
               { key: 'team-4', name: 'Lanqi Zhang', role: 'User Research', image: 'Lanqi.jpg' },
               { key: 'team-5', name: 'Amber Lu', role: 'Development', image: 'Amber.jpg' },
