@@ -456,88 +456,100 @@ const ComparePage = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <h5 className="font-medium text-gray-900">Quality Factors</h5>
+              <div className="space-y-4">
+                {/* Sustainability Section */}
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h5 className="font-semibold text-green-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 text-green-700 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
+                    </svg>
+                    Sustainability Features (40 points) - GreenTail&apos;s #1 Priority
+                  </h5>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <span>Organic Certified</span>
-                      </div>
-                      <span className="font-medium">20 pts</span>
+                      <span className="text-gray-700">Low-Footprint Proteins</span>
+                      <span className="font-medium text-green-800">15 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <span>Grain-Free Formula</span>
-                      </div>
-                      <span className="font-medium">15 pts</span>
+                      <span className="text-gray-700">Recyclable/Compostable Packaging</span>
+                      <span className="font-medium text-green-800">12 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span>Premium Quality</span>
-                      </div>
-                      <span className="font-medium">10 pts</span>
+                      <span className="text-gray-700">Local Production</span>
+                      <span className="font-medium text-green-800">8 pts</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">General Sustainability Indicators</span>
+                      <span className="font-medium text-green-800">5 pts</span>
                     </div>
                   </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <h5 className="font-medium text-gray-900">Sustainability & Value</h5>
+
+                {/* Organic & Certifications Section */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 text-blue-700 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                    Organic & Certifications (30 points) - Core Transparency Value
+                  </h5>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                        </svg>
-                        <span>Recyclable Packaging</span>
-                      </div>
-                      <span className="font-medium">10 pts</span>
+                      <span className="text-gray-700">Organic Certification</span>
+                      <span className="font-medium text-blue-800">18 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
-                        </svg>
-                        <span>Low-Carbon Protein</span>
-                      </div>
-                      <span className="font-medium">15 pts</span>
+                      <span className="text-gray-700">Credible Certifications</span>
+                      <span className="font-medium text-blue-800">12 pts</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pet Health Section */}
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h5 className="font-semibold text-purple-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 text-purple-700 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Pet Health Features (20 points) - Important but Secondary
+                  </h5>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Grain-Free Formula</span>
+                      <span className="font-medium text-purple-800">8 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
-                        </svg>
-                        <span>Budget-Friendly</span>
-                      </div>
-                      <span className="font-medium">10 pts</span>
+                      <span className="text-gray-700">High Protein</span>
+                      <span className="font-medium text-purple-800">5 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>Good Value/Calorie</span>
-                      </div>
-                      <span className="font-medium">10 pts</span>
+                      <span className="text-gray-700">Hypoallergenic/Limited Ingredient</span>
+                      <span className="font-medium text-purple-800">4 pts</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <span>Sustainable Practices</span>
-                      </div>
-                      <span className="font-medium">10 pts</span>
+                      <span className="text-gray-700">Human-Grade Quality</span>
+                      <span className="font-medium text-purple-800">3 pts</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Value/Affordability Section */}
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h5 className="font-semibold text-yellow-900 mb-3 flex items-center">
+                    <svg className="w-5 h-5 text-yellow-700 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+                    </svg>
+                    Value/Affordability (10 points) - Lower Priority
+                  </h5>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Reasonable Price (≤$40)</span>
+                      <span className="font-medium text-yellow-800">5 pts</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Good Value per Calorie (≤$3.5/1000kcal)</span>
+                      <span className="font-medium text-yellow-800">5 pts</span>
                     </div>
                   </div>
                 </div>
