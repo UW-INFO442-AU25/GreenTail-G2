@@ -84,7 +84,7 @@ const FirstTimePage = () => {
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-200 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div className="text-center">
             <div 
               ref={el => sectionsRef.current['hero-title'] = el}
@@ -94,7 +94,7 @@ const FirstTimePage = () => {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h1 className="text-5xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
                 New to pet parenting? Start here.
               </h1>
               <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-500 mx-auto rounded-full mb-8"></div>
@@ -150,7 +150,7 @@ const FirstTimePage = () => {
                 : 'opacity-0 translate-y-5'
             }`}
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Video: Getting started with your pet</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Video: Getting started with your pet</h2>
             <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-500 mx-auto rounded-full"></div>
           </div>
           <div 
@@ -179,7 +179,7 @@ const FirstTimePage = () => {
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-blue-100/40 to-teal-100/40 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div 
             ref={el => sectionsRef.current['essentials-title'] = el}
             className="mb-16 text-center"
@@ -191,7 +191,7 @@ const FirstTimePage = () => {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Essentials you'll want to know</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Essentials you'll want to know</h2>
               <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-500 mx-auto rounded-full"></div>
             </div>
           </div>
@@ -235,7 +235,7 @@ const FirstTimePage = () => {
 
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">

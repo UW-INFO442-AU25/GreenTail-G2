@@ -547,7 +547,7 @@ function SearchPage() {
           ref={el => sectionsRef.current['search-context'] = el}
         >
           <div 
-            className={`max-w-6xl mx-auto px-8 transition-all duration-1000 ease-out ${
+            className={`max-w-6xl mx-auto px-4 sm:px-6 md:px-8 transition-all duration-1000 ease-out ${
               isVisible['search-context'] 
                 ? 'opacity-100 translate-y-0' 
                 : 'opacity-0 translate-y-5'
@@ -1514,7 +1514,7 @@ function SearchPage() {
 
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">

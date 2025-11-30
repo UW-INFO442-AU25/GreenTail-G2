@@ -447,7 +447,7 @@ function ResultsPage() {
 
       {/* Main Content */}
       <div className="pt-24 pb-20">
-        <div className="max-w-7xl mx-auto px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           {/* Contextual Help Banner - Phase 6: Dismissible top banner */}
           <ContextualHelpBanner 
             isVisible={showHelpBanner} 

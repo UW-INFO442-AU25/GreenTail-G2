@@ -88,7 +88,7 @@ const AboutPage = () => {
       {/* Hero Section */}
       {/* Optimization: Initial load animations - hero image, title, description, buttons with staggered timing */}
       <section className="about-hero-section pt-24">
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Main Visual/Image - Subtle Scale & Fade-in */}
             {/* Optimization: scale(1.05) to scale(1) with opacity 0->1, duration 1.2s */}
@@ -129,7 +129,7 @@ const AboutPage = () => {
                 }`}
                 style={{ transitionTimingFunction: 'ease-out' }}
               >
-                <h1 className="about-section-title text-4xl lg:text-5xl">
+                <h1 className="about-section-title">
                   Why GreenTail exists
                 </h1>
               </div>
@@ -201,7 +201,7 @@ const AboutPage = () => {
           <div className="absolute bottom-10 right-10 w-40 h-40 bg-emerald-200/30 rounded-full blur-xl"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto px-8 text-center relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 text-center relative z-10">
           {/* Section Title: Fade-in & Slide-up (consistent with hero title) */}
           {/* Optimization: Uses Intersection Observer - triggers when 20% visible */}
           <div 
@@ -215,7 +215,7 @@ const AboutPage = () => {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
                 Why does it matter?
               </h2>
               <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-500 mx-auto rounded-full"></div>
@@ -265,7 +265,7 @@ const AboutPage = () => {
           <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-br from-emerald-100/40 to-teal-100/40 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div 
             className="text-center mb-20"
             ref={el => sectionsRef.current['mission-title'] = el}
@@ -278,7 +278,7 @@ const AboutPage = () => {
               }`}
             >
               <div className="inline-block">
-                <h2 className="about-section-title text-4xl lg:text-6xl">
+                <h2 className="about-section-title">
                   Our mission
                 </h2>
               </div>
@@ -321,7 +321,7 @@ const AboutPage = () => {
       {/* Team Section */}
       {/* Optimization: Scroll-triggered title animation, staggered team member cards */}
       <section id="team" className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <div 
             className="text-center mb-16"
             ref={el => sectionsRef.current['team-title'] = el}
@@ -387,7 +387,7 @@ const AboutPage = () => {
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-br from-blue-100/40 to-teal-100/40 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="max-w-6xl mx-auto px-8 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div 
               className="lg:w-1/2"
@@ -478,7 +478,7 @@ const AboutPage = () => {
 
       {/* Learn more */}
       <footer className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-8">Learn more</h3>
           <ul className="flex flex-wrap gap-4 md:gap-6 mb-8 items-center">
             <li className="flex items-center">

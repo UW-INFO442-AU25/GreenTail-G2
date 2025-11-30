@@ -8,8 +8,8 @@ const TermsOfServicePage = () => {
       <NavigationBar />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-8 pt-24 pb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-24 pb-12">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
         <p className="text-sm text-gray-500 mb-8">Last updated: January 2025</p>
 
         <div className="prose prose-lg max-w-none">
@@ -120,7 +120,7 @@ const TermsOfServicePage = () => {
 
       {/* Footer */}
       <footer className="bg-gray-100 text-gray-700 py-12 mt-16">
-        <div className="max-w-6xl mx-auto px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">

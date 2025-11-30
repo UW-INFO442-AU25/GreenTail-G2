@@ -676,7 +676,19 @@ input[type="checkbox"]:checked::after {
   background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%);
   position: relative;
   overflow: hidden;
-  padding: 100px 40px;
+  padding: 60px 20px;
+}
+
+@media (min-width: 640px) {
+  .about-hero-section {
+    padding: 80px 30px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-hero-section {
+    padding: 100px 40px;
+  }
 }
 
 .about-hero-section::before {
@@ -726,13 +738,29 @@ input[type="checkbox"]:checked::after {
 
 /* Section Title with Creative Underline */
 .about-section-title {
-  font-size: 56px;
+  font-size: 28px;
   font-weight: 800;
   color: #111827;
   margin-bottom: 24px;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
   position: relative;
   display: inline-block;
+  line-height: 1.2;
+}
+
+/* Responsive font sizes for about-section-title */
+@media (min-width: 640px) {
+  .about-section-title {
+    font-size: 36px;
+    letter-spacing: -0.75px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-section-title {
+    font-size: 56px;
+    letter-spacing: -1px;
+  }
 }
 
 .about-section-title::after {
@@ -740,11 +768,25 @@ input[type="checkbox"]:checked::after {
   position: absolute;
   bottom: -12px;
   left: 0;
-  width: 120px;
-  height: 6px;
+  width: 80px;
+  height: 4px;
   background: linear-gradient(90deg, #10B981, #34D399);
   border-radius: 3px;
   animation: expandWidth 1s ease-out;
+}
+
+@media (min-width: 640px) {
+  .about-section-title::after {
+    width: 100px;
+    height: 5px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .about-section-title::after {
+    width: 120px;
+    height: 6px;
+  }
 }
 
 @keyframes expandWidth {

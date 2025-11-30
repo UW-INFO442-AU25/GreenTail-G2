@@ -363,7 +363,7 @@ function HomePage() {
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-emerald-400 rounded-full blur-3xl"></div>
         </div>
         
-        <div className={`max-w-6xl mx-auto px-8 relative z-10 transition-opacity duration-1000 ${
+        <div className={`max-w-6xl mx-auto px-4 sm:px-6 md:px-8 relative z-10 transition-opacity duration-1000 ${
           showContent ? 'opacity-100' : 'opacity-0'
         }`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -383,7 +383,7 @@ function HomePage() {
                 }`}
                 style={{ transitionTimingFunction: 'ease-out' }}
               >
-                <h1 className="text-6xl md:text-7xl font-bold text-white leading-tight tracking-tight mb-6 drop-shadow-lg">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight tracking-tight mb-6 drop-shadow-lg">
                   Feed well. Do right by the planet.
                 </h1>
               </div>
@@ -826,7 +826,7 @@ function HomePage() {
                   : 'opacity-0 translate-y-5'
               }`}
             >
-              <h2 id="why-trust-heading" className="text-4xl font-bold text-center text-gray-900">Why trust GreenTail?</h2>
+              <h2 id="why-trust-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900">Why trust GreenTail?</h2>
             </div>
             <ReadingTime minutes={1} className="absolute right-0 hidden md:block" />
           </div>
